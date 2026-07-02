@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Kirana Poster Maker</title>
+<style>
+:root{
+  --red:#7A1612; --red-d:#4A0C0A; --haldi:#F2B33D; --cream:#F7EFD9; --ink:#2A1210;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Roboto,Arial,sans-serif}
+body{background:var(--red-d);color:var(--cream);min-height:100vh;padding-bottom:30px}
+header{background:var(--red);padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:3px solid var(--haldi)}
+header .mark{width:38px;height:38px;border-radius:50%;background:var(--haldi);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--red-d);font-size:15px}
+header h1{font-size:18px;letter-spacing:.5px}
+header p{font-size:11px;opacity:.8}
+.wrap{max-width:520px;margin:0 auto;padding:14px}
+.card{background:rgba(255,255,255,.06);border:1px solid rgba(242,179,61,.35);border-radius:12px;padding:14px;margin-bottom:14px}
+.card h2{font-size:13px;color:var(--haldi);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+label{display:block;font-size:12px;margin:8px 0 4px;opacity:.9}
+input[type=text],input[type=number],textarea,select{
+  width:100%;padding:10px;border-radius:8px;border:1px solid rgba(242,179,61,.4);
+  background:rgba(0,0,0,.25);color:var(--cream);font-size:15px}
+textarea{resize:vertical;min-height:54px}
+.row{display:flex;gap:10px}.row>div{flex:1}
+.tpl{display:flex;gap:8px;flex-wrap:wrap}
+.tpl button{flex:1;min-width:90px;padding:10px 6px;border-radius:8px;border:2px solid transparent;font-size:12px;font-weight:700;cursor:pointer}
+.tpl button.active{border-color:var(--cream);box-shadow:0 0 0 2px rgba(247,239,217,.3)}
+.t-red{background:linear-gradient(135deg,#7A1612,#B3261E);color:#F7EFD9}
+.t-green{background:linear-gradient(135deg,#123B2C,#1E6B4F);color:#F7EFD9}
+.t-festive{background:linear-gradient(135deg,#4A0C6B,#B3261E);color:#FFD34D}
+.t-fresh{background:linear-gradient(135deg,#F2B33D,#E07B00);color:#4A0C0A}
+.photo-btn{display:block;width:100%;padding:11px;border-radius:8px;border:1px dashed var(--haldi);background:transparent;color:var(--haldi);font-size:14px;cursor:pointer;text-align:center}
+canvas{width:100%;border-radius:12px;border:2px solid var(--haldi);display:block}
+.actions{display:flex;gap:10px;margin-top:12px}
+.actions button{flex:1;padding:14px;border:none;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer}
+#dl{background:var(--haldi);color:var(--red-d)}
+#share{background:#1E6B4F;color:#fff}
+.hint{font-size:11px;opacity:.7;margin-top:8px;text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <div class="mark">AK</div>
+  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo</p></div>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <h2>1 · Template chuno</h2>
+    <div class="tpl">
+      <button class="t-red active" data-t="red">Classic Red</button>
+      <button class="t-green" data-t="green">Green Fresh</button>
+      <button class="t-festive" data-t="festive">Festive</button>
+      <button class="t-fresh" data-t="fresh">Haldi Bright</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>2 · Details bharo</h2>
+    <label>Shop ka naam</label>
+    <input type="text" id="shop" value="ANKUSH KIRANA">
+    <label>Scheme / Offer title (bada text)</label>
+    <input type="text" id="title" value="MEGA OFFER" placeholder="jaise: DHAMAKA SALE">
+    <label>Product ka naam</label>
+    <input type="text" id="prod" value="Basmati Chawal 5kg" placeholder="jaise: Fortune Oil 1L">
+    <div class="row">
+      <div><label>MRP (₹)</label><input type="number" id="mrp" value="450"></div>
+      <div><label>Offer Price (₹)</label><input type="number" id="price" value="399"></div>
+    </div>
+    <label>Extra line (optional)</label>
+    <input type="text" id="extra" value="Ghar baithe order karo — Free Home Delivery!" placeholder="jaise: 2 pe 1 FREE">
+    <label>Offer validity</label>
+    <input type="text" id="valid" value="Offer valid till: 12 July 2026" >
+    <label>Product photo (optional)</label>
+    <input type="file" id="photo" accept="image/*" hidden>
+    <button class="photo-btn" onclick="document.getElementById('photo').click()">📷 Photo add karo</button>
+  </div>
+
+  <div class="card">
+    <h2>3 · Poster ready!</h2>
+    <canvas id="cv" width="1080" height="1080"></canvas>
+    <div class="actions">
+      <button id="dl">⬇ Download</button>
+      <button id="share">📤 Share</button>
+    </div>
+    <p class="hint">Download karke seedha WhatsApp Channel pe post karo</p>
+  </div>
+</div>
+
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const W=1080,H=1080;
+let tpl='red',img=null;
+
+const THEMES={
+  red:    {bg1:'#7A1612',bg2:'#4A0C0A',acc:'#F2B33D',txt:'#F7EFD9',badge:'#F2B33D',badgeTxt:'#4A0C0A'},
+  green:  {bg1:'#1E6B4F',bg2:'#0A2E20',acc:'#F2B33D',txt:'#F7EFD9',badge:'#F2B33D',badgeTxt:'#0A2E20'},
+  festive:{bg1:'#5B1070',bg2:'#2A0838',acc:'#FFD34D',txt:'#FFF3E0',badge:'#E23A2E',badgeTxt:'#FFF3E0'},
+  fresh:  {bg1:'#F2B33D',bg2:'#E07B00',acc:'#7A1612',txt:'#4A0C0A',badge:'#7A1612',badgeTxt:'#F7EFD9'}
+};
+
+function val(id){return document.getElementById(id).value.trim()}
+
+function fitText(text,maxW,base,weight,family){
+  let s=base;
+  ctx.font=weight+' '+s+'px '+family;
+  while(ctx.measureText(text).width>maxW && s>20){s-=2;ctx.font=weight+' '+s+'px '+family}
+  return s;
+}
+
+function draw(){
+  const t=THEMES[tpl];
+  // background gradient
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,t.bg1);g.addColorStop(1,t.bg2);
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+
+  // decorative rays from top center
+  ctx.save();ctx.globalAlpha=.08;ctx.fillStyle=t.txt;
+  for(let i=0;i<12;i++){ctx.beginPath();ctx.moveTo(W/2,180);
+    const a1=(i*30)*Math.PI/180,a2=(i*30+14)*Math.PI/180;
+    ctx.arc(W/2,180,1400,a1,a2);ctx.closePath();ctx.fill();}
+  ctx.restore();
+
+  // border frame + corner dots
+  ctx.strokeStyle=t.acc;ctx.lineWidth=10;
+  ctx.strokeRect(24,24,W-48,H-48);
+  ctx.fillStyle=t.acc;
+  ctx.setLineDash([2,26]);ctx.lineWidth=8;ctx.strokeStyle=t.acc;
+  ctx.strokeRect(48,48,W-96,H-96);ctx.setLineDash([]);
+
+  // shop name ribbon
+  ctx.fillStyle=t.acc;
+  ctx.beginPath();ctx.roundRect(W/2-330,64,660,86,14);ctx.fill();
+  ctx.fillStyle=t.badgeTxt==='#F7EFD9'&&tpl==='festive'?'#2A0838':(tpl==='fresh'?'#F7EFD9':t.bg2);
+  const shop=val('shop')||'MY KIRANA';
+  let fs=fitText(shop,600,52,'800','Georgia,serif');
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.font='800 '+fs+'px Georgia,serif';
+  ctx.fillText(shop,W/2,110);
+
+  // scheme title
+  const title=val('title')||'OFFER';
+  fs=fitText(title,940,96,'900','Arial,sans-serif');
+  ctx.font='900 '+fs+'px Arial,sans-serif';
+  ctx.fillStyle=t.txt;
+  ctx.shadowColor='rgba(0,0,0,.45)';ctx.shadowBlur=14;ctx.shadowOffsetY=6;
+  ctx.fillText(title,W/2,240);
+  ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+
+  // product photo circle (if uploaded)
+  let prodY=430;
+  if(img){
+    const r=140,cx2=W/2,cy2=445;
+    ctx.save();ctx.beginPath();ctx.arc(cx2,cy2,r,0,7);ctx.clip();
+    const s=Math.max(2*r/img.width,2*r/img.height);
+    ctx.drawImage(img,cx2-img.width*s/2,cy2-img.height*s/2,img.width*s,img.height*s);
+    ctx.restore();
+    ctx.beginPath();ctx.arc(cx2,cy2,r,0,7);
+    ctx.lineWidth=12;ctx.strokeStyle=t.acc;ctx.stroke();
+    prodY=645;
+  }
+
+  // product name (full width, nothing overlaps this line)
+  const prod=val('prod');
+  if(prod){
+    fs=fitText(prod,940,56,'700','Arial,sans-serif');
+    ctx.font='700 '+fs+'px Arial,sans-serif';
+    ctx.fillStyle=t.txt;
+    ctx.fillText(prod,W/2,prodY);
+  }
+
+  // price badge
+  const mrp=parseFloat(val('mrp'))||0, price=parseFloat(val('price'))||0;
+  const py=img?800:615;
+  if(price>0){
+    // burst star (compact, stays below product name)
+    ctx.save();ctx.translate(W/2,py);
+    ctx.fillStyle=t.badge;
+    ctx.beginPath();
+    for(let i=0;i<24;i++){
+      const a=i*Math.PI/12, r=i%2? 150:180;
+      ctx.lineTo(Math.cos(a)*r*1.25,Math.sin(a)*r*.62);
+    }
+    ctx.closePath();ctx.fill();
+    ctx.fillStyle=t.badgeTxt;
+    ctx.font='900 84px Arial,sans-serif';
+    ctx.fillText('₹'+price,0,-10);
+    if(mrp>price){
+      ctx.font='600 36px Arial,sans-serif';
+      const mtxt='MRP ₹'+mrp;
+      ctx.fillText(mtxt,0,50);
+      const w2=ctx.measureText(mtxt).width;
+      ctx.strokeStyle=t.badgeTxt;ctx.lineWidth=5;
+      ctx.beginPath();ctx.moveTo(-w2/2-6,48);ctx.lineTo(w2/2+6,48);ctx.stroke();
+    }
+    ctx.restore();
+    // discount tag - beside photo (or above burst if no photo)
+    if(mrp>price){
+      const off=Math.round((mrp-price)/mrp*100);
+      const tx=W/2+320, ty=img?445:py+150;
+      ctx.save();ctx.translate(tx,ty);ctx.rotate(.16);
+      ctx.fillStyle=t.txt;
+      ctx.beginPath();ctx.roundRect(-105,-42,210,84,16);ctx.fill();
+      ctx.fillStyle=t.bg2;
+      ctx.font='900 48px Arial,sans-serif';
+      ctx.fillText(off+'% OFF',0,2);
+      ctx.restore();
+    }
+  }
+
+  // extra line (safely inside frame, above validity)
+  const extra=val('extra');
+  if(extra){
+    fs=fitText(extra,900,40,'700','Arial,sans-serif');
+    ctx.font='700 '+fs+'px Arial,sans-serif';
+    ctx.fillStyle=t.acc;
+    ctx.fillText(extra,W/2,img?938:880);
+  }
+
+  // validity strip (inside dashed border)
+  const vld=val('valid');
+  if(vld){
+    ctx.fillStyle='rgba(0,0,0,.3)';
+    ctx.fillRect(64,H-110,W-128,52);
+    ctx.fillStyle=t.txt;
+    fs=fitText(vld,840,32,'600','Arial,sans-serif');
+    ctx.font='600 '+fs+'px Arial,sans-serif';
+    ctx.fillText(vld,W/2,H-84);
+  }
+}
+
+// events
+document.querySelectorAll('.tpl button').forEach(b=>{
+  b.onclick=()=>{document.querySelectorAll('.tpl button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');tpl=b.dataset.t;draw();}
+});
+['shop','title','prod','mrp','price','extra','valid'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',draw);
+});
+document.getElementById('photo').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{img=new Image();img.onload=draw;img.src=ev.target.result};
+  r.readAsDataURL(f);
+});
+document.getElementById('dl').onclick=()=>{
+  const a=document.createElement('a');
+  a.download='poster.png';a.href=cv.toDataURL('image/png');a.click();
+};
+document.getElementById('share').onclick=async()=>{
+  cv.toBlob(async b=>{
+    const file=new File([b],'poster.png',{type:'image/png'});
+    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file],title:'Offer Poster'})}catch(e){}
+    }else{document.getElementById('dl').click()}
+  });
+};
+draw();
+</script>
+</body>
+</html>
