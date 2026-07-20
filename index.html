@@ -41,23 +41,37 @@ canvas{width:100%;border-radius:12px;border:2px solid var(--haldi);display:block
 #dl{background:var(--haldi);color:var(--red-d)}
 #share{background:#1E6B4F;color:#fff}
 .hint{font-size:11px;opacity:.7;margin-top:8px;text-align:center}
-.rate-head{display:flex;gap:6px;margin-bottom:8px}
-.rate-head .rh-name{flex:2;font-size:11px;opacity:.8;align-self:end}
-.rate-head .rh-u{flex:1}
-.rate-head .rh-u label{margin:0 0 3px}
+.rate-head{display:flex;gap:6px;margin-bottom:8px;align-items:flex-end}
+.rate-head .rh-name{flex:1 1 auto;min-width:0;font-size:11px;opacity:.8}
+.rate-head .rh-u{flex:0 0 78px;width:78px}
+.rate-head .rh-u label{margin:0 0 3px;font-size:10px}
+.rate-head .rh-u input{padding:8px 4px;text-align:center}
+.rate-head .rh-sp{flex:0 0 36px}
 .rate-row{display:flex;gap:6px;margin-bottom:6px;align-items:center}
-.rate-row .rname{flex:2;padding:9px}
-.rate-row .rr1,.rate-row .rr2{flex:1;min-width:0;padding:9px}
-.rate-row .rdel{flex:none;width:36px;padding:9px 0;background:var(--red-d);color:var(--cream);border:1px solid rgba(242,179,61,.4);border-radius:8px;font-size:14px;cursor:pointer}
+.rate-row .rname{flex:1 1 auto;min-width:0;padding:9px}
+.rate-row .rr1,.rate-row .rr2{flex:0 0 78px;width:78px;min-width:0;padding:9px 6px;text-align:center}
+.rate-row .rdel{flex:0 0 36px;width:36px;padding:9px 0;background:var(--red-d);color:var(--cream);border:1px solid rgba(242,179,61,.4);border-radius:8px;font-size:14px;cursor:pointer}
 .add-row{width:100%;padding:11px;border-radius:8px;border:1px dashed var(--haldi);background:transparent;color:var(--haldi);font-weight:800;cursor:pointer;margin-top:6px}
+#installBtn{margin-left:auto;background:var(--haldi);color:var(--red-d);border:none;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
+#iosHint{max-width:520px;margin:0 auto;padding:0 14px}
+#iosHint .box{background:rgba(242,179,61,.14);border:1px solid rgba(242,179,61,.5);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--cream);margin-top:12px}
 </style>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#7A1612">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kirana Poster">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
 </head>
 <body>
 <header>
   <div class="mark">AK</div>
   <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo</p></div>
+  <button id="installBtn" style="display:none">📲 App Install</button>
 </header>
 
+<div id="iosHint" style="display:none"><div class="box">📲 <b>Install karne ke liye:</b> niche <b>Share</b> button dabao → <b>“Add to Home Screen”</b> select karo.</div></div>
 <div class="wrap">
   <div class="card">
     <h2>1 · Template chuno</h2>
@@ -105,6 +119,7 @@ canvas{width:100%;border-radius:12px;border:2px solid var(--haldi);display:block
       <div class="rh-name">Product</div>
       <div class="rh-u"><label>Unit 1</label><input type="text" id="unit1" value="30 Kg"></div>
       <div class="rh-u"><label>Unit 2</label><input type="text" id="unit2" value="1 Kg"></div>
+      <div class="rh-sp"></div>
     </div>
     <div id="rateRows"></div>
     <button class="add-row" id="addRow">＋ Product add karo</button>
@@ -427,6 +442,32 @@ createRow('Aata (Gehu)','980','36');
 createRow('Toor Dal','','130');
 
 draw();
+
+/* ---------- PWA: install + service worker ---------- */
+let deferredPrompt=null;
+const installBtn=document.getElementById('installBtn');
+const iosHint=document.getElementById('iosHint');
+const isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredPrompt=e;
+  if(!isStandalone)installBtn.style.display='';
+});
+installBtn.onclick=async()=>{
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  try{await deferredPrompt.userChoice;}catch(e){}
+  deferredPrompt=null;installBtn.style.display='none';
+};
+window.addEventListener('appinstalled',()=>{installBtn.style.display='none';iosHint.style.display='none';});
+
+// iOS Safari has no beforeinstallprompt -> show manual hint
+if(isIOS && !isStandalone){iosHint.style.display='';}
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});
+}
 </script>
 </body>
 </html>
