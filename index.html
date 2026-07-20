@@ -118,7 +118,7 @@ canvas{width:100%;border-radius:12px;border:2px solid var(--haldi);display:block
 
     <div id="grpSingle" style="display:none">
       <div class="row">
-        <div><label>Rate (₹)</label><input type="number" id="srate" value="2250"></div>
+        <div><label>Rate (₹)</label><input type="number" id="srate" value="2250" placeholder="jaise: 2250"></div>
         <div><label>Kitne ka rate</label><input type="text" id="sqty" value="30 KG"></div>
       </div>
       <label>Features (optional — ek line me ek, max 3)</label>
@@ -127,7 +127,7 @@ canvas{width:100%;border-radius:12px;border:2px solid var(--haldi);display:block
 
     <div id="grpExtra">
       <label id="lblExtra">Extra line (optional)</label>
-      <input type="text" id="extra" value="Ghar baithe order karo — Free Home Delivery!" placeholder="jaise: 2 pe 1 FREE">
+      <input type="text" id="extra" value="" placeholder="Optional — khaali chhodo to poster pe nahi aayega">
     </div>
 
     <div id="grpPhoto">
@@ -347,7 +347,18 @@ function paintRateList(t){
   const rates=readRates();
   const u1=(val('unit1')||'30 Kg').toUpperCase();
   const u2=(val('unit2')||'1 Kg').toUpperCase();
-  const L=72,R=W-72,top=328,sep1=560,sep2=784;
+  const L=72,R=W-72,top=328;
+
+  // sirf wahi column jisme rate bhara hai
+  const hasU1=rates.some(r=>r.r1);
+  const hasU2=rates.some(r=>r.r2);
+  const cols=[];
+  if(hasU1)cols.push({label:u1,key:'r1'});
+  if(hasU2)cols.push({label:u2,key:'r2'});
+  const nCols=cols.length;
+  const rateColW=nCols>0?Math.min(232,(R-L)*0.30):0;
+  const prodRight=R-rateColW*nCols;
+  const colCenter=i=>prodRight+rateColW*i+rateColW/2;
 
   // header bar
   ctx.fillStyle=t.acc;
@@ -356,10 +367,11 @@ function paintRateList(t){
   ctx.textAlign='left';ctx.font='800 34px Arial,sans-serif';
   ctx.fillText('PRODUCT',L+24,top+33);
   ctx.textAlign='center';
-  let uf=fitText(u1,sep2-sep1-16,30,'800','Arial,sans-serif');
-  ctx.font='800 '+uf+'px Arial,sans-serif';ctx.fillText(u1,(sep1+sep2)/2,top+33);
-  uf=fitText(u2,R-sep2-16,30,'800','Arial,sans-serif');
-  ctx.font='800 '+uf+'px Arial,sans-serif';ctx.fillText(u2,(sep2+R)/2,top+33);
+  cols.forEach((c,i)=>{
+    const cf=fitText(c.label,rateColW-16,30,'800','Arial,sans-serif');
+    ctx.font='800 '+cf+'px Arial,sans-serif';
+    ctx.fillText(c.label,colCenter(i),top+33);
+  });
 
   if(rates.length===0){
     ctx.fillStyle=t.txt;ctx.textAlign='center';ctx.textBaseline='middle';
@@ -380,18 +392,17 @@ function paintRateList(t){
       ctx.beginPath();ctx.roundRect(L,y,R-L,rowH-4,8);ctx.fill();}
     // name
     ctx.fillStyle=t.txt;ctx.textAlign='left';ctx.textBaseline='middle';
-    const nf=fitText(row.name,sep1-L-40,fsz,'700','Arial,sans-serif');
+    const nf=fitText(row.name,prodRight-L-40,fsz,'700','Arial,sans-serif');
     ctx.font='700 '+nf+'px Arial,sans-serif';
     ctx.fillText(row.name,L+24,y+rowH/2);
     // rates
     ctx.textAlign='center';ctx.fillStyle=t.acc;ctx.font='800 '+fsz+'px Arial,sans-serif';
-    if(row.r1)ctx.fillText('₹'+row.r1,(sep1+sep2)/2,y+rowH/2);
-    if(row.r2)ctx.fillText('₹'+row.r2,(sep2+R)/2,y+rowH/2);
+    cols.forEach((c,ci)=>{if(row[c.key])ctx.fillText('₹'+row[c.key],colCenter(ci),y+rowH/2);});
   });
 
   // column separators
   ctx.strokeStyle='rgba(247,239,217,.25)';ctx.lineWidth=2;
-  [sep1,sep2].forEach(x=>{ctx.beginPath();ctx.moveTo(x,top);ctx.lineTo(x,rowsTop+n*rowH);ctx.stroke();});
+  for(let i=0;i<nCols;i++){const x=prodRight+rateColW*i;ctx.beginPath();ctx.moveTo(x,top);ctx.lineTo(x,rowsTop+n*rowH);ctx.stroke();}
 }
 
 /* ---------- SINGLE ITEM layout ---------- */
@@ -499,7 +510,16 @@ function draw(){
   paintValidity(t);
 }
 
-/* ---------- rate row builder ---------- */
+/* ---------- rate row builder + save/restore ---------- */
+function saveBhav(){
+  try{
+    const data={u1:val('unit1'),u2:val('unit2'),rows:[]};
+    document.querySelectorAll('#rateRows .rate-row').forEach(r=>{
+      data.rows.push({n:r.querySelector('.rname').value,a:r.querySelector('.rr1').value,b:r.querySelector('.rr2').value});
+    });
+    localStorage.setItem('kirana_bhav',JSON.stringify(data));
+  }catch(e){}
+}
 function createRow(name='',r1='',r2=''){
   const div=document.createElement('div');
   div.className='rate-row';
@@ -508,8 +528,22 @@ function createRow(name='',r1='',r2=''){
     '<input class="rr2" inputmode="decimal" placeholder="Rate" value="'+esc(r2)+'">'+
     '<button class="rdel" title="Hatao">✕</button>';
   document.getElementById('rateRows').appendChild(div);
-  div.querySelectorAll('input').forEach(inp=>inp.addEventListener('input',draw));
-  div.querySelector('.rdel').onclick=()=>{div.remove();draw();};
+  div.querySelectorAll('input').forEach(inp=>inp.addEventListener('input',()=>{draw();saveBhav();}));
+  div.querySelector('.rdel').onclick=()=>{div.remove();draw();saveBhav();};
+}
+function loadBhav(){
+  let data=null;
+  try{data=JSON.parse(localStorage.getItem('kirana_bhav'));}catch(e){}
+  if(data&&Array.isArray(data.rows)&&data.rows.length){
+    if(typeof data.u1==='string')document.getElementById('unit1').value=data.u1;
+    if(typeof data.u2==='string')document.getElementById('unit2').value=data.u2;
+    data.rows.forEach(r=>createRow(r.n||'',r.a||'',r.b||''));
+  }else{
+    createRow('Basmati Chawal','1250','45');
+    createRow('Shakkar (Sugar)','1450','52');
+    createRow('Aata (Gehu)','980','36');
+    createRow('Toor Dal','','130');
+  }
 }
 
 /* ---------- layout switch ---------- */
@@ -543,7 +577,8 @@ document.querySelectorAll('.seg button').forEach(b=>{
 ['shop','title','prod','mrp','price','extra','valid','unit1','unit2','srate','sqty','feats'].forEach(id=>{
   const el=document.getElementById(id);if(el)el.addEventListener('input',draw);
 });
-document.getElementById('addRow').onclick=()=>{createRow();draw();};
+document.getElementById('addRow').onclick=()=>{createRow();draw();saveBhav();};
+['unit1','unit2'].forEach(id=>{const e=document.getElementById(id);if(e)e.addEventListener('input',saveBhav);});
 document.getElementById('photo').addEventListener('change',e=>{
   const f=e.target.files[0];if(!f)return;
   const r=new FileReader();
@@ -569,11 +604,16 @@ document.getElementById('share').onclick=async()=>{
   });
 };
 
-/* seed sample rate rows */
-createRow('Basmati Chawal','1250','45');
-createRow('Shakkar (Sugar)','1450','52');
-createRow('Aata (Gehu)','980','36');
-createRow('Toor Dal','','130');
+/* bhav list restore (saved) ya default */
+loadBhav();
+
+/* validity = aaj ki date (live, device se) */
+(function(){
+  const d=new Date();
+  const M=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const el=document.getElementById('valid');
+  if(el)el.value=d.getDate()+' '+M[d.getMonth()]+' '+d.getFullYear();
+})();
 
 draw();
 
