@@ -84,6 +84,7 @@ canvas{width:100%;border-radius:12px;border:2px solid var(--haldi);display:block
     </div>
     <div class="seg">
       <button class="active" data-l="offer">🏷️ Offer Poster</button>
+      <button data-l="single">⭐ Single Item</button>
       <button data-l="ratelist">📋 Bhav List (Rate)</button>
     </div>
   </div>
@@ -92,19 +93,39 @@ canvas{width:100%;border-radius:12px;border:2px solid var(--haldi);display:block
     <h2>2 · Details bharo</h2>
     <label>Shop ka naam</label>
     <input type="text" id="shop" value="ANKUSH KIRANA">
-    <label>Title (bada text)</label>
-    <input type="text" id="title" value="MEGA OFFER" placeholder="jaise: DHAMAKA SALE / आज का भाव">
+    <div id="grpTitle">
+      <label>Title (bada text)</label>
+      <input type="text" id="title" value="MEGA OFFER" placeholder="jaise: DHAMAKA SALE / आज का भाव">
+    </div>
 
-    <div id="offerFields">
+    <div id="grpProd">
       <label>Product ka naam</label>
       <input type="text" id="prod" value="Basmati Chawal 5kg" placeholder="jaise: Fortune Oil 1L">
+    </div>
+
+    <div id="grpOfferPrice">
       <div class="row">
         <div><label>MRP (₹)</label><input type="number" id="mrp" value="450"></div>
         <div><label>Offer Price (₹)</label><input type="number" id="price" value="399"></div>
       </div>
-      <label>Extra line (optional)</label>
+    </div>
+
+    <div id="grpSingle" style="display:none">
+      <div class="row">
+        <div><label>Rate (₹)</label><input type="number" id="srate" value="2250"></div>
+        <div><label>Kitne ka rate</label><input type="text" id="sqty" value="30 KG"></div>
+      </div>
+      <label>Features (optional — ek line me ek, max 3)</label>
+      <textarea id="feats" placeholder="Khaali chhodo to poster pe kuch nahi aayega"></textarea>
+    </div>
+
+    <div id="grpExtra">
+      <label id="lblExtra">Extra line (optional)</label>
       <input type="text" id="extra" value="Ghar baithe order karo — Free Home Delivery!" placeholder="jaise: 2 pe 1 FREE">
-      <label>Product photo (optional)</label>
+    </div>
+
+    <div id="grpPhoto">
+      <label>Product photo</label>
       <input type="file" id="photo" accept="image/*" hidden>
       <button class="photo-btn" onclick="document.getElementById('photo').click()">📷 Photo add karo</button>
     </div>
@@ -364,12 +385,107 @@ function paintRateList(t){
   [sep1,sep2].forEach(x=>{ctx.beginPath();ctx.moveTo(x,top);ctx.lineTo(x,rowsTop+n*rowH);ctx.stroke();});
 }
 
+/* ---------- SINGLE ITEM layout ---------- */
+function badgeKG(cx,cy,r,t){
+  const q=(val('sqty')||'').trim();if(!q)return;
+  let top=q,bot='';
+  const m=q.match(/^(\d+[.,]?\d*)\s*(.*)$/);
+  if(m){top=m[1];bot=(m[2]||'').toUpperCase();}
+  ctx.save();ctx.translate(cx,cy);
+  ctx.fillStyle=t.acc;ctx.beginPath();
+  const teeth=22;
+  for(let i=0;i<=teeth*2;i++){const a=i*Math.PI/teeth,rr=(i%2?r:r*0.86);
+    const x=Math.cos(a)*rr,y=Math.sin(a)*rr;i?ctx.lineTo(x,y):ctx.moveTo(x,y);}
+  ctx.closePath();ctx.fill();
+  ctx.fillStyle=t.bg2;ctx.beginPath();ctx.arc(0,0,r*0.8,0,7);ctx.fill();
+  ctx.lineWidth=5;ctx.strokeStyle=t.acc;ctx.stroke();
+  ctx.fillStyle=t.txt;ctx.textAlign='center';ctx.textBaseline='middle';
+  if(bot){
+    let f=fitText(top,r*1.35,Math.round(r*0.62),'900','Arial,sans-serif');
+    ctx.font='900 '+f+'px Arial,sans-serif';ctx.fillText(top,0,-r*0.14);
+    f=fitText(bot,r*1.35,Math.round(r*0.3),'800','Arial,sans-serif');
+    ctx.font='800 '+f+'px Arial,sans-serif';ctx.fillText(bot,0,r*0.34);
+  }else{
+    const f=fitText(top,r*1.4,Math.round(r*0.55),'900','Arial,sans-serif');
+    ctx.font='900 '+f+'px Arial,sans-serif';ctx.fillText(top,0,0);
+  }
+  ctx.restore();
+}
+function paintSingle(t){
+  const hasPhoto=!!img;
+  // hero product name (gold with dark outline)
+  const prod=(val('prod')||'PRODUCT').toUpperCase();
+  const nf=fitText(prod,960,116,'900','Arial,sans-serif');
+  ctx.font='900 '+nf+'px Arial,sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.lineWidth=Math.max(4,nf*0.06);ctx.strokeStyle='rgba(0,0,0,.45)';
+  ctx.strokeText(prod,W/2,238);
+  ctx.fillStyle=t.acc;ctx.fillText(prod,W/2,238);
+  ctx.globalAlpha=.7;ctx.strokeStyle=t.acc;ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(W/2-130,300);ctx.lineTo(W/2+130,300);ctx.stroke();ctx.globalAlpha=1;
+
+  const bx=64,by=340,bw=452,bh=hasPhoto?176:206;
+
+  // rate box (left)
+  const rate=val('srate');
+  if(rate){
+    ctx.fillStyle='rgba(0,0,0,.30)';ctx.beginPath();ctx.roundRect(bx,by,bw,bh,18);ctx.fill();
+    ctx.lineWidth=8;ctx.strokeStyle=t.acc;ctx.beginPath();ctx.roundRect(bx,by,bw,bh,18);ctx.stroke();
+    const rtxt='₹'+rate;
+    const rf=fitText(rtxt,bw-48,hasPhoto?120:136,'900','Arial,sans-serif');
+    ctx.font='900 '+rf+'px Arial,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.lineWidth=Math.max(3,rf*0.05);ctx.strokeStyle='rgba(0,0,0,.4)';
+    ctx.strokeText(rtxt,bx+bw/2,by+bh/2);
+    ctx.fillStyle=t.acc;ctx.fillText(rtxt,bx+bw/2,by+bh/2);
+  }
+
+  let featY,featMaxW;
+  if(hasPhoto){
+    // photo on right
+    const px=548,py=332,pw=472,ph=548;
+    ctx.save();ctx.beginPath();ctx.roundRect(px,py,pw,ph,20);ctx.clip();
+    const s=Math.max(pw/img.width,ph/img.height);
+    ctx.drawImage(img,px+pw/2-img.width*s/2,py+ph/2-img.height*s/2,img.width*s,img.height*s);
+    ctx.restore();
+    ctx.lineWidth=8;ctx.strokeStyle=t.acc;ctx.beginPath();ctx.roundRect(px,py,pw,ph,20);ctx.stroke();
+    // small KG badge on left, under rate box
+    badgeKG(bx+150,662,120,t);
+    featY=794;featMaxW=bw-52;
+  }else{
+    // no photo -> big KG badge on right, features under rate box
+    badgeKG(786,600,205,t);
+    featY=by+bh+46;featMaxW=470;
+  }
+
+  // features (left column)
+  const fEl=document.getElementById('feats');
+  const feats=(fEl?fEl.value:'').split('\n').map(s=>s.trim()).filter(Boolean).slice(0,3);
+  feats.forEach(line=>{
+    ctx.fillStyle=t.acc;ctx.beginPath();ctx.arc(bx+14,featY,9,0,7);ctx.fill();
+    ctx.fillStyle=t.txt;ctx.textAlign='left';ctx.textBaseline='middle';
+    const lf=fitText(line,featMaxW,30,'700','Arial,sans-serif');
+    ctx.font='700 '+lf+'px Arial,sans-serif';ctx.fillText(line,bx+40,featY);
+    featY+=46;
+  });
+
+  // tagline ribbon (reuse extra)
+  const tag=val('extra');
+  if(tag){
+    const ry=902,rh=54;
+    ctx.fillStyle=t.acc;ctx.beginPath();ctx.roundRect(64,ry,W-128,rh,12);ctx.fill();
+    ctx.fillStyle=t.bg2;ctx.textAlign='center';ctx.textBaseline='middle';
+    const tf=fitText(tag,W-180,32,'800','Arial,sans-serif');
+    ctx.font='800 '+tf+'px Arial,sans-serif';ctx.fillText(tag,W/2,ry+rh/2);
+  }
+}
+
 /* ---------- main draw ---------- */
 function draw(){
   const t=(tpl==='auto')?(autoTheme||THEMES.red):THEMES[tpl];
   paintBase(t);
   paintShop(t);
   if(layout==='ratelist')paintRateList(t);
+  else if(layout==='single')paintSingle(t);
   else paintOffer(t);
   paintValidity(t);
 }
@@ -388,12 +504,21 @@ function createRow(name='',r1='',r2=''){
 }
 
 /* ---------- layout switch ---------- */
+function show(id,on){const e=document.getElementById(id);if(e)e.style.display=on?'':'none';}
 function applyLayout(){
-  document.getElementById('offerFields').style.display=layout==='offer'?'':'none';
-  document.getElementById('rateCard').style.display=layout==='ratelist'?'':'none';
+  const L=layout;
+  show('grpTitle', L==='offer'||L==='ratelist');
+  show('grpProd', L==='offer'||L==='single');
+  show('grpOfferPrice', L==='offer');
+  show('grpSingle', L==='single');
+  show('grpExtra', L==='offer'||L==='single');
+  show('grpPhoto', L==='offer'||L==='single');
+  show('rateCard', L==='ratelist');
+  const lx=document.getElementById('lblExtra');
+  if(lx)lx.textContent=(L==='single')?'Tagline (niche wali ribbon)':'Extra line (optional)';
   const tEl=document.getElementById('title'),v=tEl.value.trim();
-  if(layout==='ratelist'&&(v===''||v==='MEGA OFFER'))tEl.value='आज का भाव';
-  if(layout==='offer'&&(v===''||v==='आज का भाव'))tEl.value='MEGA OFFER';
+  if(L==='ratelist'&&(v===''||v==='MEGA OFFER'))tEl.value='आज का भाव';
+  if(L==='offer'&&(v===''||v==='आज का भाव'))tEl.value='MEGA OFFER';
   draw();
 }
 
@@ -406,7 +531,7 @@ document.querySelectorAll('.seg button').forEach(b=>{
   b.onclick=()=>{document.querySelectorAll('.seg button').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');layout=b.dataset.l;applyLayout();}
 });
-['shop','title','prod','mrp','price','extra','valid','unit1','unit2'].forEach(id=>{
+['shop','title','prod','mrp','price','extra','valid','unit1','unit2','srate','sqty','feats'].forEach(id=>{
   const el=document.getElementById(id);if(el)el.addEventListener('input',draw);
 });
 document.getElementById('addRow').onclick=()=>{createRow();draw();};
@@ -423,7 +548,7 @@ document.getElementById('photo').addEventListener('change',e=>{
 });
 document.getElementById('dl').onclick=()=>{
   const a=document.createElement('a');
-  a.download=(layout==='ratelist'?'bhav-list':'poster')+'.png';
+  a.download=(layout==='ratelist'?'bhav-list':layout==='single'?'product-poster':'poster')+'.png';
   a.href=cv.toDataURL('image/png');a.click();
 };
 document.getElementById('share').onclick=async()=>{
