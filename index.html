@@ -1,4 +1,11 @@
 <!DOCTYPE html>
+<!--
+  Kirana Poster Maker — v1.2
+  v1.2 : Bhav List ka text BADA (poster ki height rows ke hisaab se auto, font ~55% bada)
+         + Sab fields (shop, title, rate, unit, template, layout) localStorage me auto-save
+         + "Sab clear" button
+  v1.1 : bhav rows localStorage save
+-->
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
@@ -70,7 +77,7 @@ canvas{width:100%;border-radius:12px;border:2px solid var(--haldi);display:block
 <body>
 <header>
   <div class="mark">AK</div>
-  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo</p></div>
+  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.2</b></p></div>
   <button id="installBtn" style="display:none">📲 App Install</button>
 </header>
 
@@ -150,6 +157,7 @@ canvas{width:100%;border-radius:12px;border:2px solid var(--haldi);display:block
     </div>
     <div id="rateRows"></div>
     <button class="add-row" id="addRow">＋ Product add karo</button>
+    <button class="add-row" id="clrRows" style="border-color:#FF9A8B;color:#FF9A8B">🗑 Sab clear karo</button>
     <p class="hint">Rate khali chhodo to woh cell blank rahega. "RATE ONLY FOR TODAY" line poster pe automatic aayegi.</p>
   </div>
 
@@ -166,7 +174,7 @@ canvas{width:100%;border-radius:12px;border:2px solid var(--haldi);display:block
 
 <script>
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
-const W=1080,H=1080;
+const W=1080;let H=1080;
 let tpl='red',layout='offer',img=null,autoTheme=null;
 
 const THEMES={
@@ -225,7 +233,7 @@ function paintBase(t){
   ctx.save();ctx.globalAlpha=.08;ctx.fillStyle=t.txt;
   for(let i=0;i<12;i++){ctx.beginPath();ctx.moveTo(W/2,180);
     const a1=(i*30)*Math.PI/180,a2=(i*30+14)*Math.PI/180;
-    ctx.arc(W/2,180,1400,a1,a2);ctx.closePath();ctx.fill();}
+    ctx.arc(W/2,180,2800,a1,a2);ctx.closePath();ctx.fill();}
   ctx.restore();
   ctx.strokeStyle=t.acc;ctx.lineWidth=10;ctx.strokeRect(24,24,W-48,H-48);
   ctx.setLineDash([2,26]);ctx.lineWidth=8;ctx.strokeStyle=t.acc;
@@ -381,10 +389,10 @@ function paintRateList(t){
   }
 
   const n=rates.length;
-  const rowsTop=top+64+10;
-  const bottom=H-128;
-  const rowH=Math.min(78,(bottom-rowsTop)/Math.max(n,1));
-  const fsz=Math.max(24,Math.min(40,rowH*0.44));
+  const rowsTop=top+64+12;
+  const bottom=H-140;
+  const rowH=Math.min(92,(bottom-rowsTop)/Math.max(n,1));
+  const fsz=Math.max(26,Math.min(56,rowH*0.62));
 
   rates.forEach((row,i)=>{
     const y=rowsTop+i*rowH;
@@ -499,8 +507,22 @@ function paintSingle(t){
   }
 }
 
+/* ---------- poster height (bhav list me rows ke hisaab se) ---------- */
+const ROWS_TOP=328+64+12;      // table shuru hone ki jagah
+const FOOT=150;                // date wali patti ke liye niche ki jagah
+const ROW_TARGET=66;           // har row ko itni jagah milni chahiye (bada text)
+function posterH(){
+  if(layout!=='ratelist')return 1080;
+  const n=readRates().length;
+  const need=ROWS_TOP+n*ROW_TARGET+FOOT;
+  return Math.max(1080,Math.min(1920,Math.round(need)));
+}
+
 /* ---------- main draw ---------- */
 function draw(){
+  const h=posterH();
+  H=h;
+  if(cv.height!==h)cv.height=h;   // canvas resize -> pura repaint niche ho raha hai
   const t=(tpl==='auto')?(autoTheme||THEMES.red):THEMES[tpl];
   paintBase(t);
   paintShop(t);
@@ -511,15 +533,19 @@ function draw(){
 }
 
 /* ---------- rate row builder + save/restore ---------- */
-function saveBhav(){
+const SKEY='kirana_poster_v1';
+const FIELDS=['shop','title','prod','mrp','price','extra','srate','sqty','feats','unit1','unit2'];
+function saveAll(){
   try{
-    const data={u1:val('unit1'),u2:val('unit2'),rows:[]};
+    const d={tpl:tpl,layout:layout,f:{},rows:[]};
+    FIELDS.forEach(id=>{const e=document.getElementById(id);if(e)d.f[id]=e.value;});
     document.querySelectorAll('#rateRows .rate-row').forEach(r=>{
-      data.rows.push({n:r.querySelector('.rname').value,a:r.querySelector('.rr1').value,b:r.querySelector('.rr2').value});
+      d.rows.push({n:r.querySelector('.rname').value,a:r.querySelector('.rr1').value,b:r.querySelector('.rr2').value});
     });
-    localStorage.setItem('kirana_bhav',JSON.stringify(data));
+    localStorage.setItem(SKEY,JSON.stringify(d));
   }catch(e){}
 }
+const saveBhav=saveAll;
 function createRow(name='',r1='',r2=''){
   const div=document.createElement('div');
   div.className='rate-row';
@@ -531,19 +557,36 @@ function createRow(name='',r1='',r2=''){
   div.querySelectorAll('input').forEach(inp=>inp.addEventListener('input',()=>{draw();saveBhav();}));
   div.querySelector('.rdel').onclick=()=>{div.remove();draw();saveBhav();};
 }
-function loadBhav(){
-  let data=null;
-  try{data=JSON.parse(localStorage.getItem('kirana_bhav'));}catch(e){}
-  if(data&&Array.isArray(data.rows)&&data.rows.length){
-    if(typeof data.u1==='string')document.getElementById('unit1').value=data.u1;
-    if(typeof data.u2==='string')document.getElementById('unit2').value=data.u2;
-    data.rows.forEach(r=>createRow(r.n||'',r.a||'',r.b||''));
-  }else{
-    createRow('Basmati Chawal','1250','45');
-    createRow('Shakkar (Sugar)','1450','52');
-    createRow('Aata (Gehu)','980','36');
-    createRow('Toor Dal','','130');
+function loadAll(){
+  let d=null;
+  try{d=JSON.parse(localStorage.getItem(SKEY));}catch(e){}
+  if(!d){ // purani version ka data (sirf bhav rows) -> migrate
+    try{
+      const o=JSON.parse(localStorage.getItem('kirana_bhav'));
+      if(o&&Array.isArray(o.rows))d={rows:o.rows,f:{unit1:o.u1,unit2:o.u2}};
+    }catch(e){}
   }
+  if(d&&d.f){
+    FIELDS.forEach(id=>{
+      const e=document.getElementById(id);
+      if(e&&typeof d.f[id]==='string')e.value=d.f[id];
+    });
+  }
+  if(d&&d.tpl&&THEMES[d.tpl]){
+    tpl=d.tpl;
+    document.querySelectorAll('.tpl button').forEach(x=>x.classList.toggle('active',x.dataset.t===tpl));
+  }
+  if(d&&(d.layout==='offer'||d.layout==='single'||d.layout==='ratelist')){
+    layout=d.layout;
+    document.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('active',x.dataset.l===layout));
+  }
+  const rows=(d&&Array.isArray(d.rows)&&d.rows.length)?d.rows:[
+    {n:'Basmati Chawal',a:'1250',b:'45'},
+    {n:'Shakkar (Sugar)',a:'1450',b:'52'},
+    {n:'Aata (Gehu)',a:'980',b:'36'},
+    {n:'Toor Dal',a:'',b:'130'}
+  ];
+  rows.forEach(r=>createRow(r.n||'',r.a||'',r.b||''));
 }
 
 /* ---------- layout switch ---------- */
@@ -568,15 +611,20 @@ function applyLayout(){
 /* ---------- events ---------- */
 document.querySelectorAll('.tpl button').forEach(b=>{
   b.onclick=()=>{document.querySelectorAll('.tpl button').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');tpl=b.dataset.t;draw();}
+    b.classList.add('active');tpl=b.dataset.t;draw();saveAll();}
 });
 document.querySelectorAll('.seg button').forEach(b=>{
   b.onclick=()=>{document.querySelectorAll('.seg button').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');layout=b.dataset.l;applyLayout();}
+    b.classList.add('active');layout=b.dataset.l;applyLayout();saveAll();}
 });
 ['shop','title','prod','mrp','price','extra','valid','unit1','unit2','srate','sqty','feats'].forEach(id=>{
-  const el=document.getElementById(id);if(el)el.addEventListener('input',draw);
+  const el=document.getElementById(id);if(el)el.addEventListener('input',()=>{draw();saveAll();});
 });
+document.getElementById('clrRows').onclick=()=>{
+  if(!confirm('Poori bhav list clear kar dein?'))return;
+  document.getElementById('rateRows').innerHTML='';
+  createRow();draw();saveAll();
+};
 document.getElementById('addRow').onclick=()=>{createRow();draw();saveBhav();};
 ['unit1','unit2'].forEach(id=>{const e=document.getElementById(id);if(e)e.addEventListener('input',saveBhav);});
 document.getElementById('photo').addEventListener('change',e=>{
@@ -604,8 +652,9 @@ document.getElementById('share').onclick=async()=>{
   });
 };
 
-/* bhav list restore (saved) ya default */
-loadBhav();
+/* saved data restore: products, rates, units, shop, title, template, layout */
+loadAll();
+applyLayout();
 
 /* validity = aaj ki date (live, device se) */
 (function(){
