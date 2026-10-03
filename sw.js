@@ -1,5 +1,5 @@
 /* Kirana Poster Maker - service worker (network-first) */
-const CACHE='kirana-poster-v7';
+const CACHE='kirana-poster-v8';
 
 self.addEventListener('install',e=>{
   self.skipWaiting();
@@ -15,6 +15,9 @@ self.addEventListener('activate',e=>{
 
 self.addEventListener('fetch',e=>{
   if(e.request.method!=='GET')return;
+  // AI background jaisi bahar ki images cache me mat bharo (sirf app + Google font)
+  const u=new URL(e.request.url);
+  if(u.origin!==self.location.origin&&!/fonts\.(googleapis|gstatic)\.com$/.test(u.hostname))return;
   e.respondWith(
     fetch(e.request).then(res=>{
       const copy=res.clone();

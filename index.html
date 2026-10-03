@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <!--
-  Kirana Poster Maker — v1.5
+  Kirana Poster Maker — v1.6
+  v1.6 : ✨ AI Poster — AI se har baar naya background (free Cloudflare server / Pollinations) + asli product photo + sahi Hindi text
   v1.5 : Hindi/Marathi chuno to English me likha naam/text apne aap देवनागरी me (Chanadal → चना दाल), MRP → एमआरपी
   v1.4 : 🪄 Smart background (product ke hisaab se rang + design) + shop logo + phone/address/UPI QR patti
          + saved products (naam chuno, rate apne aap) + purani bhav list + pichhle posters + dono size download
@@ -62,6 +63,12 @@ canvas#cv{width:100%;border-radius:12px;border:2px solid var(--haldi);display:bl
 .actions button{flex:1;padding:14px;border:none;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer}
 #dl{background:var(--haldi);color:var(--red-d)}
 #share{background:#1E6B4F;color:#fff}
+#aiGo{width:100%;padding:13px;border:none;border-radius:10px;background:linear-gradient(135deg,#F2B33D,#E07B00);color:#4A0C0A;font-size:15px;font-weight:800;cursor:pointer}
+#aiGo:disabled{opacity:.7}
+#aiStatus{text-align:left;font-size:12px;margin-top:8px;opacity:1}
+details.aiset{margin-top:12px;border:1px dashed rgba(242,179,61,.5);border-radius:10px;padding:8px 10px}
+details.aiset summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--haldi)}
+details.aiset a{color:var(--haldi)}
 #dlBoth{width:100%;margin-top:8px;padding:11px;border-radius:10px;border:1px solid var(--haldi);background:transparent;color:var(--haldi);font-size:14px;font-weight:800;cursor:pointer}
 .hint{font-size:11px;opacity:.7;margin-top:8px;text-align:center}
 .warn{font-size:12px;color:#FFD34D;background:rgba(255,211,77,.12);border-radius:8px;padding:8px;margin-top:8px}
@@ -112,7 +119,7 @@ option{background:#4A0C0A;color:#F7EFD9}
 <body>
 <header>
   <div class="mark">AK</div>
-  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.5</b></p></div>
+  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.6</b></p></div>
   <button id="installBtn" style="display:none">📲 App Install</button>
 </header>
 
@@ -139,6 +146,7 @@ option{background:#4A0C0A;color:#F7EFD9}
       <button data-l="ratelist">📋 Bhav List (Rate)</button>
       <button data-l="combo">🎁 Combo Offer</button>
       <button data-l="festival">🪔 Festival Greeting</button>
+      <button data-l="ai">✨ AI Poster</button>
     </div>
     <div class="opt-lbl">Poster ki bhasha</div>
     <div class="seg opt" id="langSeg">
@@ -239,6 +247,39 @@ option{background:#4A0C0A;color:#F7EFD9}
     <select id="bhavHist"></select>
     <button class="add-row" id="clrRows" style="border-color:#FF9A8B;color:#FF9A8B">🗑 Sab clear karo</button>
     <p class="hint">Rate khali chhodo to woh cell blank rahega. "RATE ONLY FOR TODAY" line poster pe automatic aayegi. 30 se zyada product ho to list 2 column me ban jaati hai.</p>
+  </div>
+
+  <div class="card" id="aiCard" style="display:none">
+    <h2>3 · ✨ AI Poster</h2>
+    <p class="hint" style="text-align:left;margin:0 0 10px">Product ki photo daalo (upar) → AI har baar naya background banayega. Packet aapki asli photo hi rahega aur Hindi/Marathi text app khud likhega, isliye spelling hamesha sahi.</p>
+    <button id="aiGo">✨ AI background banao</button>
+    <p class="hint" id="aiStatus"></p>
+    <label>Background ka style</label>
+    <select id="aiStyle">
+      <option value="auto">🪄 Auto — product ke hisaab se</option>
+      <option value="kitchen">🍳 Rasoi (kitchen)</option>
+      <option value="festive">🪔 Tyohar (diye, phool)</option>
+      <option value="golden">✨ Premium sunehra</option>
+      <option value="nature">🌿 Khet / prakriti</option>
+      <option value="market">🛒 Bazaar / dukaan</option>
+    </select>
+    <label>Apni marzi ka background (optional, English me)</label>
+    <input type="text" id="aiExtra" placeholder="jaise: with marigold flowers, morning sunlight">
+    <label>Upar ki badi line (headline)</label>
+    <input type="text" id="aiHead">
+    <label>Product ke neeche chhoti line</label>
+    <input type="text" id="aiSub">
+    <label>Khoobiyan (ek line me ek, max 4)</label>
+    <textarea id="aiFeats" rows="4"></textarea>
+    <details class="aiset">
+      <summary>⚙️ AI setting (free server / key)</summary>
+      <p class="hint" style="text-align:left">AI background ke liye ek free server chahiye. Sabse bharosemand: <b>apna free Cloudflare server</b> (5 minute ka kaam) — <a href="https://github.com/ankushchhajed7-cmd/KIRANA-POSTER/blob/main/AI-SETUP.md" target="_blank" rel="noopener">step-by-step guide</a>. Khaali chhodoge to app bina key wala Pollinations link try karega (shayad na chale).</p>
+      <label>Cloudflare server URL</label>
+      <input type="text" id="aiUrl" placeholder="https://kirana-ai.aapka-naam.workers.dev" autocapitalize="off" autocomplete="off">
+      <label>Pollinations key (optional)</label>
+      <input type="text" id="aiKey" placeholder="enter.pollinations.ai se mili key" autocapitalize="off" autocomplete="off">
+      <p class="hint" style="text-align:left">Yeh dono sirf aapke phone me save rehte hain.</p>
+    </details>
   </div>
 
   <div class="card" id="comboCard" style="display:none">
@@ -425,6 +466,7 @@ const DICT=(function(){
   add('mahavir','महावीर');add('jain','जैन');add('agrawal agarwal','अग्रवाल');add('gupta','गुप्ता');add('patil','पाटील');
   add('rajesh','राजेश');add('suresh','सुरेश');add('mahesh','महेश');add('ganesh','गणेश');add('lakshmi laxmi','लक्ष्मी');
   add('krishna','कृष्णा');add('shree shri','श्री');add('sai','साई');add('balaji','बालाजी');add('om','ॐ');
+  add('upvas upwas upavas','उपवास');add('vrat','व्रत');add('farali faraali frali','फराली','फराळी');add('fast','फास्ट');add('flour','आटा','पीठ');
   add('pune','पुणे');add('nashik','नाशिक');add('mumbai','मुंबई');add('nagpur','नागपुर','नागपूर');add('indore','इंदौर');
   add('stores','स्टोर्स','स्टोअर्स');add('enterprises','एंटरप्राइजेज');add('provision provisions','प्रोविजन','प्रोव्हिजन');
   return d;
@@ -575,7 +617,7 @@ function catOf(text){
 /* poster ke hisaab se kaunsi category */
 function smartCat(){
   let names=[];
-  if(layout==='offer'||layout==='single')names=[val('prod')];
+  if(layout==='offer'||layout==='single'||layout==='ai')names=[val('prod')];
   else if(layout==='combo')names=readCombo().map(x=>x.n);
   else if(layout==='ratelist')names=readRates().map(x=>x.name);
   else return null;
@@ -781,8 +823,223 @@ function paintMotifs(t){
   ctx.restore();
 }
 
+/* ---------- ✨ AI POSTER: AI se background (har baar naya) + asli photo + sahi Hindi text ---------- */
+const DEF_AI={
+  head:{en:'Purity & Taste, Together',hi:'शुद्धता और स्वाद का असली संगम',mr:'शुद्धता आणि चवीचा खरा संगम'},
+  sub:{en:'Best quality at the right price',hi:'बेहतरीन क्वालिटी, सही दाम',mr:'उत्तम दर्जा, योग्य भाव'},
+  feats:{en:'100% Pure\nBest Quality\nTasty & Healthy\nFresh Stock',hi:'100% शुद्ध\nबेहतरीन गुणवत्ता\nस्वादिष्ट और पौष्टिक\nताज़ा माल',mr:'100% शुद्ध\nउत्तम दर्जा\nचविष्ट आणि पौष्टिक\nताजा माल'}
+};
+function setDefaultAI(){
+  [['aiHead','head'],['aiSub','sub'],['aiFeats','feats']].forEach(([id,k])=>{
+    const el=document.getElementById(id),v=el.value.trim();
+    if(v===''||Object.values(DEF_AI[k]).includes(v))el.value=DEF_AI[k][lang];
+  });
+}
+const AI_SCENE={
+  oil:'golden cooking oil being poured with glossy oil drops, sunflowers, warm golden light, indian kitchen counter',
+  grain:'rustic indian kitchen table with fresh golden wheat stalks, a stack of soft rotis, wooden bowl of flour, burlap sack, warm sunlight',
+  dal:'wooden bowls full of colourful lentils and pulses, wooden spoons, burlap cloth, warm kitchen light',
+  spice:'colourful indian spices in brass bowls, red chillies, turmeric powder, dramatic warm light',
+  sweet:'sugar cubes and jaggery with indian sweets on a brass plate, soft festive light',
+  tea:'steaming cup of masala chai in a clay kulhad, loose tea leaves, soft morning light',
+  dairy:'fresh milk splash, glass of milk, paneer and butter, cool fresh morning light',
+  snack:'crispy indian snacks and biscuits on a wooden table, bright cheerful light',
+  clean:'fresh clean laundry and soap bubbles, aqua blue clean light',
+  veg:'fresh vegetables and fruits in a wicker basket, green leaves, morning market light',
+  drink:'chilled drink bottles with ice cubes and water droplets, bright summer light',
+  none:'premium indian grocery store background, warm golden bokeh lights'
+};
+const AI_STYLE={
+  kitchen:'cozy indian home kitchen counter, wooden table, warm window light',
+  festive:'festive indian diwali decoration, glowing diyas, marigold flowers, rangoli, warm bokeh lights',
+  golden:'luxury golden silk background with soft glitter bokeh and light rays',
+  nature:'lush green farm field at sunrise, soft natural light, fresh organic feel',
+  market:'colourful indian grocery market shelves, blurred, warm lights'
+};
+function aiPrompt(){
+  const st=val('aiStyle')||'auto';
+  const scene=st==='auto'?AI_SCENE[smartCat()||'none']:AI_STYLE[st];
+  const extra=val('aiExtra');
+  return scene+(extra?', '+extra:'')+', professional product advertisement background, empty space in the middle, photorealistic, soft depth of field, high detail, no text, no letters, no words, no logo, no watermark, no people';
+}
+const AKEY='kp_ai_cfg',ABG='kp_ai_bg';
+let aiBg=null,aiBusy=false;
+function aiCfg(){return lsGet(AKEY)||{};}
+function aiUrls(prompt,seed,w,h){
+  const c=aiCfg(),enc=encodeURIComponent(prompt),out=[];
+  if(c.url&&/^https:\/\//.test(c.url))out.push(c.url+(c.url.includes('?')?'&':'?')+'prompt='+enc+'&seed='+seed+'&width='+w+'&height='+h);
+  if(c.key)out.push('https://gen.pollinations.ai/image/'+enc+'?width='+w+'&height='+h+'&seed='+seed+'&nologo=true&key='+encodeURIComponent(c.key));
+  out.push('https://image.pollinations.ai/prompt/'+enc+'?width='+w+'&height='+h+'&seed='+seed+'&nologo=true');
+  return out;
+}
+/* blob URL se image — canvas "tainted" nahi hota, download chalta rahe */
+async function fetchImage(url,ms){
+  const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),ms);
+  try{
+    const r=await fetch(url,{signal:ac.signal});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const b=await r.blob();
+    if(!/^image\//.test(b.type)||b.size<5000)throw new Error('image nahi mili');
+    const u=URL.createObjectURL(b);
+    return await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>rej(new Error('image kharab'));im.src=u;});
+  }finally{clearTimeout(tm);}
+}
+function aiStatus(msg,warn){const e=document.getElementById('aiStatus');e.textContent=msg;e.style.color=warn?'#FFD34D':'';}
+async function aiGenerate(){
+  if(aiBusy)return;
+  if(!navigator.onLine){aiStatus('⚠️ Internet nahi hai — AI background ke liye internet chahiye. Abhi design wala background laga hai.',true);return;}
+  aiBusy=true;
+  const btn=document.getElementById('aiGo');btn.disabled=true;btn.textContent='⏳ AI background ban raha hai… (20–60 sec)';
+  aiStatus('');
+  const status=size==='status',w=status?720:896,h=status?1280:1120;
+  const seed=Math.floor(Math.random()*1e9),prompt=aiPrompt();
+  let im=null,err='';
+  for(const u of aiUrls(prompt,seed,w,h)){
+    try{im=await fetchImage(u,90000);break;}catch(e){err=e&&e.message||String(e);}
+  }
+  aiBusy=false;btn.disabled=false;btn.textContent='🔄 Naya AI background banao';
+  if(!im){
+    aiStatus('⚠️ AI background nahi mila ('+err+'). Abhi design wala background laga hai. Free Cloudflare server jodne ke liye neeche "⚙️ AI setting" kholo.',true);
+    return;
+  }
+  aiBg=im;
+  // agli baar app kholne pe bhi rahe (chhota JPEG)
+  try{
+    const c=document.createElement('canvas'),s=Math.min(1,1100/Math.max(im.width,im.height));
+    c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);
+    c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+    localStorage.setItem(ABG,c.toDataURL('image/jpeg',.82));
+  }catch(e){}
+  aiStatus('✅ Naya background taiyaar! Pasand nahi aaya to dobara dabao — har baar alag banega.');
+  draw();
+}
+function withAlpha(c,a){
+  if(/^#([0-9a-f]{6})$/i.test(c)){const n=parseInt(c.slice(1),16);return 'rgba('+(n>>16)+','+(n>>8&255)+','+(n&255)+','+a+')';}
+  const m=String(c).match(/rgba?\(([^)]+)\)/);
+  if(m){const p=m[1].split(',').slice(0,3).join(',');return 'rgba('+p+','+a+')';}
+  return c;
+}
+const AI_ICONS=[[/शुद्ध|pure|100/i,'🌿'],[/गुण|दर्जा|quality|बेहतरीन|उत्तम/i,'⭐'],[/स्वाद|चव|taste|पौष्टिक|healthy/i,'😋'],
+  [/ताज़ा|ताजा|fresh/i,'🌾'],[/व्रत|उपवास|fast/i,'🙏'],[/delivery|डिलीवरी|डिलिव्हरी/i,'🛵'],[/दाम|भाव|price|सस्ता|किंमत/i,'💰']];
+function priceBurst(t,cx,cy,K,price,mrp){
+  const T=LBL();
+  ctx.save();ctx.translate(cx,cy);ctx.scale(K,K);
+  ctx.fillStyle=t.badge;ctx.beginPath();
+  for(let i=0;i<24;i++){const a=i*Math.PI/12,r=i%2?150:180;ctx.lineTo(Math.cos(a)*r*1.25,Math.sin(a)*r*.62);}
+  ctx.closePath();ctx.fill();
+  ctx.fillStyle=t.badgeTxt;ctx.textAlign='center';ctx.textBaseline='middle';
+  const ptxt='₹'+fmt(price),pf=fitText(ptxt,380,84,'900',F);
+  ctx.font='900 '+pf+'px '+F;ctx.fillText(ptxt,0,mrp>price?-10:0);
+  if(mrp>price){
+    ctx.font='600 36px '+F;
+    const mtxt=T.mrp+' ₹'+fmt(mrp);ctx.fillText(mtxt,0,50);
+    const w2=ctx.measureText(mtxt).width;
+    ctx.strokeStyle=t.badgeTxt;ctx.lineWidth=5;
+    ctx.beginPath();ctx.moveTo(-w2/2-6,48);ctx.lineTo(w2/2+6,48);ctx.stroke();
+  }
+  ctx.restore();
+}
+function paintAI(t){
+  const S=H/1350,Y=v=>v*S,dark=withAlpha(t.bg2,.88);
+  // padhne layak banane ke liye upar-neeche halka andhera
+  let g=ctx.createLinearGradient(0,0,0,Y(440));
+  g.addColorStop(0,withAlpha(t.bg2,.85));g.addColorStop(1,withAlpha(t.bg2,0));
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,Y(440));
+  g=ctx.createLinearGradient(0,H-Y(420),0,H);
+  g.addColorStop(0,withAlpha(t.bg2,0));g.addColorStop(1,withAlpha(t.bg2,.92));
+  ctx.fillStyle=g;ctx.fillRect(0,H-Y(420),W,Y(420));
+  paintShop(t);
+
+  // headline
+  const head=val('aiHead');
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  if(head){
+    const w=wrapLines(head,940,Math.round(66*Math.min(S,1.2)),'900',F,2);
+    ctx.font='900 '+w.s+'px '+F;
+    const y0=Y(222)-(w.lines.length-1)*w.s*0.58;
+    // kisi bhi background pe padhne layak — peeche halki patti
+    const lw=Math.max(...w.lines.map(l=>ctx.measureText(l).width))+70,lh=w.lines.length*w.s*1.16+30;
+    ctx.fillStyle=withAlpha(t.bg2,.6);ctx.beginPath();ctx.roundRect(W/2-lw/2,y0-w.s*0.58-15,lw,lh,lh/2>40?40:lh/2);ctx.fill();
+    ctx.fillStyle=t.txt;
+    ctx.shadowColor='rgba(0,0,0,.6)';ctx.shadowBlur=16;ctx.shadowOffsetY=5;
+    w.lines.forEach((l,i)=>ctx.fillText(l,W/2,y0+i*w.s*1.16));
+    ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+  }
+
+  // product photo — safed frame, halka tircha, parchhai
+  const pw=500,ph=Math.min(Y(610),720),px=78,py=Y(350);
+  ctx.save();ctx.translate(px+pw/2,py+ph/2);ctx.rotate(-0.045);
+  if(img){
+    ctx.shadowColor='rgba(0,0,0,.55)';ctx.shadowBlur=40;ctx.shadowOffsetY=18;
+    ctx.fillStyle='#FFFFFF';ctx.beginPath();ctx.roundRect(-pw/2-12,-ph/2-12,pw+24,ph+24,26);ctx.fill();
+    ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+    ctx.beginPath();ctx.roundRect(-pw/2,-ph/2,pw,ph,18);ctx.clip();
+    const s=Math.max(pw/img.width,ph/img.height);
+    ctx.drawImage(img,-img.width*s/2,-img.height*s/2,img.width*s,img.height*s);
+  }else{
+    ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.roundRect(-pw/2,-ph/2,pw,ph,22);ctx.fill();
+    ctx.setLineDash([14,12]);ctx.lineWidth=5;ctx.strokeStyle=t.acc;ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=t.txt;ctx.font='700 40px '+F;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('📷',0,-30);ctx.font='700 30px '+F;ctx.fillText('Product photo daalo',0,30);
+  }
+  ctx.restore();
+
+  // right side badge: product naam + chhoti line
+  const bx=622,bw=398,prod=val('prod')||'PRODUCT',sub=val('aiSub');
+  const nw=wrapLines(prod,bw-56,Math.round(70*Math.min(S,1.15)),'900',F,3);
+  const sw=sub?wrapLines(sub,bw-56,Math.round(32*Math.min(S,1.15)),'700',F,3):{lines:[],s:0};
+  const nh=nw.lines.length*nw.s*1.12,shh=sw.lines.length*sw.s*1.3;
+  const bh=48+nh+(sub?40+shh:0)+40,by=Y(560)-bh/2-Y(40);
+  ctx.fillStyle=dark;ctx.beginPath();ctx.roundRect(bx,by,bw,bh,28);ctx.fill();
+  ctx.lineWidth=5;ctx.strokeStyle=t.acc;ctx.stroke();
+  ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(bx+10,by+10,bw-20,bh-20,22);ctx.stroke();
+  let yy=by+48+nw.s*0.5;
+  ctx.font='900 '+nw.s+'px '+F;ctx.fillStyle=t.acc;ctx.textAlign='center';ctx.textBaseline='middle';
+  nw.lines.forEach(l=>{ctx.fillText(l,bx+bw/2,yy);yy+=nw.s*1.12;});
+  if(sub){
+    const dy=yy-nw.s*0.5+18;
+    ctx.globalAlpha=.7;ctx.strokeStyle=t.acc;ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(bx+80,dy);ctx.lineTo(bx+bw-80,dy);ctx.stroke();ctx.globalAlpha=1;
+    yy=dy+22+sw.s*0.6;
+    ctx.font='700 '+sw.s+'px '+F;ctx.fillStyle=t.txt;
+    sw.lines.forEach(l=>{ctx.fillText(l,bx+bw/2,yy);yy+=sw.s*1.3;});
+  }
+
+  // daam
+  const mrp=parseFloat(val('mrp'))||0,price=parseFloat(val('price'))||0;
+  if(price>0)priceBurst(t,bx+bw/2,Math.min(by+bh+Y(130),H-Y(390)),0.82*Math.min(S,1.2),price,mrp);
+
+  // khoobiyan — neeche golden gol icon
+  const feats=(document.getElementById('aiFeats').value||'').split('\n').map(s=>s.trim()).filter(Boolean).slice(0,4);
+  if(feats.length){
+    const top=H-130-Y(190),bh2=Y(180),L=64,R=W-64,cw=(R-L)/feats.length;
+    ctx.fillStyle=dark;ctx.beginPath();ctx.roundRect(L,top,R-L,bh2,24);ctx.fill();
+    ctx.lineWidth=3;ctx.strokeStyle=t.acc;ctx.stroke();
+    const r=Math.round(36*Math.min(S,1.2));
+    feats.forEach((f,i)=>{
+      const cx=L+cw*i+cw/2,cy=top+r+16;
+      if(i){ctx.globalAlpha=.35;ctx.strokeStyle=t.acc;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(L+cw*i,top+20);ctx.lineTo(L+cw*i,top+bh2-20);ctx.stroke();ctx.globalAlpha=1;}
+      ctx.fillStyle=t.acc;ctx.beginPath();ctx.arc(cx,cy,r,0,7);ctx.fill();
+      const ic=(AI_ICONS.find(([re])=>re.test(f))||[0,['✅','⭐','🌿','❤️'][i]])[1];
+      ctx.font=Math.round(r*1.05)+'px '+EMOJI_FONT;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#000';
+      ctx.fillText(ic,cx,cy+2);
+      const w=wrapLines(f,cw-24,Math.round(28*Math.min(S,1.2)),'800',F,2);
+      ctx.font='800 '+w.s+'px '+F;ctx.fillStyle=t.txt;
+      const ly=cy+r+14+w.s*0.55;
+      w.lines.forEach((l,j)=>ctx.fillText(l,cx,ly+j*w.s*1.15));
+    });
+  }
+}
+
 /* ---------- shared paint helpers ---------- */
 function paintBase(t){
+  if(layout==='ai'&&aiBg){
+    const s=Math.max(W/aiBg.width,H/aiBg.height);
+    ctx.drawImage(aiBg,(W-aiBg.width*s)/2,(H-aiBg.height*s)/2,aiBg.width*s,aiBg.height*s);
+    ctx.strokeStyle=t.acc;ctx.lineWidth=10;ctx.strokeRect(24,24,W-48,H-48);
+    ctx.lineWidth=2;ctx.strokeRect(40,40,W-80,H-80);
+    return;
+  }
   const g=ctx.createLinearGradient(0,0,0,H);
   g.addColorStop(0,t.bg1);g.addColorStop(1,t.bg2);
   ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
@@ -1399,6 +1656,7 @@ function paintFestival(t){
 const FOOT=150,ROW_TARGET=66;
 function posterH(fh){
   if(size==='status')return 1920-fh;       // status hamesha 9:16 rahe — footer andar hi
+  if(layout==='ai')return 1350;            // 4:5 — Instagram/WhatsApp pe poora dikhe
   if(layout!=='ratelist')return 1080;
   const n=readRates().length,per=n>SPLIT_N?Math.ceil(n/2):n;
   const need=ROWS_TOP+per*ROW_TARGET+FOOT;
@@ -1418,8 +1676,10 @@ function draw(){
   if(cv.height!==total)cv.height=total;
   const t=curTheme();
   paintBase(t);
-  paintShop(t);
-  if(layout==='ratelist')paintRateList(t);
+  if(layout==='ai')paintAI(t);
+  else paintShop(t);
+  if(layout==='ai'){}
+  else if(layout==='ratelist')paintRateList(t);
   else if(layout==='single')paintSingle(t);
   else if(layout==='combo')paintCombo(t);
   else if(layout==='festival')paintFestival(t);
@@ -1453,6 +1713,7 @@ miniBox.onclick=()=>document.getElementById('posterCard').scrollIntoView({behavi
 const SKEY='kirana_poster_v1';
 const FIELDS=['shop','title','prod','mrp','price','extra','srate','sqty','feats','unit1','unit2',
   'festSel','festName','festMsg','festOffer','comboPrice','valid','phone','addr','upi',
+  'aiStyle','aiExtra','aiHead','aiSub','aiFeats',
   'cn1','cm1','cp1','cn2','cm2','cp2','cn3','cm3','cp3','cn4','cm4','cp4'];
 function getState(){
   const d={tpl:tpl,layout:layout,lang:lang,size:size,f:{},rows:[],validAuto:val('valid')===autoDate(lang),
@@ -1516,7 +1777,7 @@ function applyState(d){
     tpl=(d.tpl==='auto'&&!img)?'smart':d.tpl;   // photo save nahi hoti, to Auto ki jagah Smart
     setActive('.tpl button','t',tpl);
   }
-  if(d&&['offer','single','ratelist','combo','festival'].includes(d.layout)){layout=d.layout;setActive('#laySeg button','l',layout);}
+  if(d&&['offer','single','ratelist','combo','festival','ai'].includes(d.layout)){layout=d.layout;setActive('#laySeg button','l',layout);}
   if(d&&L10N[d.lang]){lang=d.lang;setActive('#langSeg button','lang',lang);}
   updateDevWrap();
   if(d&&(d.size==='post'||d.size==='status')){size=d.size;setActive('#sizeSeg button','size',size);}
@@ -1662,25 +1923,28 @@ function setDefaultTitle(){
   const el=document.getElementById('title');
   if(isDefTitle(el.value.trim()))el.value=d[lang];
 }
+function setDefaultTitleAll(){setDefaultTitle();setDefaultAI();}
 function applyLayout(fromUser){
   const L=layout;
   show('grpTitle', L==='offer'||L==='ratelist'||L==='combo');
-  show('grpProd', L==='offer'||L==='single');
-  show('grpOfferPrice', L==='offer');
+  show('grpProd', L==='offer'||L==='single'||L==='ai');
+  show('grpOfferPrice', L==='offer'||L==='ai');
   show('grpSingle', L==='single');
   show('grpExtra', L==='offer'||L==='single'||L==='combo');
-  show('grpPhoto', L==='offer'||L==='single');
+  show('grpPhoto', L==='offer'||L==='single'||L==='ai');
+  show('aiCard', L==='ai');
   show('grpFest', L==='festival');
   show('rateCard', L==='ratelist');
   show('comboCard', L==='combo');
   const lx=document.getElementById('lblExtra');
   if(lx)lx.textContent=(L==='single')?'Tagline (niche wali ribbon)':'Extra line (optional)';
   if(fromUser)setDefaultTitle();
+  if(L==='ai'){setDefaultAI();if(fromUser&&!aiBg)aiGenerate();}
   draw();
 }
 
 /* ---------- 🔤 Hindi/Marathi chuno to English me likha text देवनागरी me ---------- */
-const TR_FIELDS=['shop','title','prod','extra','feats','festName','festMsg','festOffer','sqty','unit1','unit2','addr','cn1','cn2','cn3','cn4'];
+const TR_FIELDS=['aiHead','aiSub','aiFeats','shop','title','prod','extra','feats','festName','festMsg','festOffer','sqty','unit1','unit2','addr','cn1','cn2','cn3','cn4'];
 const HAS_LATIN=/[A-Za-z]/;
 function trEls(){return TR_FIELDS.map(id=>document.getElementById(id)).concat(Array.from(document.querySelectorAll('#rateRows .rname')));}
 function autoDevOn(){return lang!=='en'&&document.getElementById('autoDev').checked;}
@@ -1739,7 +2003,7 @@ document.querySelectorAll('#langSeg button').forEach(b=>{
     if(prev!=='en'&&b.dataset.lang!==prev)devRestore();   // pehle English wapas, phir nayi bhasha me
     lang=b.dataset.lang;setActive('#langSeg button','lang',lang);updateDevWrap();
     if(wasAuto)document.getElementById('valid').value=autoDate(lang);
-    setDefaultTitle();
+    setDefaultTitleAll();
     if(festDef)fillFest();
     draw();saveAll();
     if(autoDevOn())devAll();
@@ -1821,7 +2085,7 @@ document.getElementById('upi').addEventListener('input',()=>{
 
 /* ---------- download / share / history ---------- */
 function fileName(sz){
-  const base={ratelist:'bhav-list',single:'product-poster',combo:'combo-offer',festival:'festival-poster'}[layout]||'poster';
+  const base={ratelist:'bhav-list',single:'product-poster',combo:'combo-offer',festival:'festival-poster',ai:'ai-poster'}[layout]||'poster';
   return base+((sz||size)==='status'?'-status':'')+'.png';
 }
 function saveBlob(blob,name){
@@ -1881,6 +2145,18 @@ function renderHistory(){
     box.appendChild(b);
   });
 }
+
+/* AI: purana background + setting */
+(function(){
+  let bg=null;try{bg=localStorage.getItem(ABG);}catch(e){}
+  if(bg){const im=new Image();im.onload=()=>{aiBg=im;draw();};im.src=bg;}
+  const c=aiCfg();document.getElementById('aiUrl').value=c.url||'';document.getElementById('aiKey').value=c.key||'';
+  ['aiUrl','aiKey'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{
+    lsSet(AKEY,{url:val('aiUrl').replace(/\/+$/,''),key:val('aiKey')});
+  }));
+})();
+document.getElementById('aiGo').onclick=aiGenerate;
+document.getElementById('aiStyle').addEventListener('change',()=>{if(aiBg)aiStatus('Style badla — "🔄 Naya AI background banao" dabao.');});
 
 /* saved data restore */
 loadAll();

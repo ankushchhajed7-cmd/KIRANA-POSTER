@@ -11,3 +11,10 @@ Kirana dukaan ke liye poster maker (PWA) — Offer, Single Item, Bhav List, Comb
 - ⬇ Dono size (Post + Status) ek saath download
 - ₹1,250 jaisa Indian format, Hindi/Marathi ke liye Mukta font, naye tyohar, chhota preview
 - 30+ products wali bhav list 2 column me
+
+## v1.5 — Hindi/Marathi
+- Hindi/Marathi chuno to English me likha naam/text apne aap देवनागरी me (Chanadal → चना दाल)
+
+## v1.6 — ✨ AI Poster
+- Product photo daalo → AI har baar naya background banata hai, packet asli photo hi rehta hai aur Hindi text app likhta hai
+- Free AI server setup: [AI-SETUP.md](AI-SETUP.md) (Cloudflare Workers AI, code: `ai-worker/worker.js`)
