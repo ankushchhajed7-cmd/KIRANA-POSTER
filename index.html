@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <!--
-  Kirana Poster Maker — v1.4
+  Kirana Poster Maker — v1.5
+  v1.5 : Hindi/Marathi chuno to English me likha naam/text apne aap देवनागरी me (Chanadal → चना दाल), MRP → एमआरपी
   v1.4 : 🪄 Smart background (product ke hisaab se rang + design) + shop logo + phone/address/UPI QR patti
          + saved products (naam chuno, rate apne aap) + purani bhav list + pichhle posters + dono size download
          + ₹1,250 format + Hindi/Marathi font + naye tyohar + chhota preview
@@ -80,6 +81,9 @@ canvas#cv{width:100%;border-radius:12px;border:2px solid var(--haldi);display:bl
 #iosHint .box{position:relative;background:rgba(242,179,61,.14);border:1px solid rgba(242,179,61,.5);border-radius:10px;padding:10px 34px 10px 12px;font-size:12px;color:var(--cream);margin-top:12px}
 #iosHint .x{position:absolute;top:6px;right:6px;width:24px;height:24px;border:none;border-radius:50%;background:rgba(0,0,0,.3);color:var(--cream);cursor:pointer}
 .seg.opt button{min-width:70px;padding:9px 4px;font-size:13px}
+.chk{display:flex;gap:8px;align-items:flex-start;font-size:12px;margin:10px 0 0;padding:8px 10px;border-radius:8px;background:rgba(0,0,0,.22);cursor:pointer;opacity:1}
+.chk input{width:18px;height:18px;flex:0 0 auto;margin-top:1px;accent-color:#F2B33D}
+#devStatus{color:#FFD34D}
 .opt-lbl{font-size:11px;opacity:.75;margin-top:12px;letter-spacing:.5px}
 .bulk-go{width:100%;padding:11px;border:none;border-radius:8px;background:var(--haldi);color:var(--red-d);font-weight:800;font-size:14px;cursor:pointer}
 .bulk-sec{width:100%;padding:9px;border-radius:8px;border:1px solid rgba(242,179,61,.4);background:transparent;color:var(--cream);font-size:12px;cursor:pointer;margin-top:6px}
@@ -108,7 +112,7 @@ option{background:#4A0C0A;color:#F7EFD9}
 <body>
 <header>
   <div class="mark">AK</div>
-  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.4</b></p></div>
+  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.5</b></p></div>
   <button id="installBtn" style="display:none">📲 App Install</button>
 </header>
 
@@ -142,6 +146,8 @@ option{background:#4A0C0A;color:#F7EFD9}
       <button data-lang="hi">हिंदी</button>
       <button data-lang="mr">मराठी</button>
     </div>
+    <label class="chk" id="devWrap" style="display:none"><input type="checkbox" id="autoDev" checked>
+      <span>🔤 English में लिखा नाम/text अपने आप <b>देवनागरी</b> में बदलो — jaise <i>Chanadal → चना दाल</i>. Galat lage to field me khud sudhar lo. <span id="devStatus"></span></span></label>
     <div class="opt-lbl">Poster size</div>
     <div class="seg opt" id="sizeSeg">
       <button class="active" data-size="post">🖼️ Post</button>
@@ -374,6 +380,132 @@ const QR=(function(){
   return {make};
 })();
 
+/* ---------- 🔤 English (Hinglish) → देवनागरी ---------- */
+/* 1) kirana dictionary (Hindi, Marathi)  2) internet ho to Google transliteration  3) offline phonetic niyam */
+const DICT=(function(){
+  const d={},add=(ws,hi,mr)=>ws.split(' ').forEach(w=>{d[w]=[hi,mr||hi];});
+  // anaj / dal / tel
+  add('rice chawal chaval','चावल','तांदूळ');add('basmati','बासमती');add('kolam','कोलम');
+  add('atta aata','आटा','पीठ');add('gehu gehun wheat','गेहूं','गहू');add('maida','मैदा');
+  add('rava rawa sooji suji','सूजी','रवा');add('besan','बेसन');add('poha pohe','पोहा','पोहे');
+  add('daliya dalia','दलिया');add('jowar','ज्वार','ज्वारी');add('bajra','बाजरा','बाजरी');
+  add('sabudana','साबूदाना','साबुदाणा');add('dal daal','दाल','डाळ');add('toor tur arhar','तूर');
+  add('chana','चना','चणा');add('moong mung','मूंग','मूग');add('masoor','मसूर');add('urad','उड़द','उडीद');
+  add('rajma','राजमा');add('kabuli','काबुली');add('oil','तेल');add('tel','तेल');add('ghee','घी','तूप');
+  add('refined','रिफाइंड');add('mustard sarson sarso','सरसों','मोहरी');add('sunflower','सूरजमुखी','सूर्यफूल');
+  add('groundnut mungfali','मूंगफली','शेंगदाणा');add('soyabean soybean soya','सोयाबीन');
+  add('sugar shakkar','शक्कर','साखर');add('cheeni chini','चीनी','साखर');add('gud gur jaggery','गुड़','गूळ');
+  add('salt namak','नमक','मीठ');add('tea chai','चाय','चहा');add('coffee','कॉफी');
+  add('milk doodh dudh','दूध');add('dahi curd','दही');add('paneer','पनीर');add('butter','मक्खन','लोणी');
+  add('soap sabun','साबुन','साबण');add('detergent','डिटर्जेंट','डिटर्जंट');add('powder','पाउडर','पावडर');
+  add('biscuit biscuits','बिस्किट');add('namkeen','नमकीन');add('masala','मसाला');add('mirchi mirch chilli chili','मिर्च','मिरची');
+  add('haldi turmeric','हल्दी','हळद');add('jeera jira','जीरा','जिरे');add('dhaniya coriander','धनिया','धणे');add('rai','राई','मोहरी');
+  add('onion pyaz pyaj kanda','प्याज','कांदा');add('potato aloo alu batata','आलू','बटाटा');add('tomato tamatar','टमाटर','टोमॅटो');
+  add('kaju cashew','काजू');add('badam almond','बादाम','बदाम');add('kishmish','किशमिश','मनुका');add('dry','ड्राई');add('fruits fruit','फ्रूट्स');
+  // unit
+  add('kg kgs kilo','किलो');add('g gm gms gram grams','ग्राम','ग्रॅम');add('l ltr litre liter','लीटर','लिटर');
+  add('ml','मि.ली.');add('pc pcs piece pieces','नग');add('pack packet','पैकेट','पाकीट');add('dozen','दर्जन','डझन');add('quintal','क्विंटल');
+  // offer ke shabd
+  add('offer','ऑफर');add('mega','मेगा');add('sale','सेल');add('dhamaka','धमाका');add('combo','कॉम्बो');add('free','फ्री');
+  add('new','नया','नवीन');add('best','बेस्ट');add('quality','क्वालिटी');add('fresh','ताज़ा','ताजे');add('today aaj','आज');
+  add('only sirf','सिर्फ','फक्त');add('rate bhav','भाव');add('price','कीमत','किंमत');add('discount','छूट','सूट');
+  add('home','होम');add('delivery','डिलीवरी','डिलिव्हरी');add('available','उपलब्ध');add('and','और','आणि');
+  add('kirana','किराना','किराणा');add('store','स्टोर','स्टोअर');add('general','जनरल');add('shop dukan','दुकान');
+  add('traders','ट्रेडर्स');add('mart','मार्ट');add('super','सुपर');add('bazar bazaar','बाज़ार','बाजार');
+  add('road','रोड');add('main','मेन');add('chowk','चौक');add('near','पास','जवळ');add('gold','गोल्ड');add('premium','प्रीमियम');
+  add('hi','ही');add('le','ले');add('jao','जाओ');add('ka','का');add('ki','की');add('ke','के');add('se','से');add('me mein','में');
+  add('pe','पे');add('par','पर');add('har','हर');add('hai','है');add('bhi','भी');add('sab','सब');add('mrp','एमआरपी');
+  // brand
+  add('fortune','फॉर्च्यून');add('saffola','सफोला');add('tata','टाटा');add('amul','अमूल');add('parle','पारले');
+  add('britannia','ब्रिटानिया');add('aashirvaad ashirvad aashirwad','आशीर्वाद');add('patanjali','पतंजलि');add('dhara','धारा');
+  add('maggi','मैगी');add('surf','सर्फ');add('excel','एक्सेल');add('nirma','निरमा');add('tide','टाइड');add('rin','रिन');
+  add('vim','विम');add('colgate','कोलगेट');add('dettol','डेटॉल');add('lifebuoy','लाइफबॉय');add('lux','लक्स');add('india','इंडिया');
+  // naam / jagah / tyohar
+  add('gandhi','गांधी');add('diwali deepawali','दिवाली','दिवाळी');add('chhoot chhut','छूट','सूट');add('kharidi','खरीदी');
+  add('mahavir','महावीर');add('jain','जैन');add('agrawal agarwal','अग्रवाल');add('gupta','गुप्ता');add('patil','पाटील');
+  add('rajesh','राजेश');add('suresh','सुरेश');add('mahesh','महेश');add('ganesh','गणेश');add('lakshmi laxmi','लक्ष्मी');
+  add('krishna','कृष्णा');add('shree shri','श्री');add('sai','साई');add('balaji','बालाजी');add('om','ॐ');
+  add('pune','पुणे');add('nashik','नाशिक');add('mumbai','मुंबई');add('nagpur','नागपुर','नागपूर');add('indore','इंदौर');
+  add('stores','स्टोर्स','स्टोअर्स');add('enterprises','एंटरप्राइजेज');add('provision provisions','प्रोविजन','प्रोव्हिजन');
+  return d;
+})();
+const TR_CONS=[['ksh','क्ष'],['chh','छ'],['kh','ख'],['gh','घ'],['ch','च'],['jh','झ'],['th','थ'],['dh','ध'],['ph','फ'],['bh','भ'],
+  ['sh','श'],['k','क'],['g','ग'],['c','क'],['j','ज'],['t','त'],['d','द'],['n','न'],['p','प'],['b','ब'],['m','म'],['y','य'],
+  ['r','र'],['l','ल'],['v','व'],['w','व'],['s','स'],['h','ह'],['f','फ'],['z','ज'],['q','क'],['x','क्स']];
+const TR_VOW=[['aa','आ','ा'],['ai','ऐ','ै'],['au','औ','ौ'],['ee','ई','ी'],['ii','ई','ी'],['oo','ऊ','ू'],['ou','औ','ौ'],
+  ['a','अ',''],['i','इ','ि'],['u','उ','ु'],['e','ए','े'],['o','ओ','ो']];
+/* offline phonetic: "ankush" → अंकुश, "kirana" → किराना */
+function ruleTr(w){
+  let i=0,out='',prevCons=false;
+  const isVow=s=>TR_VOW.some(v=>s.startsWith(v[0]));
+  while(i<w.length){
+    const v=TR_VOW.find(x=>w.startsWith(x[0],i));
+    if(v){
+      const end=i+v[0].length>=w.length;
+      if(prevCons&&end&&v[0]==='a')out+='ा';          // aakhri "a" = आ ki matra (chana → चना)
+      else if(prevCons&&end&&v[0]==='i')out+='ी';     // aakhri "i" = ई (haldi → हल्दी)
+      else out+=prevCons?v[2]:v[1];
+      i+=v[0].length;prevCons=false;continue;
+    }
+    const c=TR_CONS.find(x=>w.startsWith(x[0],i));
+    if(c){
+      const rest=w.slice(i+c[0].length);
+      // anusvara: vowel ke baad "n" + vyanjan (ankush), "m" + p/b (champa)
+      if(!prevCons&&i>0&&rest&&!isVow(rest)&&
+         ((c[0]==='n'&&!/^[nyrlvwh]/.test(rest))||(c[0]==='m'&&/^[pb]/.test(rest)))){
+        out+='ं';i++;continue;
+      }
+      if(prevCons)out+='्';
+      out+=c[1];i+=c[0].length;prevCons=true;continue;
+    }
+    out+=w[i];i++;prevCons=false;
+  }
+  return out;
+}
+const TR_KEY='kp_translit';
+let trCache=null;
+function trCacheGet(){if(!trCache){try{trCache=JSON.parse(localStorage.getItem(TR_KEY))||{};}catch(e){trCache={};}}return trCache;}
+async function googleTr(w,lg){
+  const c=trCacheGet(),k=lg+':'+w;
+  if(c[k])return c[k];
+  if(!navigator.onLine||typeof fetch!=='function'||typeof AbortController!=='function')return null;
+  const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),2500);
+  try{
+    const r=await fetch('https://inputtools.google.com/request?itc='+(lg==='mr'?'mr':'hi')+'-t-i0-und&num=1&cp=0&cs=1&ie=utf-8&oe=utf-8&text='+encodeURIComponent(w),{signal:ac.signal});
+    const j=await r.json();
+    const out=j&&j[0]==='SUCCESS'&&j[1]&&j[1][0]&&j[1][0][1]&&j[1][0][1][0];
+    if(typeof out==='string'&&/^[ऀ-ॿ]+$/.test(out)){
+      c[k]=out;try{localStorage.setItem(TR_KEY,JSON.stringify(c));}catch(e){}
+      return out;
+    }
+  }catch(e){}finally{clearTimeout(tm);}
+  return null;
+}
+/* jude hue shabd todo: "chanadal" → chana + dal → "चना दाल" */
+function splitCompound(w){
+  const n=w.length,best=new Array(n+1).fill(null);best[0]=[];
+  for(let i=0;i<n;i++){
+    if(!best[i])continue;
+    for(let j=i+3;j<=n;j++){
+      const p=w.slice(i,j);
+      if(DICT[p]&&(!best[j]||best[j].length>best[i].length+1))best[j]=best[i].concat(p);
+    }
+  }
+  return best[n]&&best[n].length>1?best[n]:null;
+}
+async function trWord(w,lg){
+  const lw=w.toLowerCase(),d=DICT[lw],li=lg==='mr'?1:0;
+  if(d)return d[li];
+  const parts=splitCompound(lw);
+  if(parts)return parts.map(p=>DICT[p][li]).join(' ');
+  return (await googleTr(lw,lg))||ruleTr(lw);
+}
+async function toDev(text,lg){
+  const parts=String(text).replace(/(\d)([A-Za-z])/g,'$1 $2').split(/([A-Za-z]+)/);
+  const out=await Promise.all(parts.map((p,i)=>i%2?trWord(p,lg):p));
+  return out.join('').replace(/(\S+) \(\1\)/g,'$1');   // "Shakkar (Sugar)" → "शक्कर (शक्कर)" → "शक्कर"
+}
+
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
 const W=1080;let H=1080;
 let tpl='smart',layout='offer',lang='en',size='post',img=null,autoTheme=null,logo=null;
@@ -403,7 +535,7 @@ const CATS={
     kw:['rice','chawal','chaval','basmati','kolam','atta','aata','gehu','gehun','wheat','maida','rava','rawa','sooji','suji','poha','jowar','bajra','besan','daliya','dalia','चावल','आटा','गेहूं','गहू','तांदूळ','पोहा','बेसन','मैदा','रवा'],
     th:{bg1:'#8D6E3F',bg2:'#3A2610',acc:'#F7DFA8',txt:'#FFF8EC',badge:'#F7DFA8',badgeTxt:'#3A2610'}},
   dal:  {lb:'🫘 Dal / Kathol',m:'lentil',
-    kw:['dal','daal','toor','tur','arhar','chana','moong','mung','masoor','urad','rajma','chole','kabuli','matar','lobia','दाल','डाळ','चना','हरभरा','मूग','तूर','राजमा'],
+    kw:['dal','daal','toor','tur','arhar','chana','moong','mung','masoor','urad','rajma','chole','kabuli','matar','lobia','दाल','डाळ','चना','हरभरा','मूग','तूर','राजमा','चणा','मूंग','उड़द','उडीद'],
     th:{bg1:'#C25E00',bg2:'#5A2400',acc:'#FFE082',txt:'#FFF6E5',badge:'#FFE082',badgeTxt:'#5A2400'}},
   spice:{lb:'🌶️ Masala / Mirchi',m:'chilli',
     kw:['masala','mirchi','mirch','chilli','chili','haldi','turmeric','jeera','jira','dhaniya','coriander','garam','hing','rai','methi','elaichi','laung','मसाला','मिर्च','मिरची','हल्दी','हळद','जीरा','धनिया'],
@@ -469,9 +601,9 @@ function updateSmartInfo(){
 
 /* ---------- bhasha (poster labels) ---------- */
 const L10N={
-  en:{product:'PRODUCT',today:'RATE ONLY FOR TODAY',off:'% OFF',allFor:'ALL FOR ONLY',save:'SAVE',from:'Best wishes from',call:'Call / WhatsApp',scan:'Scan & pay by UPI'},
-  hi:{product:'सामान',today:'भाव सिर्फ आज के लिए',off:'% छूट',allFor:'सब मिलाकर सिर्फ',save:'बचत',from:'शुभकामनाओं सहित —',call:'कॉल / व्हाट्सएप',scan:'स्कैन करके UPI से पेमेंट करें'},
-  mr:{product:'वस्तू',today:'भाव फक्त आजसाठी',off:'% सूट',allFor:'सर्व मिळून फक्त',save:'बचत',from:'शुभेच्छुक —',call:'कॉल / व्हॉट्सॲप',scan:'स्कॅन करून UPI ने पेमेंट करा'}
+  en:{mrp:'MRP',product:'PRODUCT',today:'RATE ONLY FOR TODAY',off:'% OFF',allFor:'ALL FOR ONLY',save:'SAVE',from:'Best wishes from',call:'Call / WhatsApp',scan:'Scan & pay by UPI'},
+  hi:{mrp:'एमआरपी',product:'सामान',today:'भाव सिर्फ आज के लिए',off:'% छूट',allFor:'सब मिलाकर सिर्फ',save:'बचत',from:'शुभकामनाओं सहित —',call:'कॉल / व्हाट्सएप',scan:'स्कैन करके UPI से पेमेंट करें'},
+  mr:{mrp:'एमआरपी',product:'वस्तू',today:'भाव फक्त आजसाठी',off:'% सूट',allFor:'सर्व मिळून फक्त',save:'बचत',from:'शुभेच्छुक —',call:'कॉल / व्हॉट्सॲप',scan:'स्कॅन करून UPI ने पेमेंट करा'}
 };
 function LBL(){return L10N[lang]||L10N.en;}
 const DEF_TITLE={
@@ -788,7 +920,7 @@ function paintOffer(t){
     ctx.font='900 '+pf+'px '+F;ctx.fillText(ptxt,0,-10);
     if(mrp>price){
       ctx.font='600 36px '+F;
-      const mtxt='MRP ₹'+fmt(mrp);ctx.fillText(mtxt,0,50);
+      const mtxt=T.mrp+' ₹'+fmt(mrp);ctx.fillText(mtxt,0,50);
       const w2=ctx.measureText(mtxt).width;
       ctx.strokeStyle=t.badgeTxt;ctx.lineWidth=5;
       ctx.beginPath();ctx.moveTo(-w2/2-6,48);ctx.lineTo(w2/2+6,48);ctx.stroke();
@@ -1071,7 +1203,7 @@ function paintCombo(t){
       // combo price ho to item pe sirf MRP — bachat neeche patti me dikhegi
       const main=it.m||it.p;
       if(main>0){
-        const pt='MRP ₹'+fmt(main),pf=fitText(pt,cw-40,Math.round(64*k),'900',F);
+        const pt=T.mrp+' ₹'+fmt(main),pf=fitText(pt,cw-40,Math.round(64*k),'900',F);
         ctx.font='900 '+pf+'px '+F;ctx.fillStyle=t.acc;ctx.fillText(pt,x+cw/2,y+ch*0.66);
       }
       return;
@@ -1088,7 +1220,7 @@ function paintCombo(t){
     if(it.p>0&&it.m>it.p){
       ctx.fillStyle=t.txt;ctx.globalAlpha=.8;
       ctx.font='600 '+Math.round(28*k)+'px '+F;
-      const mt='MRP ₹'+fmt(it.m),mw=ctx.measureText(mt).width,my=y+ch*0.86;
+      const mt=T.mrp+' ₹'+fmt(it.m),mw=ctx.measureText(mt).width,my=y+ch*0.86;
       ctx.fillText(mt,x+cw/2,my);
       ctx.strokeStyle=t.txt;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x+cw/2-mw/2-4,my);ctx.lineTo(x+cw/2+mw/2+4,my);ctx.stroke();
       ctx.globalAlpha=1;
@@ -1131,7 +1263,7 @@ function paintCombo(t){
       ctx.beginPath();ctx.moveTo(L+(R-L)*0.56,bandY+22);ctx.lineTo(L+(R-L)*0.56,bandY+bandH-22);ctx.stroke();
       ctx.globalAlpha=1;
       ctx.font='600 '+Math.round(32*S)+'px '+F;
-      const mt='MRP ₹'+fmt(sum),mw=ctx.measureText(mt).width,my=bandY+bandH*0.32;
+      const mt=T.mrp+' ₹'+fmt(sum),mw=ctx.measureText(mt).width,my=bandY+bandH*0.32;
       ctx.fillText(mt,rx,my);
       ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(rx-mw/2-4,my);ctx.lineTo(rx+mw/2+4,my);ctx.stroke();
       const st=T.save+' ₹'+fmt(Math.round((sum-cp)*100)/100);
@@ -1323,10 +1455,14 @@ const FIELDS=['shop','title','prod','mrp','price','extra','srate','sqty','feats'
   'festSel','festName','festMsg','festOffer','comboPrice','valid','phone','addr','upi',
   'cn1','cm1','cp1','cn2','cm2','cp2','cn3','cm3','cp3','cn4','cm4','cp4'];
 function getState(){
-  const d={tpl:tpl,layout:layout,lang:lang,size:size,f:{},rows:[],validAuto:val('valid')===autoDate(lang)};
+  const d={tpl:tpl,layout:layout,lang:lang,size:size,f:{},rows:[],validAuto:val('valid')===autoDate(lang),
+    autoDev:document.getElementById('autoDev').checked,tr:{}};
+  TR_FIELDS.forEach(id=>{const e=document.getElementById(id);if(e&&e.dataset.en&&e.dataset.dev)d.tr[id]=[e.dataset.en,e.dataset.dev];});
   FIELDS.forEach(id=>{const e=document.getElementById(id);if(e)d.f[id]=e.value;});
   document.querySelectorAll('#rateRows .rate-row').forEach(r=>{
-    d.rows.push({n:r.querySelector('.rname').value,a:r.querySelector('.rr1').value,b:r.querySelector('.rr2').value});
+    const nm=r.querySelector('.rname'),row={n:nm.value,a:r.querySelector('.rr1').value,b:r.querySelector('.rr2').value};
+    if(nm.dataset.en&&nm.dataset.dev)row.e=[nm.dataset.en,nm.dataset.dev];
+    d.rows.push(row);
   });
   return d;
 }
@@ -1348,7 +1484,10 @@ function createRow(name='',r1='',r2=''){
 }
 function setRows(rows){
   document.getElementById('rateRows').innerHTML='';
-  rows.forEach(r=>createRow(r.n||'',r.a||'',r.b||''));
+  rows.forEach(r=>{
+    createRow(r.n||'',r.a||'',r.b||'');
+    if(Array.isArray(r.e)){const el=document.querySelector('#rateRows .rate-row:last-child .rname');el.dataset.en=r.e[0];el.dataset.dev=r.e[1];}
+  });
 }
 function setActive(sel,attr,v){
   document.querySelectorAll(sel).forEach(x=>x.classList.toggle('active',x.dataset[attr]===v));
@@ -1360,6 +1499,10 @@ const DEF_ROWS=[
   {n:'Toor Dal',a:'',b:'130'}
 ];
 function applyState(d){
+  TR_FIELDS.forEach(id=>{const e=document.getElementById(id);delete e.dataset.en;delete e.dataset.dev;});
+  if(d&&d.tr)Object.keys(d.tr).forEach(id=>{const e=document.getElementById(id);
+    if(e&&Array.isArray(d.tr[id])){e.dataset.en=d.tr[id][0];e.dataset.dev=d.tr[id][1];}});
+  document.getElementById('autoDev').checked=!(d&&d.autoDev===false);
   if(d&&d.f){
     FIELDS.forEach(id=>{
       const e=document.getElementById(id);
@@ -1375,6 +1518,7 @@ function applyState(d){
   }
   if(d&&['offer','single','ratelist','combo','festival'].includes(d.layout)){layout=d.layout;setActive('#laySeg button','l',layout);}
   if(d&&L10N[d.lang]){lang=d.lang;setActive('#langSeg button','lang',lang);}
+  updateDevWrap();
   if(d&&(d.size==='post'||d.size==='status')){size=d.size;setActive('#sizeSeg button','size',size);}
   setRows((d&&Array.isArray(d.rows)&&d.rows.length)?d.rows:DEF_ROWS);
   // validity: pehle auto date thi to aaj ki date, warna jo likha tha wahi
@@ -1463,6 +1607,7 @@ document.getElementById('bhavHist').addEventListener('change',e=>{
   if(h.u1)document.getElementById('unit1').value=h.u1;
   if(h.u2)document.getElementById('unit2').value=h.u2;
   draw();saveAll();
+  if(autoDevOn())devAll();
 });
 function updateRateWarn(){
   const w=document.getElementById('rateWarn'),n=layout==='ratelist'?readRates().length:0;
@@ -1507,6 +1652,7 @@ function bulkApply(replace){
   document.getElementById('bulkTxt').value='';
   document.getElementById('bulkBox').style.display='none';
   draw();saveAll();updateCatalog();
+  if(autoDevOn())devAll();
 }
 
 /* ---------- layout switch ---------- */
@@ -1533,6 +1679,52 @@ function applyLayout(fromUser){
   draw();
 }
 
+/* ---------- 🔤 Hindi/Marathi chuno to English me likha text देवनागरी me ---------- */
+const TR_FIELDS=['shop','title','prod','extra','feats','festName','festMsg','festOffer','sqty','unit1','unit2','addr','cn1','cn2','cn3','cn4'];
+const HAS_LATIN=/[A-Za-z]/;
+function trEls(){return TR_FIELDS.map(id=>document.getElementById(id)).concat(Array.from(document.querySelectorAll('#rateRows .rname')));}
+function autoDevOn(){return lang!=='en'&&document.getElementById('autoDev').checked;}
+function updateDevWrap(){document.getElementById('devWrap').style.display=lang==='en'?'none':'';}
+async function devEl(el){
+  if(!HAS_LATIN.test(el.value))return false;
+  const src=el.value,lg=lang;
+  // pehle badla hua hissa + naya English → poora English yaad rakho (English chuno to wapas aa jaye)
+  const en=(el.dataset.dev&&el.dataset.en&&src.startsWith(el.dataset.dev))?el.dataset.en+src.slice(el.dataset.dev.length):src;
+  const out=await toDev(src,lg);
+  if(el.value!==src||lang!==lg||out===src)return false;   // beech me user ne badal diya
+  el.dataset.en=en;el.dataset.dev=out;el.value=out;return true;
+}
+let devBusy=0;
+async function devAll(){
+  const st=document.getElementById('devStatus');
+  devBusy++;st.textContent='⏳ बदल रहे हैं…';
+  try{await Promise.all(trEls().map(devEl));}catch(e){}
+  if(!--devBusy)st.textContent='';
+  draw();saveAll();
+}
+/* jo field abhi bhi hamara badla hua hai (user ne edit nahi kiya), use English me wapas */
+function devRestore(){
+  trEls().forEach(el=>{if(el.dataset.en&&el.value===el.dataset.dev)el.value=el.dataset.en;delete el.dataset.en;delete el.dataset.dev;});
+}
+/* Hindi/Marathi me naya English text likha → field chhodte hi badlo */
+document.addEventListener('change',e=>{
+  const el=e.target;
+  if(!autoDevOn()||!el||!(TR_FIELDS.includes(el.id)||(el.classList.contains('rname')&&el.closest('#rateRows'))))return;
+  devEl(el).then(ch=>{if(ch){draw();saveAll();}});
+});
+/* type karte waqt: har shabd ke baad (space / comma) turant badlo */
+document.addEventListener('input',e=>{
+  const el=e.target;
+  if(!autoDevOn()||!el||!(TR_FIELDS.includes(el.id)||(el.classList.contains('rname')&&el.closest('#rateRows'))))return;
+  const v=el.value;
+  if(!HAS_LATIN.test(v)||!/[\s,.!?;:()\/-]$/.test(v)||el.selectionStart!==v.length)return;
+  devEl(el).then(ch=>{if(ch){draw();saveAll();}});
+});
+document.getElementById('autoDev').addEventListener('change',e=>{
+  if(e.target.checked){if(lang!=='en')devAll();}
+  else{devRestore();draw();saveAll();}
+});
+
 /* ---------- events ---------- */
 document.querySelectorAll('.tpl button').forEach(b=>{
   b.onclick=()=>{tpl=b.dataset.t;setActive('.tpl button','t',tpl);draw();saveAll();};
@@ -1543,12 +1735,14 @@ document.querySelectorAll('#laySeg button').forEach(b=>{
 document.querySelectorAll('#langSeg button').forEach(b=>{
   b.onclick=()=>{
     const wasAuto=['en','hi','mr'].some(x=>val('valid')===autoDate(x));
-    const festDef=festIsDefault();
-    lang=b.dataset.lang;setActive('#langSeg button','lang',lang);
+    const festDef=festIsDefault(),prev=lang;
+    if(prev!=='en'&&b.dataset.lang!==prev)devRestore();   // pehle English wapas, phir nayi bhasha me
+    lang=b.dataset.lang;setActive('#langSeg button','lang',lang);updateDevWrap();
     if(wasAuto)document.getElementById('valid').value=autoDate(lang);
     setDefaultTitle();
     if(festDef)fillFest();
     draw();saveAll();
+    if(autoDevOn())devAll();
   };
 });
 document.querySelectorAll('#sizeSeg button').forEach(b=>{
@@ -1681,6 +1875,7 @@ function renderHistory(){
       const st=JSON.parse(JSON.stringify(x.state));
       st.f.valid=val('valid');st.validAuto=val('valid')===autoDate(lang);
       applyState(st);applyLayout(false);saveAll();
+      if(autoDevOn())devAll();
       document.getElementById('posterCard').scrollIntoView({behavior:'smooth'});
     };
     box.appendChild(b);
@@ -1694,6 +1889,7 @@ refreshDatalist();
 refreshBhavHist();
 renderHistory();
 applyLayout(false);
+if(autoDevOn())devAll();
 /* Hindi/Marathi font load hone ke baad dobara banao */
 if(document.fonts){
   document.fonts.load('800 40px Mukta','अआ').then(draw).catch(()=>{});
