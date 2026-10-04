@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <!--
-  Kirana Poster Maker — v1.16
+  Kirana Poster Maker — v1.17
+  v1.17: 🔎 Product naam ke box me Hindi/Marathi naamon ki suggestion list (English se bhi search)
   v1.16: 🎉 Pehli baar setup page (dukaan ki jaankari ek baar) + sabke liye free AI server, roz 10 AI background
   v1.15: App look sirf Classic (Gulabi Rose) + Soft 3D
   v1.14: 🏷️ Logo ka alag button (Refresh ke neeche) — logo ka popup panna, baaki pages se hata
@@ -112,6 +113,11 @@ html[data-ui="classic"] #logoOpen{color:#fff}
 #setupSheet .sheet-panel{max-width:520px;margin:0 auto;background:var(--red-d)}
 html[data-ui="soft"] #setupSheet .sheet-panel{background:#E6E9EF}
 html[data-ui="classic"] #setupSheet .sheet-panel{background:#FFFFFF}
+#sugBox{display:none;position:fixed;z-index:80;background:#fff;color:#222;border:1px solid #ddd;border-radius:12px;box-shadow:0 10px 28px rgba(0,0,0,.28);max-height:260px;overflow-y:auto}
+#sugBox button{display:flex;justify-content:space-between;gap:10px;align-items:center;width:100%;text-align:left;padding:11px 14px;border:none;border-bottom:1px solid #f0f0f0;background:none;color:#222;font-size:15px;cursor:pointer}
+#sugBox button:last-child{border-bottom:none}
+#sugBox button small{color:#999;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:45%}
+#sugBox button:active{background:#FCEDEE}
 #logoSheet{display:none;position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.55);overflow-y:auto;padding:18px 12px 40px}
 #logoSheet.open{display:block}
 #logoSheet .sheet-panel{max-width:520px;margin:0 auto;background:var(--red-d)}
@@ -249,7 +255,7 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
 <body>
 <header>
   <div class="mark" id="hdrMark">K</div>
-  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.16</b></p></div>
+  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.17</b></p></div>
   <div class="hbtns">
     <button id="refreshBtn" title="Naya version laao / page refresh">🔄 Refresh</button>
     <button id="logoOpen" title="Dukaan ka logo"><img id="logoMini" alt="" style="display:none">🏷️ Logo</button>
@@ -337,7 +343,7 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
 
     <div id="grpProd">
       <label>Product ka naam</label>
-      <input type="text" id="prod" list="prodList" value="Basmati Chawal 5kg" placeholder="jaise: Fortune Oil 1L">
+      <input type="text" id="prod" value="Basmati Chawal 5kg" placeholder="jaise: Fortune Oil 1L">
       <p class="hint" style="text-align:left;margin-top:4px">💾 Pehle use kiye products list me aa jaate hain — chuno to rate apne aap bhar jayega.</p>
       <p class="hint" id="prodAuto" style="text-align:left;margin-top:4px;opacity:1"></p>
     </div>
@@ -446,10 +452,10 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
       <div class="rh-u"><label>MRP ₹</label></div>
       <div class="rh-u"><label>Offer ₹</label></div>
     </div>
-    <div class="rate-row"><input type="text" class="rname" id="cn1" list="prodList" placeholder="Product 1" value="Fortune Oil 1L"><input type="text" class="rr1" id="cm1" inputmode="decimal" placeholder="MRP" value="180"><input type="text" class="rr2" id="cp1" inputmode="decimal" placeholder="₹" value="165"></div>
-    <div class="rate-row"><input type="text" class="rname" id="cn2" list="prodList" placeholder="Product 2" value="Shakkar 5kg"><input type="text" class="rr1" id="cm2" inputmode="decimal" placeholder="MRP" value="260"><input type="text" class="rr2" id="cp2" inputmode="decimal" placeholder="₹" value="240"></div>
-    <div class="rate-row"><input type="text" class="rname" id="cn3" list="prodList" placeholder="Product 3"><input type="text" class="rr1" id="cm3" inputmode="decimal" placeholder="MRP"><input type="text" class="rr2" id="cp3" inputmode="decimal" placeholder="₹"></div>
-    <div class="rate-row"><input type="text" class="rname" id="cn4" list="prodList" placeholder="Product 4"><input type="text" class="rr1" id="cm4" inputmode="decimal" placeholder="MRP"><input type="text" class="rr2" id="cp4" inputmode="decimal" placeholder="₹"></div>
+    <div class="rate-row"><input type="text" class="rname" id="cn1" placeholder="Product 1" value="Fortune Oil 1L"><input type="text" class="rr1" id="cm1" inputmode="decimal" placeholder="MRP" value="180"><input type="text" class="rr2" id="cp1" inputmode="decimal" placeholder="₹" value="165"></div>
+    <div class="rate-row"><input type="text" class="rname" id="cn2" placeholder="Product 2" value="Shakkar 5kg"><input type="text" class="rr1" id="cm2" inputmode="decimal" placeholder="MRP" value="260"><input type="text" class="rr2" id="cp2" inputmode="decimal" placeholder="₹" value="240"></div>
+    <div class="rate-row"><input type="text" class="rname" id="cn3" placeholder="Product 3"><input type="text" class="rr1" id="cm3" inputmode="decimal" placeholder="MRP"><input type="text" class="rr2" id="cp3" inputmode="decimal" placeholder="₹"></div>
+    <div class="rate-row"><input type="text" class="rname" id="cn4" placeholder="Product 4"><input type="text" class="rr1" id="cm4" inputmode="decimal" placeholder="MRP"><input type="text" class="rr2" id="cp4" inputmode="decimal" placeholder="₹"></div>
     <label>Combo price — sab milake (optional)</label>
     <input type="number" id="comboPrice" placeholder="Khaali chhodo = alag-alag offer grid">
     <p class="hint">Combo price bharoge to har item pe sirf uska MRP dikhega, beech me "+" aur niche "sab milakar ₹___ / bachat ₹___" patti — taaki customer ko seedha combo ki bachat samajh aaye.</p>
@@ -505,6 +511,7 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
     <button class="logo-make" id="setupSave">✅ Save karo aur logo banao</button>
   </div>
 </div>
+<div id="sugBox" role="listbox"></div>
 <div id="logoSheet" role="dialog" aria-label="Dukaan ka logo">
   <div class="card sheet-panel">
     <div class="sheet-head"><h2>🏷️ Dukaan ka logo</h2><button id="logoClose" title="Band karo">✕</button></div>
@@ -1978,7 +1985,7 @@ function saveAll(){
 function createRow(name='',r1='',r2=''){
   const div=document.createElement('div');
   div.className='rate-row';
-  div.innerHTML='<input type="text" class="rname" list="prodList" placeholder="Product" value="'+esc(name)+'">'+
+  div.innerHTML='<input type="text" class="rname" placeholder="Product" value="'+esc(name)+'">'+
     '<input type="text" class="rr1" inputmode="decimal" placeholder="Rate" value="'+esc(r1)+'">'+
     '<input type="text" class="rr2" inputmode="decimal" placeholder="Rate" value="'+esc(r2)+'">'+
     '<button class="rdel" title="Hatao">✕</button>';
@@ -2068,6 +2075,55 @@ function updateCatalog(){
   lsSet(CKEY,catalog);
   refreshDatalist();
 }
+/* ---------- 🔎 Product naam suggestion (Hindi/Marathi naam, English se bhi search) ---------- */
+const SUG_ALIAS={'चनादाळ':'chana dal chanadal chana','मुगदाळ':'mung dal moong dal mugdal','मठदाळ':'math dal moth dal mathdal','तूरदाळ':'toor dal tur dal turdal tuvar',
+  'मठ':'math moth matki','हराभरा तांदूळ':'harabhara tandul rice chawal','बाजिगर तांदूळ':'bajigar tandul rice chawal','बेसन 200':'besan 200','बेसन 500':'besan 500',
+  'दाळ्या A 1':'dalya daliya a1','मसूर दाळ':'masoor dal masur','पोहा 1 kg':'poha pohe 1 kg','पोहा 500':'poha pohe 500','सफेद दाळ':'safed dal white urad',
+  'काळी दाळ':'kali dal black urad','भगर':'bhagar varai','साबुदाणा':'sabudana sago','सोयावडी 5 kg':'soyavadi soya chunks badi 5 kg','रवा 1 kg':'rava rawa suji sooji 1 kg',
+  'रवा 500gm':'rava rawa suji sooji 500gm','मैदा 1 kg':'maida 1 kg','मैदा 500gm':'maida 500gm','टाटा नमक 1 kg':'tata namak salt 1 kg','आटा 5 kg':'aata atta flour 5 kg'};
+function sugEntries(){
+  const seen={},out=[];
+  const add=(n,alias)=>{n=String(n||'').trim();if(!n||n==='—'||seen[n.toLowerCase()])return;seen[n.toLowerCase()]=1;out.push({n:n,a:alias||'',k:(n+' '+(alias||'')).toLowerCase()});};
+  defNames().forEach(n=>add(n,SUG_ALIAS[n]));
+  Object.keys(catalog).reverse().forEach(k=>add(catalog[k].n,SUG_ALIAS[catalog[k].n]));
+  return out;
+}
+let sugFor=null;
+function sugHide(){const b=document.getElementById('sugBox');b.style.display='none';b.innerHTML='';sugFor=null;}
+function sugShow(el){
+  const q=el.value.trim().toLowerCase(),box=document.getElementById('sugBox');
+  const words=q.split(/\s+/).filter(Boolean);
+  let list=sugEntries();
+  if(words.length)list=list.filter(e=>words.every(w=>e.k.includes(w)));
+  list=list.filter(e=>e.n.toLowerCase()!==q).slice(0,8);
+  if(!list.length){sugHide();return;}
+  box.innerHTML='';
+  list.forEach(e=>{
+    const b=document.createElement('button');b.type='button';
+    b.innerHTML='<span></span><small></small>';b.firstChild.textContent=e.n;b.lastChild.textContent=e.a?e.a.split(' ').slice(0,2).join(' '):'';
+    b.addEventListener('mousedown',ev=>ev.preventDefault());   // input ka focus na jaaye
+    b.onclick=()=>{
+      el.value=e.n;delete el.dataset.en;delete el.dataset.dev;
+      el.dispatchEvent(new Event('input',{bubbles:true}));
+      el.dispatchEvent(new Event('change',{bubbles:true}));
+      sugHide();
+    };
+    box.appendChild(b);
+  });
+  const r=el.getBoundingClientRect(),below=window.innerHeight-r.bottom;
+  box.style.left=r.left+'px';box.style.width=r.width<240?'240px':r.width+'px';
+  if(below<200&&r.top>below){box.style.top='';box.style.bottom=(window.innerHeight-r.top+4)+'px';}
+  else{box.style.bottom='';box.style.top=(r.bottom+4)+'px';}
+  box.style.display='block';sugFor=el;
+}
+function isSugInput(el){return el&&el.tagName==='INPUT'&&(el.id==='prod'||/^cn[1-4]$/.test(el.id)||(el.classList.contains('rname')&&el.closest('#rateRows')));}
+document.addEventListener('focusin',e=>{if(isSugInput(e.target))sugShow(e.target);else if(!e.target.closest||!e.target.closest('#sugBox'))sugHide();});
+document.addEventListener('input',e=>{if(isSugInput(e.target))sugShow(e.target);});
+document.addEventListener('focusout',e=>{if(isSugInput(e.target))setTimeout(()=>{if(document.activeElement!==sugFor)sugHide();},180);});
+window.addEventListener('scroll',()=>{if(sugFor)sugShow(sugFor);},{passive:true});   // keyboard khulne pe scroll hota hai — list saath chale
+window.addEventListener('resize',()=>{if(sugFor)sugShow(sugFor);});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')sugHide();});
+
 function refreshDatalist(){
   const dl=document.getElementById('prodList');dl.innerHTML='';
   Object.keys(catalog).reverse().forEach(k=>{const o=document.createElement('option');o.value=catalog[k].n;dl.appendChild(o);});
@@ -2723,7 +2779,7 @@ if(isIOS && !isStandalone && !lsGet('kp_ioshint_off')){iosHint.style.display='';
 document.getElementById('iosHintX').onclick=()=>{iosHint.style.display='none';lsSet('kp_ioshint_off',1);};
 
 /* ---------- 🔄 Refresh + naya version check ---------- */
-const APP_VERSION='1.16';
+const APP_VERSION='1.17';
 async function hardRefresh(){
   const b=document.getElementById('refreshBtn');b.textContent='⏳';b.disabled=true;
   try{
