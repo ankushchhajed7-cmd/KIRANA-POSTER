@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <!--
-  Kirana Poster Maker — v1.6
+  Kirana Poster Maker — v1.7
+  v1.7 : 📷 Photo daalte hi product ka naam apne aap (Cloudflare vision AI), किराणा spelling
   v1.6 : ✨ AI Poster — AI se har baar naya background (free Cloudflare server / Pollinations) + asli product photo + sahi Hindi text
   v1.5 : Hindi/Marathi chuno to English me likha naam/text apne aap देवनागरी me (Chanadal → चना दाल), MRP → एमआरपी
   v1.4 : 🪄 Smart background (product ke hisaab se rang + design) + shop logo + phone/address/UPI QR patti
@@ -65,6 +66,7 @@ canvas#cv{width:100%;border-radius:12px;border:2px solid var(--haldi);display:bl
 #share{background:#1E6B4F;color:#fff}
 #aiGo{width:100%;padding:13px;border:none;border-radius:10px;background:linear-gradient(135deg,#F2B33D,#E07B00);color:#4A0C0A;font-size:15px;font-weight:800;cursor:pointer}
 #aiGo:disabled{opacity:.7}
+#prodAuto button{margin-left:6px;padding:3px 8px;border-radius:6px;border:1px solid rgba(242,179,61,.6);background:transparent;color:var(--haldi);font-size:11px;cursor:pointer}
 #aiStatus{text-align:left;font-size:12px;margin-top:8px;opacity:1}
 details.aiset{margin-top:12px;border:1px dashed rgba(242,179,61,.5);border-radius:10px;padding:8px 10px}
 details.aiset summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--haldi)}
@@ -119,7 +121,7 @@ option{background:#4A0C0A;color:#F7EFD9}
 <body>
 <header>
   <div class="mark">AK</div>
-  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.6</b></p></div>
+  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.7</b></p></div>
   <button id="installBtn" style="display:none">📲 App Install</button>
 </header>
 
@@ -188,6 +190,7 @@ option{background:#4A0C0A;color:#F7EFD9}
       <label>Product ka naam</label>
       <input type="text" id="prod" list="prodList" value="Basmati Chawal 5kg" placeholder="jaise: Fortune Oil 1L">
       <p class="hint" style="text-align:left;margin-top:4px">💾 Pehle use kiye products list me aa jaate hain — chuno to rate apne aap bhar jayega.</p>
+      <p class="hint" id="prodAuto" style="text-align:left;margin-top:4px;opacity:1"></p>
     </div>
 
     <div id="grpOfferPrice">
@@ -451,7 +454,7 @@ const DICT=(function(){
   add('new','नया','नवीन');add('best','बेस्ट');add('quality','क्वालिटी');add('fresh','ताज़ा','ताजे');add('today aaj','आज');
   add('only sirf','सिर्फ','फक्त');add('rate bhav','भाव');add('price','कीमत','किंमत');add('discount','छूट','सूट');
   add('home','होम');add('delivery','डिलीवरी','डिलिव्हरी');add('available','उपलब्ध');add('and','और','आणि');
-  add('kirana','किराना','किराणा');add('store','स्टोर','स्टोअर');add('general','जनरल');add('shop dukan','दुकान');
+  add('kirana','किराणा');add('store','स्टोर','स्टोअर');add('general','जनरल');add('shop dukan','दुकान');
   add('traders','ट्रेडर्स');add('mart','मार्ट');add('super','सुपर');add('bazar bazaar','बाज़ार','बाजार');
   add('road','रोड');add('main','मेन');add('chowk','चौक');add('near','पास','जवळ');add('gold','गोल्ड');add('premium','प्रीमियम');
   add('hi','ही');add('le','ले');add('jao','जाओ');add('ka','का');add('ki','की');add('ke','के');add('se','से');add('me mein','में');
@@ -465,7 +468,7 @@ const DICT=(function(){
   add('gandhi','गांधी');add('diwali deepawali','दिवाली','दिवाळी');add('chhoot chhut','छूट','सूट');add('kharidi','खरीदी');
   add('mahavir','महावीर');add('jain','जैन');add('agrawal agarwal','अग्रवाल');add('gupta','गुप्ता');add('patil','पाटील');
   add('rajesh','राजेश');add('suresh','सुरेश');add('mahesh','महेश');add('ganesh','गणेश');add('lakshmi laxmi','लक्ष्मी');
-  add('krishna','कृष्णा');add('shree shri','श्री');add('sai','साई');add('balaji','बालाजी');add('om','ॐ');
+  add('krishna','कृष्णा');add('shree shri','श्री');add('shraddha shradha shraddha shradhha sharadha','श्रद्धा');add('sai','साई');add('balaji','बालाजी');add('om','ॐ');
   add('upvas upwas upavas','उपवास');add('vrat','व्रत');add('farali faraali frali','फराली','फराळी');add('fast','फास्ट');add('flour','आटा','पीठ');
   add('pune','पुणे');add('nashik','नाशिक');add('mumbai','मुंबई');add('nagpur','नागपुर','नागपूर');add('indore','इंदौर');
   add('stores','स्टोर्स','स्टोअर्स');add('enterprises','एंटरप्राइजेज');add('provision provisions','प्रोविजन','प्रोव्हिजन');
@@ -865,6 +868,40 @@ function aiPrompt(){
 const AKEY='kp_ai_cfg',ABG='kp_ai_bg';
 let aiBg=null,aiBusy=false;
 function aiCfg(){return lsGet(AKEY)||{};}
+
+/* ---------- 📷 Photo se product ka naam (Cloudflare server ka vision AI) ---------- */
+let nameBusy=false;
+async function readNameFromPhoto(manual){
+  const st=document.getElementById('prodAuto'),u=aiCfg().url||'';
+  if(!img||nameBusy)return;
+  if(!/^https:\/\//.test(u)){
+    st.innerHTML='💡 Photo se naam apne aap bharne ke liye <b>✨ AI Poster → ⚙️ AI setting</b> me Cloudflare server URL daalo.';
+    return;
+  }
+  nameBusy=true;st.textContent='🔍 Photo se product ka naam padh rahe hain…';
+  const c=document.createElement('canvas'),s=Math.min(1,768/Math.max(img.width,img.height));
+  c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);
+  c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+  const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),45000);
+  try{
+    // text/plain = "simple" request, browser alag se OPTIONS nahi bhejta
+    const r=await fetch(u+(u.includes('?')?'&':'?')+'task=name',{method:'POST',headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({image:c.toDataURL('image/jpeg',.82)}),signal:ac.signal});
+    let j;try{j=await r.json();}catch(e){throw new Error('server ka code purana hai — AI-SETUP.md se naya code daalo');}
+    const name=String(j&&j.name||'').trim();
+    if(!name)throw new Error(j&&j.error||'naam nahi mila');
+    const el=document.getElementById('prod'),prev=el.value;
+    el.value=name;delete el.dataset.en;delete el.dataset.dev;
+    if(autoDevOn())await devEl(el);
+    draw();saveAll();
+    st.innerHTML='✅ Photo se naam bhara: <b></b> — galat ho to khud sudhar lo.<button>↩ Purana naam</button>';
+    st.querySelector('b').textContent=el.value;
+    st.querySelector('button').onclick=()=>{el.value=prev;delete el.dataset.en;delete el.dataset.dev;st.textContent='';draw();saveAll();};
+  }catch(e){
+    const m=e&&e.name==='AbortError'?'time out':(e&&e.message||String(e));
+    st.textContent='⚠️ Photo se naam nahi padh paaye ('+m.slice(0,160)+'). Naam khud likho'+(manual?'.':' ya baad me dobara photo daalo.');
+  }finally{clearTimeout(tm);nameBusy=false;}
+}
 function aiUrls(prompt,seed,w,h){
   const c=aiCfg(),enc=encodeURIComponent(prompt),out=[];
   if(c.url&&/^https:\/\//.test(c.url))out.push(c.url+(c.url.includes('?')?'&':'?')+'prompt='+enc+'&seed='+seed+'&width='+w+'&height='+h);
@@ -2050,6 +2087,7 @@ document.getElementById('photo').addEventListener('change',e=>{
     if(tpl!=='smart'){tpl='auto';setActive('.tpl button','t','auto');}
     document.getElementById('photoDel').style.display='';
     draw();saveAll();
+    if(['offer','single','ai'].includes(layout))readNameFromPhoto(false);
   });
 });
 document.getElementById('photoDel').onclick=()=>{

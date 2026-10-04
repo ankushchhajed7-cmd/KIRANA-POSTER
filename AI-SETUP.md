@@ -23,6 +23,15 @@ Cloudflare har account ko roz free AI quota deta hai (roz raat 12 baje UTC pe re
 2. Poster app me **✨ AI Poster** → **⚙️ AI setting** → **Cloudflare server URL** me paste karo.
 3. **✨ AI background banao** dabao — 10–30 second me naya background!
 
+## 📷 Photo se product ka naam (v2 code)
+Naya `worker.js` (v2) photo dekh kar product ka naam bhi padhta hai. Server URL kholne pe
+*"... chal raha hai ✅ (v2: background + photo se naam)"* dikhe to v2 laga hai.
+App me product photo daalte hi naam apne aap Product me bhar jayega.
+
+Agar app me error aaye jisme **license / agree** likha ho, to ek baar browser me
+`https://<aapka-worker>.workers.dev/?agree=1` kholo — isse Meta Llama 3.2 Vision ka license accept hota hai
+(sirf tab kholo jab aap Meta ki license sharten maanne ko taiyaar ho).
+
 ## (Optional) Sirf apni app ke liye lock karo
 Koi aur aapka URL use karke free quota na khaa jaye, isliye `worker.js` me upar
 `ALLOWED_ORIGIN` me apni app ka address likh do, jaise `'https://ankushchhajed7-cmd.github.io'`, aur dobara Deploy karo.
