@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <!--
-  Kirana Poster Maker — v1.15
+  Kirana Poster Maker — v1.16
+  v1.16: 🎉 Pehli baar setup page (dukaan ki jaankari ek baar) + sabke liye free AI server, roz 10 AI background
   v1.15: App look sirf Classic (Gulabi Rose) + Soft 3D
   v1.14: 🏷️ Logo ka alag button (Refresh ke neeche) — logo ka popup panna, baaki pages se hata
   v1.13: 🎨 App ka look — 6 design (Classic, Minimal, Soft 3D, Glass, Bazaar Bold, Mobile App), default Soft 3D
@@ -106,6 +107,11 @@ header .hbtns #refreshBtn,header .hbtns #installBtn{margin-left:0}
 html[data-ui] header #logoOpen{color:inherit}
 html[data-ui="soft"] #logoOpen{background:#E6E9EF;border:none;box-shadow:5px 5px 10px #C3C7CF,-5px -5px 10px #fff;border-radius:12px;color:#3B4252}
 html[data-ui="classic"] #logoOpen{color:#fff}
+#setupSheet{display:none;position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.55);overflow-y:auto;padding:18px 12px 40px}
+#setupSheet.open{display:block}
+#setupSheet .sheet-panel{max-width:520px;margin:0 auto;background:var(--red-d)}
+html[data-ui="soft"] #setupSheet .sheet-panel{background:#E6E9EF}
+html[data-ui="classic"] #setupSheet .sheet-panel{background:#FFFFFF}
 #logoSheet{display:none;position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.55);overflow-y:auto;padding:18px 12px 40px}
 #logoSheet.open{display:block}
 #logoSheet .sheet-panel{max-width:520px;margin:0 auto;background:var(--red-d)}
@@ -242,8 +248,8 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
 </head>
 <body>
 <header>
-  <div class="mark">AK</div>
-  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.15</b></p></div>
+  <div class="mark" id="hdrMark">K</div>
+  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.16</b></p></div>
   <div class="hbtns">
     <button id="refreshBtn" title="Naya version laao / page refresh">🔄 Refresh</button>
     <button id="logoOpen" title="Dukaan ka logo"><img id="logoMini" alt="" style="display:none">🏷️ Logo</button>
@@ -311,7 +317,7 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
   <div class="card">
     <h2>2 · Details bharo</h2>
     <label>Shop ka naam</label>
-    <input type="text" id="shop" value="ANKUSH KIRANA">
+    <input type="text" id="shop" value="" placeholder="Aapki dukaan ka naam, jaise: SHREE KIRANA STORE">
     <div id="grpTitle">
       <label>Title (bada text)</label>
       <input type="text" id="title" value="MEGA OFFER" placeholder="jaise: DHAMAKA SALE / आज का भाव">
@@ -402,6 +408,7 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
     <h2>3 · ✨ AI Poster</h2>
     <p class="hint" style="text-align:left;margin:0 0 10px">Product ki photo daalo (upar) → AI har baar naya background banayega. Packet aapki asli photo hi rahega aur Hindi/Marathi text app khud likhega, isliye spelling hamesha sahi.</p>
     <button id="aiGo">✨ AI background banao</button>
+    <p class="hint" id="aiLeft" style="text-align:left;margin-top:6px;opacity:.85"></p>
     <p class="hint" id="aiStatus"></p>
     <label>Background ka style</label>
     <select id="aiStyle">
@@ -422,12 +429,13 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
     <textarea id="aiFeats" rows="4"></textarea>
     <details class="aiset">
       <summary>⚙️ AI setting (free server / key)</summary>
-      <p class="hint" style="text-align:left">AI background ke liye ek free server chahiye. Sabse bharosemand: <b>apna free Cloudflare server</b> (5 minute ka kaam) — <a href="https://github.com/ankushchhajed7-cmd/KIRANA-POSTER/blob/main/AI-SETUP.md" target="_blank" rel="noopener">step-by-step guide</a>. Khaali chhodoge to app bina key wala Pollinations link try karega (shayad na chale).</p>
+      <p class="hint" style="text-align:left">Khaali chhodoge to app ka <b>free server</b> chalega (roz 10 AI background). Apna free Cloudflare server daaloge to <b>koi limit nahi</b> — <a href="https://github.com/ankushchhajed7-cmd/KIRANA-POSTER/blob/main/AI-SETUP.md" target="_blank" rel="noopener">step-by-step guide</a>.</p>
       <label>Cloudflare server URL</label>
       <input type="text" id="aiUrl" placeholder="https://kirana-ai.aapka-naam.workers.dev" autocapitalize="off" autocomplete="off">
       <label>Pollinations key (optional)</label>
       <input type="text" id="aiKey" placeholder="enter.pollinations.ai se mili key" autocapitalize="off" autocomplete="off">
       <p class="hint" style="text-align:left">Yeh dono sirf aapke phone me save rehte hain.</p>
+      <p class="hint" style="text-align:left;opacity:.6">AI: FLUX.1 [schnell] (Black Forest Labs) se background · photo se naam: Built with Llama (Meta)</p>
     </details>
   </div>
 
@@ -449,6 +457,7 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
 
   <div class="card">
     <h2>4 · Contact patti (har poster pe)</h2>
+    <button class="add-row" id="setupOpen" style="margin:0 0 6px">⚙️ Dukaan ki jaankari badlo (setup)</button>
     <label>Phone / WhatsApp number</label>
     <input type="tel" id="phone" placeholder="jaise: 98765 43210">
     <label>Address (chhota)</label>
@@ -473,6 +482,27 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
     <h2>🕘 Pichhle posters</h2>
     <div id="histList"></div>
     <p class="hint">Download/Share kiye poster yaha save hote hain — tap karo to wapas khul jayega (photo dobara daalni hogi).</p>
+  </div>
+</div>
+<div id="setupSheet" role="dialog" aria-label="Pehli baar setup">
+  <div class="card sheet-panel">
+    <div class="sheet-head"><h2>🎉 Swagat hai!</h2><button id="setupClose" title="Baad me">✕</button></div>
+    <p class="hint" style="text-align:left;margin:4px 0 8px;font-size:13px;opacity:.9">Sirf <b>ek baar</b> apni dukaan ki jaankari bharo — har poster me apne aap aa jayegi. Baad me kabhi bhi badal sakte ho.</p>
+    <label>Dukaan ka naam *</label>
+    <input type="text" id="suShop" placeholder="jaise: SHREE KIRANA STORE">
+    <label>Phone / WhatsApp number</label>
+    <input type="tel" id="suPhone" placeholder="jaise: 98765 43210">
+    <label>Address (chhota)</label>
+    <input type="text" id="suAddr" placeholder="jaise: Main Road, Gandhi Chowk">
+    <label>UPI ID (optional — poster pe QR banega)</label>
+    <input type="text" id="suUpi" placeholder="jaise: shreekirana@okaxis" autocapitalize="off" autocomplete="off">
+    <div class="opt-lbl">Poster ki bhasha</div>
+    <div class="seg opt" id="suLang"><button data-v="en" class="active">English</button><button data-v="hi">हिंदी</button><button data-v="mr">मराठी</button></div>
+    <div class="opt-lbl">App ka look</div>
+    <div class="seg opt" id="suUi"><button data-v="soft" class="active">Soft 3D</button><button data-v="classic">Classic</button></div>
+    <label class="chk"><input type="checkbox" id="suList" checked><span>📋 Bhav List me aam kirana saamaan ke 24 naam daal do (rate aap roz bharoge)</span></label>
+    <p class="hint warnTxt" id="suErr" style="text-align:left;display:none">Dukaan ka naam zaroor likho.</p>
+    <button class="logo-make" id="setupSave">✅ Save karo aur logo banao</button>
   </div>
 </div>
 <div id="logoSheet" role="dialog" aria-label="Dukaan ka logo">
@@ -1025,11 +1055,22 @@ function aiPrompt(){
 const AKEY='kp_ai_cfg',ABG='kp_ai_bg';
 let aiBg=null,aiBusy=false;
 function aiCfg(){return lsGet(AKEY)||{};}
+/* sabke liye default free server (Ankush ka) — har phone pe roz AI_DAILY AI background.
+   Apna server URL daaloge to koi limit nahi. */
+const AI_DEFAULT_URL='https://kirana-ai.ankushchhajed13.workers.dev',AI_DAILY=10;
+function aiServer(){const u=aiCfg().url||'';return /^https:\/\//.test(u)?u:AI_DEFAULT_URL;}
+function aiLimited(){return !/^https:\/\//.test(aiCfg().url||'');}
+function aiUsed(){const u=lsGet('kp_ai_use')||{};return u.d===dayKey()?(u.n||0):0;}
+function aiCount(){lsSet('kp_ai_use',{d:dayKey(),n:aiUsed()+1});}
+function aiLeftText(){
+  const e=document.getElementById('aiLeft');if(!e)return;
+  e.textContent=aiLimited()?('🎟️ Aaj bache AI background: '+Math.max(0,AI_DAILY-aiUsed())+' / '+AI_DAILY+' (roz raat 12 baje phir se '+AI_DAILY+')'):'♾️ Apna server — koi limit nahi';
+}
 
 /* ---------- 📷 Photo se product ka naam (Cloudflare server ka vision AI) ---------- */
 let nameBusy=false;
 async function readNameFromPhoto(manual){
-  const st=document.getElementById('prodAuto'),u=aiCfg().url||'';
+  const st=document.getElementById('prodAuto'),u=aiServer();
   if(!img||nameBusy)return;
   if(!/^https:\/\//.test(u)){
     st.innerHTML='💡 Photo se naam apne aap bharne ke liye <b>✨ AI Poster → ⚙️ AI setting</b> me Cloudflare server URL daalo.';
@@ -1060,8 +1101,8 @@ async function readNameFromPhoto(manual){
   }finally{clearTimeout(tm);nameBusy=false;}
 }
 function aiUrls(prompt,seed,w,h){
-  const c=aiCfg(),enc=encodeURIComponent(prompt),out=[];
-  if(c.url&&/^https:\/\//.test(c.url))out.push(c.url+(c.url.includes('?')?'&':'?')+'prompt='+enc+'&seed='+seed+'&width='+w+'&height='+h);
+  const c=aiCfg(),enc=encodeURIComponent(prompt),out=[],u=aiServer();
+  out.push(u+(u.includes('?')?'&':'?')+'prompt='+enc+'&seed='+seed+'&width='+w+'&height='+h);
   if(c.key)out.push('https://gen.pollinations.ai/image/'+enc+'?width='+w+'&height='+h+'&seed='+seed+'&nologo=true&key='+encodeURIComponent(c.key));
   out.push('https://image.pollinations.ai/prompt/'+enc+'?width='+w+'&height='+h+'&seed='+seed+'&nologo=true');
   return out;
@@ -1082,15 +1123,22 @@ function aiStatus(msg,warn){const e=document.getElementById('aiStatus');e.textCo
 async function aiGenerate(){
   if(aiBusy)return;
   if(!navigator.onLine){aiStatus('⚠️ Internet nahi hai — AI background ke liye internet chahiye. Abhi design wala background laga hai.',true);return;}
+  if(aiLimited()&&aiUsed()>=AI_DAILY){
+    aiStatus('⏳ Aaj ke '+AI_DAILY+' AI background ho gaye. Kal phir '+AI_DAILY+' milenge (raat 12 baje). Tab tak design wala background laga hai — poster ban jayega.',true);
+    aiLeftText();return;
+  }
   aiBusy=true;
   const btn=document.getElementById('aiGo');btn.disabled=true;btn.textContent='⏳ AI background ban raha hai… (20–60 sec)';
   aiStatus('');
   const status=size==='status',w=status?720:896,h=status?1280:1120;
   const seed=Math.floor(Math.random()*1e9),prompt=aiPrompt();
-  let im=null,err='';
-  for(const u of aiUrls(prompt,seed,w,h)){
-    try{im=await fetchImage(u,90000);break;}catch(e){err=e&&e.message||String(e);}
+  let im=null,err='',fromMain=false;
+  const urls=aiUrls(prompt,seed,w,h);
+  for(let i=0;i<urls.length;i++){
+    try{im=await fetchImage(urls[i],90000);fromMain=i===0;break;}catch(e){err=e&&e.message||String(e);}
   }
+  if(im&&fromMain&&aiLimited())aiCount();
+  aiLeftText();
   aiBusy=false;btn.disabled=false;btn.textContent='🔄 Naya AI background banao';
   if(!im){
     aiStatus('⚠️ AI background nahi mila ('+err+'). Abhi design wala background laga hai. Free Cloudflare server jodne ke liye neeche "⚙️ AI setting" kholo.',true);
@@ -1883,6 +1931,7 @@ function draw(){
   updateSmartInfo();
   updateRateWarn();
   updateMini();
+  if(typeof updateHdrMark==='function')updateHdrMark();
 }
 
 /* ---------- chhota preview (form bharte waqt) ---------- */
@@ -2578,7 +2627,7 @@ function renderHistory(){
   if(bg){const im=new Image();im.onload=()=>{aiBg=im;draw();};im.src=bg;}
   const c=aiCfg();document.getElementById('aiUrl').value=c.url||'';document.getElementById('aiKey').value=c.key||'';
   ['aiUrl','aiKey'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{
-    lsSet(AKEY,{url:val('aiUrl').replace(/\/+$/,''),key:val('aiKey')});
+    lsSet(AKEY,{url:val('aiUrl').replace(/\/+$/,''),key:val('aiKey')});aiLeftText();
   }));
 })();
 document.getElementById('aiGo').onclick=aiGenerate;
@@ -2595,6 +2644,41 @@ function setUI(u){
 document.querySelectorAll('#uiSeg button').forEach(b=>{b.onclick=()=>{setUI(b.dataset.ui);lsSet('kp_ui',b.dataset.ui);};});
 setUI(lsGet('kp_ui')||'soft');
 
+/* ---------- 🎉 Pehli baar setup (ek baar) ---------- */
+function updateHdrMark(){const e=document.getElementById('hdrMark');if(e)e.textContent=shopInitials(val('shop')||'K');}
+document.getElementById('shop').addEventListener('input',updateHdrMark);
+function segPick(id,v){document.querySelectorAll('#'+id+' button').forEach(b=>b.classList.toggle('active',b.dataset.v===v));}
+function segVal(id){const b=document.querySelector('#'+id+' button.active');return b?b.dataset.v:'';}
+['suLang','suUi'].forEach(id=>document.querySelectorAll('#'+id+' button').forEach(b=>{b.onclick=()=>{segPick(id,b.dataset.v);if(id==='suUi')setUI(b.dataset.v);};}));
+function openSetup(){
+  const sh=document.getElementById('setupSheet');
+  document.getElementById('suShop').value=val('shop');
+  document.getElementById('suPhone').value=val('phone');
+  document.getElementById('suAddr').value=val('addr');
+  document.getElementById('suUpi').value=val('upi');
+  segPick('suLang',lang);segPick('suUi',document.documentElement.dataset.ui||'soft');
+  document.getElementById('suErr').style.display='none';
+  sh.classList.add('open');document.body.classList.add('sheet-open');
+}
+function closeSetup(){document.getElementById('setupSheet').classList.remove('open');document.body.classList.remove('sheet-open');lsSet('kp_setup_done',1);}
+document.getElementById('setupOpen').onclick=openSetup;
+document.getElementById('setupClose').onclick=closeSetup;
+document.getElementById('setupSave').onclick=()=>{
+  const name=document.getElementById('suShop').value.trim();
+  if(!name){document.getElementById('suErr').style.display='';document.getElementById('suShop').focus();return;}
+  const set=(id,v)=>{const e=document.getElementById(id);e.value=v;delete e.dataset.en;delete e.dataset.dev;};
+  set('shop',name);set('phone',document.getElementById('suPhone').value.trim());
+  set('addr',document.getElementById('suAddr').value.trim());set('upi',document.getElementById('suUpi').value.replace(/\s/g,''));
+  const ui=segVal('suUi')||'soft';setUI(ui);lsSet('kp_ui',ui);
+  if(!lsGet('kp_setup_done'))setRows(document.getElementById('suList').checked?defRows():[{n:'',a:'',b:''}]);
+  const lg=segVal('suLang')||'en';
+  updateHdrMark();draw();saveAll();updateCatalog();
+  closeSetup();
+  if(lg!==lang){const b=document.querySelector('#langSeg button[data-lang="'+lg+'"]');if(b)b.click();}
+  // ab logo banao
+  setTimeout(()=>{openLogoSheet();logoSeed=0;makeLogos();document.getElementById('logoHint').style.display='';},lg!==lang?700:250);
+};
+
 /* saved data restore */
 loadAll();
 setLogo(lsGet(LKEY));
@@ -2603,6 +2687,13 @@ refreshBhavHist();
 renderHistory();
 applyLayout(false);
 setTimeout(showActiveTpl,300);
+updateHdrMark();aiLeftText();
+(function(){
+  let had=false;try{had=!!localStorage.getItem(SKEY);}catch(e){}
+  if(lsGet('kp_setup_done'))return;
+  if(had&&val('shop')){lsSet('kp_setup_done',1);return;}   // purane user — setup ki zarurat nahi
+  setTimeout(openSetup,400);
+})();
 if(autoDevOn())devAll();
 /* Hindi/Marathi font load hone ke baad dobara banao */
 if(document.fonts){
@@ -2632,7 +2723,7 @@ if(isIOS && !isStandalone && !lsGet('kp_ioshint_off')){iosHint.style.display='';
 document.getElementById('iosHintX').onclick=()=>{iosHint.style.display='none';lsSet('kp_ioshint_off',1);};
 
 /* ---------- 🔄 Refresh + naya version check ---------- */
-const APP_VERSION='1.15';
+const APP_VERSION='1.16';
 async function hardRefresh(){
   const b=document.getElementById('refreshBtn');b.textContent='⏳';b.disabled=true;
   try{
