@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <!--
-  Kirana Poster Maker — v1.11
+  Kirana Poster Maker — v1.12
+  v1.12: Rang (template) ki line upar tabs ke neeche — side scroll, hamesha dikhe
   v1.11: 🎨 Logo maker — dukaan ke naam se 6 alag design, tap karke lagao, download bhi
   v1.10: Bhav List me Ankush Kirana ke 24 naam default (rate khaali) + 'sirf rate khaali karo' / default list buttons
   v1.9 : 📑 Har poster type ka alag page — upar tabs + side swipe, har page ka apna header
@@ -129,6 +130,10 @@ option{background:#4A0C0A;color:#F7EFD9}
 #laySeg::-webkit-scrollbar{display:none}
 #laySeg button{flex:0 0 auto;scroll-snap-align:center;padding:9px 14px;border-radius:999px;border:2px solid rgba(242,179,61,.35);background:rgba(0,0,0,.28);color:var(--cream);font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap}
 #laySeg button.active{border-color:var(--haldi);background:var(--haldi);color:var(--red-d)}
+#tplBar{flex-wrap:nowrap;gap:8px;overflow-x:auto;padding:0 14px 10px;max-width:520px;margin:0 auto;scrollbar-width:none;scroll-snap-type:x proximity}
+#tplBar::-webkit-scrollbar{display:none}
+#tplBar button{flex:0 0 auto!important;min-width:0;padding:7px 13px;border-radius:999px;font-size:12px!important;white-space:nowrap;scroll-snap-align:center;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+#tplBar button.active{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.45)}
 .hero{display:flex;align-items:center;gap:8px;border-radius:14px;padding:16px 10px;margin-bottom:14px;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);touch-action:pan-y}
 .hero .hmid{flex:1;text-align:center;min-width:0}
 .hero .hicon{font-size:40px;line-height:1}
@@ -159,7 +164,7 @@ option{background:#4A0C0A;color:#F7EFD9}
 <body>
 <header>
   <div class="mark">AK</div>
-  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.11</b></p></div>
+  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.12</b></p></div>
   <button id="refreshBtn" title="Naya version laao / page refresh">🔄 Refresh</button>
   <button id="installBtn" style="display:none">📲 App Install</button>
 </header>
@@ -174,6 +179,17 @@ option{background:#4A0C0A;color:#F7EFD9}
   <button data-l="combo">🎁 Combo</button>
   <button data-l="festival">🪔 Festival</button>
   <button data-l="ai">✨ AI Poster</button>
+</div>
+<div class="tpl" id="tplBar">
+  <button class="t-smart active" data-t="smart">🪄 Smart</button>
+  <button class="t-red" data-t="red">Classic Red</button>
+  <button class="t-green" data-t="green">Green Fresh</button>
+  <button class="t-festive" data-t="festive">Festive</button>
+  <button class="t-fresh" data-t="fresh">Haldi Bright</button>
+  <button class="t-royal" data-t="royal">🔵 Royal Blue</button>
+  <button class="t-black" data-t="black">⚫ Black Gold</button>
+  <button class="t-rose" data-t="rose">🌸 Rani Pink</button>
+  <button class="t-auto" data-t="auto">🎨 Auto (Photo)</button>
 </div></nav>
 <div class="wrap">
   <div class="hero" id="pageHero">
@@ -188,18 +204,7 @@ option{background:#4A0C0A;color:#F7EFD9}
     <button class="pnav" id="pgNext" title="Agla page">›</button>
   </div>
   <div class="card">
-    <h2>1 · Design chuno</h2>
-    <div class="tpl">
-      <button class="t-smart active" data-t="smart">🪄 Smart — product ke hisaab se background</button>
-      <button class="t-red" data-t="red">Classic Red</button>
-      <button class="t-green" data-t="green">Green Fresh</button>
-      <button class="t-festive" data-t="festive">Festive</button>
-      <button class="t-fresh" data-t="fresh">Haldi Bright</button>
-      <button class="t-royal" data-t="royal">🔵 Royal Blue</button>
-      <button class="t-black" data-t="black">⚫ Black Gold</button>
-      <button class="t-rose" data-t="rose">🌸 Rani Pink</button>
-      <button class="t-auto" data-t="auto">🎨 Auto (Photo)</button>
-    </div>
+    <h2>1 · Bhasha aur size</h2>
     <div id="smartInfo" class="hint"></div>
     <div class="opt-lbl">Poster ki bhasha</div>
     <div class="seg opt" id="langSeg">
@@ -2147,8 +2152,12 @@ document.getElementById('autoDev').addEventListener('change',e=>{
 });
 
 /* ---------- events ---------- */
+function showActiveTpl(){
+  const bar=document.getElementById('tplBar'),b=bar&&bar.querySelector('button.active');
+  if(b)bar.scrollTo({left:b.offsetLeft-(bar.clientWidth-b.offsetWidth)/2,behavior:'smooth'});
+}
 document.querySelectorAll('.tpl button').forEach(b=>{
-  b.onclick=()=>{tpl=b.dataset.t;setActive('.tpl button','t',tpl);draw();saveAll();};
+  b.onclick=()=>{tpl=b.dataset.t;setActive('.tpl button','t',tpl);showActiveTpl();draw();saveAll();};
 });
 document.querySelectorAll('#laySeg button').forEach(b=>{
   b.onclick=()=>goPage(b.dataset.l,PAGES.indexOf(b.dataset.l)-PAGES.indexOf(layout));
@@ -2480,6 +2489,7 @@ refreshDatalist();
 refreshBhavHist();
 renderHistory();
 applyLayout(false);
+setTimeout(showActiveTpl,300);
 if(autoDevOn())devAll();
 /* Hindi/Marathi font load hone ke baad dobara banao */
 if(document.fonts){
@@ -2509,7 +2519,7 @@ if(isIOS && !isStandalone && !lsGet('kp_ioshint_off')){iosHint.style.display='';
 document.getElementById('iosHintX').onclick=()=>{iosHint.style.display='none';lsSet('kp_ioshint_off',1);};
 
 /* ---------- 🔄 Refresh + naya version check ---------- */
-const APP_VERSION='1.11';
+const APP_VERSION='1.12';
 async function hardRefresh(){
   const b=document.getElementById('refreshBtn');b.textContent='⏳';b.disabled=true;
   try{
