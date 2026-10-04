@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <!--
-  Kirana Poster Maker — v1.9
+  Kirana Poster Maker — v1.10
+  v1.10: Bhav List me Ankush Kirana ke 24 naam default (rate khaali) + 'sirf rate khaali karo' / default list buttons
   v1.9 : 📑 Har poster type ka alag page — upar tabs + side swipe, har page ka apna header
   v1.8 : 🔄 Refresh button + naya version aane pe "Update karo" patti (installed app me bhi)
   v1.7 : 📷 Photo daalte hi product ka naam apne aap (Cloudflare vision AI), किराणा spelling
@@ -148,7 +149,7 @@ option{background:#4A0C0A;color:#F7EFD9}
 <body>
 <header>
   <div class="mark">AK</div>
-  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.9</b></p></div>
+  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.10</b></p></div>
   <button id="refreshBtn" title="Naya version laao / page refresh">🔄 Refresh</button>
   <button id="installBtn" style="display:none">📲 App Install</button>
 </header>
@@ -288,6 +289,9 @@ option{background:#4A0C0A;color:#F7EFD9}
     </div>
     <label>📅 Purani bhav list wapas lao</label>
     <select id="bhavHist"></select>
+    <button class="add-row" id="clrRates">🧹 Sirf rate khaali karo (naam rahenge)</button>
+    <button class="add-row" id="loadDef">📝 Meri default list lao (sirf naam)</button>
+    <button class="add-row" id="saveDef">⭐ Abhi ke naam default banao</button>
     <button class="add-row" id="clrRows" style="border-color:#FF9A8B;color:#FF9A8B">🗑 Sab clear karo</button>
     <p class="hint">Rate khali chhodo to woh cell blank rahega. "RATE ONLY FOR TODAY" line poster pe automatic aayegi. 30 se zyada product ho to list 2 column me ban jaati hai.</p>
   </div>
@@ -620,7 +624,7 @@ const CATS={
     kw:['rice','chawal','chaval','basmati','kolam','atta','aata','gehu','gehun','wheat','maida','rava','rawa','sooji','suji','poha','jowar','bajra','besan','daliya','dalia','चावल','आटा','गेहूं','गहू','तांदूळ','पोहा','बेसन','मैदा','रवा'],
     th:{bg1:'#8D6E3F',bg2:'#3A2610',acc:'#F7DFA8',txt:'#FFF8EC',badge:'#F7DFA8',badgeTxt:'#3A2610'}},
   dal:  {lb:'🫘 Dal / Kathol',m:'lentil',
-    kw:['dal','daal','toor','tur','arhar','chana','moong','mung','masoor','urad','rajma','chole','kabuli','matar','lobia','दाल','डाळ','चना','हरभरा','मूग','तूर','राजमा','चणा','मूंग','उड़द','उडीद'],
+    kw:['dal','daal','toor','tur','arhar','chana','moong','mung','masoor','urad','rajma','chole','kabuli','matar','lobia','दाल','डाळ','चना','हरभरा','मूग','तूर','राजमा','चणा','दाळ','मूंग','मूंग','उड़द','उडीद'],
     th:{bg1:'#C25E00',bg2:'#5A2400',acc:'#FFE082',txt:'#FFF6E5',badge:'#FFE082',badgeTxt:'#5A2400'}},
   spice:{lb:'🌶️ Masala / Mirchi',m:'chilli',
     kw:['masala','mirchi','mirch','chilli','chili','haldi','turmeric','jeera','jira','dhaniya','coriander','garam','hing','rai','methi','elaichi','laung','मसाला','मिर्च','मिरची','हल्दी','हळद','जीरा','धनिया'],
@@ -1830,12 +1834,14 @@ function setRows(rows){
 function setActive(sel,attr,v){
   document.querySelectorAll(sel).forEach(x=>x.classList.toggle('active',x.dataset[attr]===v));
 }
-const DEF_ROWS=[
-  {n:'Basmati Chawal',a:'1250',b:'45'},
-  {n:'Shakkar (Sugar)',a:'1450',b:'52'},
-  {n:'Aata (Gehu)',a:'980',b:'36'},
-  {n:'Toor Dal',a:'',b:'130'}
-];
+/* Ankush Kirana ki apni bhav list — sirf naam, rate roz khud bharo */
+const MY_NAMES=['चनादाळ','मुगदाळ','मठदाळ','तूरदाळ','मठ','हराभरा तांदूळ','बाजिगर तांदूळ','बेसन 200','बेसन 500',
+  'दाळ्या A 1','मसूर दाळ','पोहा 1 kg','पोहा 500','सफेद दाळ','काळी दाळ','भगर','साबुदाणा','सोयावडी 5 kg',
+  'रवा 1 kg','रवा 500gm','मैदा 1 kg','मैदा 500gm','टाटा नमक 1 kg','आटा 5 kg'];
+const NKEY='kp_def_names',OLD_DEF=['Basmati Chawal','Shakkar (Sugar)','Aata (Gehu)','Toor Dal'];
+function defNames(){const n=lsGet(NKEY);return Array.isArray(n)&&n.length?n:MY_NAMES;}
+function defRows(){return defNames().map(n=>({n:n,a:'',b:''}));}
+const DEF_ROWS=defRows();
 function applyState(d){
   TR_FIELDS.forEach(id=>{const e=document.getElementById(id);delete e.dataset.en;delete e.dataset.dev;});
   if(d&&d.tr)Object.keys(d.tr).forEach(id=>{const e=document.getElementById(id);
@@ -1858,7 +1864,14 @@ function applyState(d){
   if(d&&L10N[d.lang]){lang=d.lang;setActive('#langSeg button','lang',lang);}
   updateDevWrap();
   if(d&&(d.size==='post'||d.size==='status')){size=d.size;setActive('#sizeSeg button','size',size);}
-  setRows((d&&Array.isArray(d.rows)&&d.rows.length)?d.rows:DEF_ROWS);
+  let rows=(d&&Array.isArray(d.rows)&&d.rows.length)?d.rows:DEF_ROWS;
+  // ek baar: purani demo list (Basmati, Shakkar…) ho to apni nayi list laga do
+  if(!lsGet('kp_mylist_v1')){
+    lsSet('kp_mylist_v1',1);
+    const demo=rows.every(r=>OLD_DEF.includes((Array.isArray(r.e)?r.e[0]:r.n||'').trim())||!(r.n||'').trim());
+    if(demo)rows=defRows();
+  }
+  setRows(rows);
   // validity: pehle auto date thi to aaj ki date, warna jo likha tha wahi
   if(!d||!d.f||typeof d.f.valid!=='string'||d.validAuto!==false)document.getElementById('valid').value=autoDate(lang);
   if(!val('festName')&&!val('festMsg'))fillFest();
@@ -2015,7 +2028,7 @@ function applyLayout(fromUser){
   show('comboCard', L==='combo');
   const lx=document.getElementById('lblExtra');
   if(lx)lx.textContent=(L==='single')?'Tagline (niche wali ribbon)':'Extra line (optional)';
-  if(fromUser)setDefaultTitle();
+  setDefaultTitle();   // sirf default title badalta hai, khud likha title nahi
   if(L==='ai'){setDefaultAI();if(fromUser&&!aiBg)aiGenerate();}
   updateHero();
   draw();
@@ -2078,6 +2091,9 @@ function autoDevOn(){return lang!=='en'&&document.getElementById('autoDev').chec
 function updateDevWrap(){document.getElementById('devWrap').style.display=lang==='en'?'none':'';}
 async function devEl(el){
   if(!HAS_LATIN.test(el.value))return false;
+  // pehle se Devanagari me likha (jaise "आटा 5 kg", "दाळ्या A 1") — waisa hi rehne do,
+  // bas hamara khud ka badla hua text aage type ho raha ho to badlo
+  if(/[\u0900-\u097F]/.test(el.value)&&!(el.dataset.dev&&el.value.startsWith(el.dataset.dev)))return false;
   const src=el.value,lg=lang;
   // pehle badla hua hissa + naya English → poora English yaad rakho (English chuno to wapas aa jaye)
   const en=(el.dataset.dev&&el.dataset.en&&src.startsWith(el.dataset.dev))?el.dataset.en+src.slice(el.dataset.dev.length):src;
@@ -2144,6 +2160,21 @@ FIELDS.forEach(id=>{
 });
 document.getElementById('festSel').addEventListener('change',()=>{fillFest();draw();saveAll();});
 document.getElementById('addRow').onclick=()=>{createRow();draw();saveAll();};
+document.getElementById('clrRates').onclick=()=>{
+  if(!confirm('Saare rate khaali kar dein? Product ke naam waise hi rahenge.'))return;
+  document.querySelectorAll('#rateRows .rr1,#rateRows .rr2').forEach(i=>i.value='');
+  draw();saveAll();
+};
+document.getElementById('loadDef').onclick=()=>{
+  if(readRates().length&&!confirm('Default list ('+defNames().length+' naam, rate khaali) lagayein? Abhi ki list hat jayegi.'))return;
+  setRows(defRows());draw();saveAll();
+};
+document.getElementById('saveDef').onclick=()=>{
+  const n=Array.from(document.querySelectorAll('#rateRows .rname')).map(i=>i.value.trim()).filter(Boolean);
+  if(!n.length){alert('Pehle list me kuch product ke naam likho.');return;}
+  if(!confirm('Yeh '+n.length+' naam aapki default list ban jayenge. Theek hai?'))return;
+  lsSet(NKEY,n);alert('✅ '+n.length+' naam default list me save ho gaye.');
+};
 document.getElementById('clrRows').onclick=()=>{
   if(!confirm('Poori bhav list clear kar dein?'))return;
   document.getElementById('rateRows').innerHTML='';
@@ -2322,7 +2353,7 @@ if(isIOS && !isStandalone && !lsGet('kp_ioshint_off')){iosHint.style.display='';
 document.getElementById('iosHintX').onclick=()=>{iosHint.style.display='none';lsSet('kp_ioshint_off',1);};
 
 /* ---------- 🔄 Refresh + naya version check ---------- */
-const APP_VERSION='1.9';
+const APP_VERSION='1.10';
 async function hardRefresh(){
   const b=document.getElementById('refreshBtn');b.textContent='⏳';b.disabled=true;
   try{
