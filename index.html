@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <!--
-  Kirana Poster Maker — v1.7
+  Kirana Poster Maker — v1.8
+  v1.8 : 🔄 Refresh button + naya version aane pe "Update karo" patti (installed app me bhi)
   v1.7 : 📷 Photo daalte hi product ka naam apne aap (Cloudflare vision AI), किराणा spelling
   v1.6 : ✨ AI Poster — AI se har baar naya background (free Cloudflare server / Pollinations) + asli product photo + sahi Hindi text
   v1.5 : Hindi/Marathi chuno to English me likha naam/text apne aap देवनागरी me (Chanadal → चना दाल), MRP → एमआरपी
@@ -85,6 +86,11 @@ details.aiset a{color:var(--haldi)}
 .rate-row .rr1,.rate-row .rr2{flex:0 0 78px;width:78px;min-width:0;padding:9px 6px;text-align:center}
 .rate-row .rdel{flex:0 0 36px;width:36px;padding:9px 0;background:var(--red-d);color:var(--cream);border:1px solid rgba(242,179,61,.4);border-radius:8px;font-size:14px;cursor:pointer}
 .add-row{width:100%;padding:11px;border-radius:8px;border:1px dashed var(--haldi);background:transparent;color:var(--haldi);font-weight:800;cursor:pointer;margin-top:6px}
+#refreshBtn{margin-left:auto;background:transparent;color:var(--cream);border:1px solid rgba(242,179,61,.6);padding:7px 10px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap}
+#refreshBtn+#installBtn{margin-left:6px}
+#updBar{display:none;max-width:520px;margin:12px auto 0;padding:0 14px}
+#updBar .box{display:flex;gap:10px;align-items:center;background:#1E6B4F;border:1px solid #6FCF97;border-radius:10px;padding:10px 12px;font-size:13px;color:#fff}
+#updBar button{margin-left:auto;background:#fff;color:#1E6B4F;border:none;border-radius:8px;padding:8px 12px;font-weight:800;cursor:pointer;white-space:nowrap}
 #installBtn{margin-left:auto;background:var(--haldi);color:var(--red-d);border:none;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
 #iosHint{max-width:520px;margin:0 auto;padding:0 14px}
 #iosHint .box{position:relative;background:rgba(242,179,61,.14);border:1px solid rgba(242,179,61,.5);border-radius:10px;padding:10px 34px 10px 12px;font-size:12px;color:var(--cream);margin-top:12px}
@@ -121,10 +127,12 @@ option{background:#4A0C0A;color:#F7EFD9}
 <body>
 <header>
   <div class="mark">AK</div>
-  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.7</b></p></div>
+  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.8</b></p></div>
+  <button id="refreshBtn" title="Naya version laao / page refresh">🔄 Refresh</button>
   <button id="installBtn" style="display:none">📲 App Install</button>
 </header>
 
+<div id="updBar"><div class="box">🎉 <span>App ka naya version aa gaya hai</span><button id="updGo">🔄 Update karo</button></div></div>
 <div id="iosHint" style="display:none"><div class="box">📲 <b>Install karne ke liye:</b> niche <b>Share</b> button dabao → <b>“Add to Home Screen”</b> select karo.<button class="x" id="iosHintX" title="Band karo">✕</button></div></div>
 <datalist id="prodList"></datalist>
 <div class="wrap">
@@ -2230,6 +2238,34 @@ installBtn.onclick=async()=>{
 window.addEventListener('appinstalled',()=>{installBtn.style.display='none';iosHint.style.display='none';});
 if(isIOS && !isStandalone && !lsGet('kp_ioshint_off')){iosHint.style.display='';}
 document.getElementById('iosHintX').onclick=()=>{iosHint.style.display='none';lsSet('kp_ioshint_off',1);};
+
+/* ---------- 🔄 Refresh + naya version check ---------- */
+const APP_VERSION='1.8';
+async function hardRefresh(){
+  const b=document.getElementById('refreshBtn');b.textContent='⏳';b.disabled=true;
+  try{
+    if('serviceWorker' in navigator){const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.update().catch(()=>{})));}
+    if(window.caches){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));}
+  }catch(e){}
+  // naya URL = browser ka purana cache bypass (aapka bhara data localStorage me safe rehta hai)
+  location.replace(location.pathname+'?r='+Date.now());
+}
+document.getElementById('refreshBtn').onclick=hardRefresh;
+document.getElementById('updGo').onclick=hardRefresh;
+if(/[?&]r=\d+/.test(location.search))history.replaceState(null,'',location.pathname);
+async function checkUpdate(){
+  if(!navigator.onLine)return;
+  try{
+    const t=await (await fetch(location.pathname+'?vcheck='+Date.now(),{cache:'no-store'})).text();
+    const m=t.match(/const APP_VERSION='([\d.]+)'/);
+    if(m&&m[1]!==APP_VERSION){
+      document.querySelector('#updBar span').textContent='App ka naya version (v'+m[1]+') aa gaya hai';
+      document.getElementById('updBar').style.display='block';
+    }
+  }catch(e){}
+}
+window.addEventListener('load',()=>setTimeout(checkUpdate,1500));
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkUpdate();});
 
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});
