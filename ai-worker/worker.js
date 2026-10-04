@@ -86,7 +86,13 @@ export default {
       try {
         await env.AI.run('@cf/meta/llama-3.2-11b-vision-instruct', { prompt: 'agree' });
         return new Response('Meta Llama 3.2 license accept ho gaya ✅', { headers: { 'content-type': 'text/plain; charset=utf-8', ...cors() } });
-      } catch (e) { return new Response('Error: ' + errMsg(e), { status: 502, headers: cors() }); }
+      } catch (e) {
+        // Cloudflare "agree" ka jawab error (5016) ke roop me deta hai: "Thank you for agreeing ..."
+        if (/thank you for agreeing/i.test(errMsg(e))) {
+          return new Response('Meta Llama 3.2 license accept ho gaya ✅', { headers: { 'content-type': 'text/plain; charset=utf-8', ...cors() } });
+        }
+        return new Response('Error: ' + errMsg(e), { status: 502, headers: cors() });
+      }
     }
 
     // AI background
