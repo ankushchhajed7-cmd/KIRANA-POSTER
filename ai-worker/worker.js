@@ -2,7 +2,7 @@
   Kirana Poster — free AI background server (Cloudflare Workers AI, FLUX.1 schnell)
   Setup: AI-SETUP.md dekho. Is Worker me "Workers AI" binding ka naam AI hona chahiye.
 
-  Request:  GET https://<aapka-worker>.workers.dev/?prompt=...&seed=123
+  Request:  GET https://<aapka-worker>.workers.dev/?prompt=...
   Response: image/jpeg
 */
 // Optional: sirf aapki app se chale (dusre log aapka free quota na khaayein).
@@ -25,9 +25,9 @@ export default {
     const url = new URL(request.url);
     const prompt = (url.searchParams.get('prompt') || '').slice(0, 1500);
     if (!prompt) return new Response('Kirana Poster AI server chal raha hai ✅', { headers: { 'content-type': 'text/plain; charset=utf-8', ...cors(origin) } });
-    const seed = parseInt(url.searchParams.get('seed'), 10) || Math.floor(Math.random() * 1e9);
     try {
-      const out = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', { prompt, seed, steps: 6 });
+      // Note: is model me ab 'seed' allowed nahi — bina seed ke har baar alag image banti hai
+      const out = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', { prompt });
       const bin = Uint8Array.from(atob(out.image), c => c.charCodeAt(0));
       return new Response(bin, { headers: { 'content-type': 'image/jpeg', 'cache-control': 'no-store', ...cors(origin) } });
     } catch (e) {
