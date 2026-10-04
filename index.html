@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <!--
-  Kirana Poster Maker — v1.8
+  Kirana Poster Maker — v1.9
+  v1.9 : 📑 Har poster type ka alag page — upar tabs + side swipe, har page ka apna header
   v1.8 : 🔄 Refresh button + naya version aane pe "Update karo" patti (installed app me bhi)
   v1.7 : 📷 Photo daalte hi product ka naam apne aap (Cloudflare vision AI), किराणा spelling
   v1.6 : ✨ AI Poster — AI se har baar naya background (free Cloudflare server / Pollinations) + asli product photo + sahi Hindi text
@@ -112,6 +113,26 @@ option{background:#4A0C0A;color:#F7EFD9}
 #histList button{flex:0 0 auto;padding:0;border:2px solid rgba(242,179,61,.5);border-radius:8px;background:none;cursor:pointer;overflow:hidden}
 #histList img{display:block;width:84px;height:auto}
 #histList small{display:block;font-size:10px;color:var(--cream);padding:3px 0;background:rgba(0,0,0,.35)}
+#pageNav{position:sticky;top:0;z-index:15;background:var(--red-d);border-bottom:1px solid rgba(242,179,61,.35);box-shadow:0 4px 12px rgba(0,0,0,.35)}
+#laySeg{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px 14px;max-width:520px;margin:0 auto;scrollbar-width:none}
+#laySeg::-webkit-scrollbar{display:none}
+#laySeg button{flex:0 0 auto;scroll-snap-align:center;padding:9px 14px;border-radius:999px;border:2px solid rgba(242,179,61,.35);background:rgba(0,0,0,.28);color:var(--cream);font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap}
+#laySeg button.active{border-color:var(--haldi);background:var(--haldi);color:var(--red-d)}
+.hero{display:flex;align-items:center;gap:8px;border-radius:14px;padding:16px 10px;margin-bottom:14px;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);touch-action:pan-y}
+.hero .hmid{flex:1;text-align:center;min-width:0}
+.hero .hicon{font-size:40px;line-height:1}
+.hero h2{font-size:21px;margin:6px 0 4px;letter-spacing:.3px}
+.hero p{font-size:12.5px;opacity:.92;line-height:1.4}
+.hero .pnav{flex:0 0 40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.5);background:rgba(0,0,0,.2);color:#fff;font-size:24px;line-height:1;cursor:pointer}
+.hero .pnav:disabled{opacity:.25;cursor:default}
+.dots{display:flex;gap:6px;justify-content:center;margin-top:10px}
+.dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.4)}
+.dots i.on{width:20px;border-radius:4px;background:#fff}
+.swipe-hint{font-size:11px;opacity:.8;margin-top:6px}
+.wrap.anim-l{animation:pgL .28s ease}
+.wrap.anim-r{animation:pgR .28s ease}
+@keyframes pgL{from{transform:translateX(48px);opacity:.25}to{transform:none;opacity:1}}
+@keyframes pgR{from{transform:translateX(-48px);opacity:.25}to{transform:none;opacity:1}}
 #miniPrev{position:fixed;right:12px;bottom:12px;width:96px;border:2px solid var(--haldi);border-radius:8px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.5);cursor:pointer;display:none;z-index:20;background:#000}
 #miniPrev canvas{display:block;width:100%;height:auto}
 #miniPrev span{position:absolute;left:0;right:0;bottom:0;font-size:10px;text-align:center;background:rgba(0,0,0,.6);padding:2px 0}
@@ -127,7 +148,7 @@ option{background:#4A0C0A;color:#F7EFD9}
 <body>
 <header>
   <div class="mark">AK</div>
-  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.8</b></p></div>
+  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.9</b></p></div>
   <button id="refreshBtn" title="Naya version laao / page refresh">🔄 Refresh</button>
   <button id="installBtn" style="display:none">📲 App Install</button>
 </header>
@@ -135,9 +156,28 @@ option{background:#4A0C0A;color:#F7EFD9}
 <div id="updBar"><div class="box">🎉 <span>App ka naya version aa gaya hai</span><button id="updGo">🔄 Update karo</button></div></div>
 <div id="iosHint" style="display:none"><div class="box">📲 <b>Install karne ke liye:</b> niche <b>Share</b> button dabao → <b>“Add to Home Screen”</b> select karo.<button class="x" id="iosHintX" title="Band karo">✕</button></div></div>
 <datalist id="prodList"></datalist>
+<nav id="pageNav"><div id="laySeg">
+  <button class="active" data-l="offer">🏷️ Offer</button>
+  <button data-l="single">⭐ Single Item</button>
+  <button data-l="ratelist">📋 Bhav List</button>
+  <button data-l="combo">🎁 Combo</button>
+  <button data-l="festival">🪔 Festival</button>
+  <button data-l="ai">✨ AI Poster</button>
+</div></nav>
 <div class="wrap">
+  <div class="hero" id="pageHero">
+    <button class="pnav" id="pgPrev" title="Pichhla page">‹</button>
+    <div class="hmid">
+      <div class="hicon" id="heroIcon"></div>
+      <h2 id="heroTitle"></h2>
+      <p id="heroDesc"></p>
+      <div class="dots" id="heroDots"></div>
+      <div class="swipe-hint">👈 Side me swipe karo — agla poster 👉</div>
+    </div>
+    <button class="pnav" id="pgNext" title="Agla page">›</button>
+  </div>
   <div class="card">
-    <h2>1 · Template chuno</h2>
+    <h2>1 · Design chuno</h2>
     <div class="tpl">
       <button class="t-smart active" data-t="smart">🪄 Smart — product ke hisaab se background</button>
       <button class="t-red" data-t="red">Classic Red</button>
@@ -150,14 +190,6 @@ option{background:#4A0C0A;color:#F7EFD9}
       <button class="t-auto" data-t="auto">🎨 Auto (Photo)</button>
     </div>
     <div id="smartInfo" class="hint"></div>
-    <div class="seg" id="laySeg">
-      <button class="active" data-l="offer">🏷️ Offer Poster</button>
-      <button data-l="single">⭐ Single Item</button>
-      <button data-l="ratelist">📋 Bhav List (Rate)</button>
-      <button data-l="combo">🎁 Combo Offer</button>
-      <button data-l="festival">🪔 Festival Greeting</button>
-      <button data-l="ai">✨ AI Poster</button>
-    </div>
     <div class="opt-lbl">Poster ki bhasha</div>
     <div class="seg opt" id="langSeg">
       <button class="active" data-lang="en">English</button>
@@ -1985,8 +2017,58 @@ function applyLayout(fromUser){
   if(lx)lx.textContent=(L==='single')?'Tagline (niche wali ribbon)':'Extra line (optional)';
   if(fromUser)setDefaultTitle();
   if(L==='ai'){setDefaultAI();if(fromUser&&!aiBg)aiGenerate();}
+  updateHero();
   draw();
 }
+
+/* ---------- 📑 Har poster ka alag page — tabs + side swipe ---------- */
+const PAGES=['offer','single','ratelist','combo','festival','ai'];
+const PAGE_META={
+  offer:{i:'🏷️',t:'Offer Poster',d:'Ek product ka offer — MRP kaata hua, offer price bada aur % chhoot.',c:'linear-gradient(135deg,#B3261E,#E65100)'},
+  single:{i:'⭐',t:'Single Item',d:'Ek saamaan ka bada rate — jaise 30 KG ka ₹2,250, saath me khoobiyan.',c:'linear-gradient(135deg,#8A5A00,#D4A017)'},
+  ratelist:{i:'📋',t:'Bhav List (Rate)',d:'Aaj ke bhav ki poori list — bulk paste, purani list, 2 column tak.',c:'linear-gradient(135deg,#1E6B4F,#2E9E6E)'},
+  combo:{i:'🎁',t:'Combo Offer',d:'2 se 4 product saath — alag-alag offer ya "sab milakar ₹___".',c:'linear-gradient(135deg,#5B1070,#9C27B0)'},
+  festival:{i:'🪔',t:'Festival Greeting',d:'Tyohar ki shubhkamna — toran, diye aur aapki dukaan ka naam.',c:'linear-gradient(135deg,#C25E00,#FF8F00)'},
+  ai:{i:'✨',t:'AI Poster',d:'AI har baar naya background banata hai — asli packet photo + sahi Hindi text.',c:'linear-gradient(135deg,#00695C,#B8860B)'}
+};
+function updateHero(){
+  const m=PAGE_META[layout]||PAGE_META.offer,i=PAGES.indexOf(layout);
+  document.getElementById('pageHero').style.background=m.c;
+  document.getElementById('heroIcon').textContent=m.i;
+  document.getElementById('heroTitle').textContent=m.t;
+  document.getElementById('heroDesc').textContent=m.d;
+  document.getElementById('heroDots').innerHTML=PAGES.map((p,j)=>'<i'+(j===i?' class="on"':'')+'></i>').join('');
+  document.getElementById('pgPrev').disabled=i<=0;
+  document.getElementById('pgNext').disabled=i>=PAGES.length-1;
+  const tab=document.querySelector('#laySeg button[data-l="'+layout+'"]'),bar=document.getElementById('laySeg');
+  if(tab&&bar)bar.scrollTo({left:tab.offsetLeft-(bar.clientWidth-tab.offsetWidth)/2,behavior:'smooth'});
+}
+function goPage(next,dir){
+  if(!PAGES.includes(next)||next===layout)return;
+  const w=document.querySelector('.wrap');
+  w.classList.remove('anim-l','anim-r');void w.offsetWidth;
+  w.classList.add(dir>0?'anim-l':'anim-r');
+  layout=next;setActive('#laySeg button','l',layout);applyLayout(true);saveAll();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function stepPage(d){const i=PAGES.indexOf(layout)+d;if(i>=0&&i<PAGES.length)goPage(PAGES[i],d);}
+document.getElementById('pgPrev').onclick=()=>stepPage(-1);
+document.getElementById('pgNext').onclick=()=>stepPage(1);
+/* ungli se left/right swipe — input, list, poster wali patti pe nahi */
+(function(){
+  let sx=0,sy=0,st=0,ok=false;
+  const w=document.querySelector('.wrap');
+  w.addEventListener('touchstart',e=>{
+    const t=e.touches[0];
+    ok=e.touches.length===1&&!e.target.closest('input,textarea,select,#histList,.tpl,#laySeg,details');
+    sx=t.clientX;sy=t.clientY;st=Date.now();
+  },{passive:true});
+  w.addEventListener('touchend',e=>{
+    if(!ok)return;ok=false;
+    const t=e.changedTouches[0],dx=t.clientX-sx,dy=t.clientY-sy;
+    if(Math.abs(dx)>70&&Math.abs(dx)>1.8*Math.abs(dy)&&Date.now()-st<700)stepPage(dx<0?1:-1);
+  },{passive:true});
+})();
 
 /* ---------- 🔤 Hindi/Marathi chuno to English me likha text देवनागरी me ---------- */
 const TR_FIELDS=['aiHead','aiSub','aiFeats','shop','title','prod','extra','feats','festName','festMsg','festOffer','sqty','unit1','unit2','addr','cn1','cn2','cn3','cn4'];
@@ -2039,7 +2121,7 @@ document.querySelectorAll('.tpl button').forEach(b=>{
   b.onclick=()=>{tpl=b.dataset.t;setActive('.tpl button','t',tpl);draw();saveAll();};
 });
 document.querySelectorAll('#laySeg button').forEach(b=>{
-  b.onclick=()=>{layout=b.dataset.l;setActive('#laySeg button','l',layout);applyLayout(true);saveAll();};
+  b.onclick=()=>goPage(b.dataset.l,PAGES.indexOf(b.dataset.l)-PAGES.indexOf(layout));
 });
 document.querySelectorAll('#langSeg button').forEach(b=>{
   b.onclick=()=>{
@@ -2240,7 +2322,7 @@ if(isIOS && !isStandalone && !lsGet('kp_ioshint_off')){iosHint.style.display='';
 document.getElementById('iosHintX').onclick=()=>{iosHint.style.display='none';lsSet('kp_ioshint_off',1);};
 
 /* ---------- 🔄 Refresh + naya version check ---------- */
-const APP_VERSION='1.8';
+const APP_VERSION='1.9';
 async function hardRefresh(){
   const b=document.getElementById('refreshBtn');b.textContent='⏳';b.disabled=true;
   try{
