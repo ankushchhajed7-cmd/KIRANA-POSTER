@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <!--
-  Kirana Poster Maker — v1.13
+  Kirana Poster Maker — v1.14
+  v1.14: 🏷️ Logo ka alag button (Refresh ke neeche) — logo ka popup panna, baaki pages se hata
   v1.13: 🎨 App ka look — 6 design (Classic, Minimal, Soft 3D, Glass, Bazaar Bold, Mobile App), default Soft 3D
   v1.12: Rang (template) ki line upar tabs ke neeche — side scroll, hamesha dikhe
   v1.11: 🎨 Logo maker — dukaan ke naam se 6 alag design, tap karke lagao, download bhi
@@ -97,6 +98,26 @@ details.aiset a{color:var(--haldi)}
 #updBar{display:none;max-width:520px;margin:12px auto 0;padding:0 14px}
 #updBar .box{display:flex;gap:10px;align-items:center;background:#1E6B4F;border:1px solid #6FCF97;border-radius:10px;padding:10px 12px;font-size:13px;color:#fff}
 #updBar button{margin-left:auto;background:#fff;color:#1E6B4F;border:none;border-radius:8px;padding:8px 12px;font-weight:800;cursor:pointer;white-space:nowrap}
+header .hbtns{margin-left:auto;display:flex;flex-direction:column;gap:6px;align-items:stretch}
+header .hbtns #refreshBtn,header .hbtns #installBtn{margin-left:0}
+#logoOpen{display:flex;align-items:center;justify-content:center;gap:5px;background:transparent;color:var(--cream);border:1px solid rgba(242,179,61,.6);padding:6px 10px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap}
+#logoOpen img{width:20px;height:20px;border-radius:50%;object-fit:cover;background:#fff}
+html[data-ui] header #logoOpen{color:inherit}
+html[data-ui="soft"] #logoOpen{background:#E6E9EF;border:none;box-shadow:5px 5px 10px #C3C7CF,-5px -5px 10px #fff;border-radius:12px;color:#3B4252}
+html[data-ui="minimal"] #logoOpen{color:#1D1D1F;border-color:#ccc}
+html[data-ui="bold"] #logoOpen{background:#FFD60A;color:#111;border:3px solid #111;border-radius:0;box-shadow:3px 3px 0 #111}
+html[data-ui="app"] #logoOpen{color:#007AFF;border:none;background:#E9F1FF;border-radius:10px}
+html[data-ui="glass"] #logoOpen,html[data-ui="classic"] #logoOpen{color:#fff}
+#logoSheet{display:none;position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.55);overflow-y:auto;padding:18px 12px 40px}
+#logoSheet.open{display:block}
+#logoSheet .sheet-panel{max-width:520px;margin:0 auto;background:var(--red-d)}
+html[data-ui="soft"] #logoSheet .sheet-panel{background:#E6E9EF}
+html[data-ui="minimal"] #logoSheet .sheet-panel,html[data-ui="app"] #logoSheet .sheet-panel,html[data-ui="bold"] #logoSheet .sheet-panel{background:#fff;padding:16px}
+html[data-ui="glass"] #logoSheet .sheet-panel{background:rgba(40,25,80,.92)}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sheet-head h2{margin:0}
+#logoClose{width:36px;height:36px;border-radius:50%;border:1px solid rgba(128,128,128,.5);background:transparent;color:inherit;font-size:16px;cursor:pointer}
+body.sheet-open{overflow:hidden}
 #installBtn{margin-left:auto;background:var(--haldi);color:var(--red-d);border:none;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
 #iosHint{max-width:520px;margin:0 auto;padding:0 14px}
 #iosHint .box{position:relative;background:rgba(242,179,61,.14);border:1px solid rgba(242,179,61,.5);border-radius:10px;padding:10px 34px 10px 12px;font-size:12px;color:var(--cream);margin-top:12px}
@@ -307,9 +328,12 @@ html[data-ui="minimal"] .warnTxt,html[data-ui="soft"] .warnTxt,html[data-ui="bol
 <body>
 <header>
   <div class="mark">AK</div>
-  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.13</b></p></div>
-  <button id="refreshBtn" title="Naya version laao / page refresh">🔄 Refresh</button>
-  <button id="installBtn" style="display:none">📲 App Install</button>
+  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.14</b></p></div>
+  <div class="hbtns">
+    <button id="refreshBtn" title="Naya version laao / page refresh">🔄 Refresh</button>
+    <button id="logoOpen" title="Dukaan ka logo"><img id="logoMini" alt="" style="display:none">🏷️ Logo</button>
+    <button id="installBtn" style="display:none">📲 App Install</button>
+  </div>
 </header>
 
 <div id="updBar"><div class="box">🎉 <span>App ka naya version aa gaya hai</span><button id="updGo">🔄 Update karo</button></div></div>
@@ -513,18 +537,7 @@ html[data-ui="minimal"] .warnTxt,html[data-ui="soft"] .warnTxt,html[data-ui="bol
   </div>
 
   <div class="card">
-    <h2>4 · Dukaan ki pehchaan (har poster pe)</h2>
-    <label>Shop logo (optional)</label>
-    <div class="logo-row">
-      <img id="logoPrev" alt="" style="display:none">
-      <input type="file" id="logoIn" accept="image/*" hidden>
-      <button class="photo-btn" id="logoBtn">🏷️ Logo add karo</button>
-    </div>
-    <button class="del-btn" id="logoDel" style="display:none">❌ Logo hatao</button>
-    <button class="logo-make" id="logoMake">🎨 Dukaan ke naam se logo banao (6 design)</button>
-    <div id="logoGrid"></div>
-    <div id="logoActs"><button id="logoMore">🔄 Aur design</button><button id="logoDl" disabled>⬇ Logo download</button></div>
-    <p class="hint" id="logoHint" style="text-align:left;display:none">Pasand wale logo pe tap karo — har poster pe lag jayega. Download karke WhatsApp DP bhi bana sakte ho.</p>
+    <h2>4 · Contact patti (har poster pe)</h2>
     <label>Phone / WhatsApp number</label>
     <input type="tel" id="phone" placeholder="jaise: 98765 43210">
     <label>Address (chhota)</label>
@@ -549,6 +562,24 @@ html[data-ui="minimal"] .warnTxt,html[data-ui="soft"] .warnTxt,html[data-ui="bol
     <h2>🕘 Pichhle posters</h2>
     <div id="histList"></div>
     <p class="hint">Download/Share kiye poster yaha save hote hain — tap karo to wapas khul jayega (photo dobara daalni hogi).</p>
+  </div>
+</div>
+<div id="logoSheet" role="dialog" aria-label="Dukaan ka logo">
+  <div class="card sheet-panel">
+    <div class="sheet-head"><h2>🏷️ Dukaan ka logo</h2><button id="logoClose" title="Band karo">✕</button></div>
+    <p class="hint" style="text-align:left;margin:0 0 6px">Yahan jo logo lagaoge, woh <b>har poster</b> pe dukaan ke naam ke saath aayega.</p>
+    <label>Apni photo se logo (optional)</label>
+    <div class="logo-row">
+      <img id="logoPrev" alt="" style="display:none">
+      <input type="file" id="logoIn" accept="image/*" hidden>
+      <button class="photo-btn" id="logoBtn">🏷️ Logo add karo</button>
+    </div>
+    <button class="del-btn" id="logoDel" style="display:none">❌ Logo hatao</button>
+    <button class="logo-make" id="logoMake">🎨 Dukaan ke naam se logo banao (6 design)</button>
+    <div id="logoGrid"></div>
+    <div id="logoActs"><button id="logoMore">🔄 Aur design</button><button id="logoDl" disabled>⬇ Logo download</button></div>
+    <p class="hint" id="logoHint" style="text-align:left;display:none">Pasand wale logo pe tap karo — har poster pe lag jayega. Download karke WhatsApp DP bhi bana sakte ho.</p>
+    <button class="add-row" id="logoDone">✅ Ho gaya</button>
   </div>
 </div>
 <div id="miniPrev" title="Poster dekho"><canvas id="mini"></canvas><span>👁 Poster</span></div>
@@ -2529,8 +2560,11 @@ function makeLogos(){
   document.getElementById('logoDl').disabled=true;
 }
 
+function openLogoSheet(){document.getElementById('logoSheet').classList.add('open');document.body.classList.add('sheet-open');}
+function closeLogoSheet(){document.getElementById('logoSheet').classList.remove('open');document.body.classList.remove('sheet-open');}
 function setLogo(dataUrl){
-  const prev=document.getElementById('logoPrev');
+  const prev=document.getElementById('logoPrev'),mini=document.getElementById('logoMini');
+  if(mini){mini.style.display=dataUrl?'':'none';if(dataUrl)mini.src=dataUrl;}
   if(!dataUrl){logo=null;prev.style.display='none';document.getElementById('logoDel').style.display='none';
     document.getElementById('logoBtn').textContent='🏷️ Logo add karo';draw();return;}
   const im=new Image();im.onload=()=>{logo=im;draw();};im.src=dataUrl;
@@ -2546,6 +2580,11 @@ document.getElementById('logoIn').addEventListener('change',e=>{
     setLogo(url);
   });
 });
+document.getElementById('logoOpen').onclick=openLogoSheet;
+document.getElementById('logoClose').onclick=closeLogoSheet;
+document.getElementById('logoDone').onclick=closeLogoSheet;
+document.getElementById('logoSheet').addEventListener('click',e=>{if(e.target.id==='logoSheet')closeLogoSheet();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLogoSheet();});
 document.getElementById('logoMake').onclick=()=>{logoSeed=0;makeLogos();document.getElementById('logoHint').style.display='';};
 document.getElementById('logoMore').onclick=()=>{logoSeed++;makeLogos();};
 document.getElementById('logoDl').onclick=()=>{
@@ -2682,7 +2721,7 @@ if(isIOS && !isStandalone && !lsGet('kp_ioshint_off')){iosHint.style.display='';
 document.getElementById('iosHintX').onclick=()=>{iosHint.style.display='none';lsSet('kp_ioshint_off',1);};
 
 /* ---------- 🔄 Refresh + naya version check ---------- */
-const APP_VERSION='1.13';
+const APP_VERSION='1.14';
 async function hardRefresh(){
   const b=document.getElementById('refreshBtn');b.textContent='⏳';b.disabled=true;
   try{
