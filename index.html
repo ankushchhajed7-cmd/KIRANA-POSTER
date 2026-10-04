@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <!--
-  Kirana Poster Maker — v1.10
+  Kirana Poster Maker — v1.11
+  v1.11: 🎨 Logo maker — dukaan ke naam se 6 alag design, tap karke lagao, download bhi
   v1.10: Bhav List me Ankush Kirana ke 24 naam default (rate khaali) + 'sirf rate khaali karo' / default list buttons
   v1.9 : 📑 Har poster type ka alag page — upar tabs + side swipe, har page ka apna header
   v1.8 : 🔄 Refresh button + naya version aane pe "Update karo" patti (installed app me bhi)
@@ -108,6 +109,15 @@ details.aiset a{color:var(--haldi)}
 #bulkTxt{min-height:150px;font-size:14px}
 option{background:#4A0C0A;color:#F7EFD9}
 .logo-row{display:flex;gap:10px;align-items:center}
+.logo-make{display:block;width:100%;margin-top:8px;padding:11px;border-radius:8px;border:none;background:linear-gradient(135deg,#F2B33D,#E07B00);color:#4A0C0A;font-weight:800;font-size:14px;cursor:pointer}
+#logoGrid{display:none;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+#logoGrid button{padding:6px 4px;border-radius:10px;border:2px solid rgba(242,179,61,.3);background:rgba(0,0,0,.2);cursor:pointer;color:var(--cream)}
+#logoGrid button.on{border-color:var(--haldi);background:rgba(242,179,61,.18);box-shadow:0 0 0 2px rgba(242,179,61,.35)}
+#logoGrid canvas{display:block;width:100%;height:auto}
+#logoGrid span{display:block;font-size:11px;margin-top:4px;opacity:.85}
+#logoActs{display:none;gap:8px;margin-top:8px}
+#logoActs button{flex:1;padding:9px;border-radius:8px;border:1px solid rgba(242,179,61,.6);background:transparent;color:var(--haldi);font-weight:700;font-size:13px;cursor:pointer}
+#logoActs button:disabled{opacity:.4}
 .logo-row img{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--haldi);background:#fff}
 .logo-row .photo-btn{flex:1}
 #histList{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
@@ -149,7 +159,7 @@ option{background:#4A0C0A;color:#F7EFD9}
 <body>
 <header>
   <div class="mark">AK</div>
-  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.10</b></p></div>
+  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.11</b></p></div>
   <button id="refreshBtn" title="Naya version laao / page refresh">🔄 Refresh</button>
   <button id="installBtn" style="display:none">📲 App Install</button>
 </header>
@@ -354,6 +364,10 @@ option{background:#4A0C0A;color:#F7EFD9}
       <button class="photo-btn" id="logoBtn">🏷️ Logo add karo</button>
     </div>
     <button class="del-btn" id="logoDel" style="display:none">❌ Logo hatao</button>
+    <button class="logo-make" id="logoMake">🎨 Dukaan ke naam se logo banao (6 design)</button>
+    <div id="logoGrid"></div>
+    <div id="logoActs"><button id="logoMore">🔄 Aur design</button><button id="logoDl" disabled>⬇ Logo download</button></div>
+    <p class="hint" id="logoHint" style="text-align:left;display:none">Pasand wale logo pe tap karo — har poster pe lag jayega. Download karke WhatsApp DP bhi bana sakte ho.</p>
     <label>Phone / WhatsApp number</label>
     <input type="tel" id="phone" placeholder="jaise: 98765 43210">
     <label>Address (chhota)</label>
@@ -2218,6 +2232,142 @@ document.getElementById('photoDel').onclick=()=>{
   draw();saveAll();
 };
 const LKEY='kirana_logo';
+/* ---------- 🎨 Logo maker: dukaan ke naam se 6 alag design (phone pe hi, bina internet) ---------- */
+const LOGO_PAL=[['#7A1612','#F7EFD9','#F2B33D'],['#1E6B4F','#FFFFFF','#F2B33D'],['#1E3A8A','#FFFFFF','#F5C542'],
+  ['#E65100','#FFFFFF','#4A0C0A'],['#5B1070','#FFF3E0','#FFD34D'],['#111111','#F2B33D','#F2B33D'],
+  ['#00695C','#FFFFFF','#FFD54F'],['#AD1457','#FFFFFF','#FFD1E3']];
+let logoSeed=0,logoPick=-1;
+function graphemes(s){
+  try{if(window.Intl&&Intl.Segmenter)return Array.from(new Intl.Segmenter('hi',{granularity:'grapheme'}).segment(s),x=>x.segment);}catch(e){}
+  return Array.from(s);
+}
+function shopInitials(name){
+  const w=name.trim().split(/\s+/).filter(Boolean);
+  if(!w.length)return 'K';
+  const g=w.length>1?[graphemes(w[0])[0],graphemes(w[1])[0]]:graphemes(w[0]).slice(0,2);
+  return g.join('').toUpperCase();
+}
+function lfit(c,txt,maxW,base,weight,fam){let s=base;c.font=weight+' '+s+'px '+fam;while(c.measureText(txt).width>maxW&&s>14){s-=2;c.font=weight+' '+s+'px '+fam;}return s;}
+/* gol ghoomta text: top=true upar (clockwise), false neeche (seedha padhne layak) */
+function arcText(c,txt,cx,cy,r,px,fam,top){
+  c.font='800 '+px+'px '+fam;c.textAlign='center';c.textBaseline='middle';
+  const gs=graphemes(txt),ws=gs.map(g=>c.measureText(g).width+px*0.08),tot=ws.reduce((a,b)=>a+b,0)/r;
+  let a=top?-Math.PI/2-tot/2:Math.PI/2+tot/2;
+  gs.forEach((g,i)=>{const da=ws[i]/r;const m=top?a+da/2:a-da/2;
+    c.save();c.translate(cx+Math.cos(m)*r,cy+Math.sin(m)*r);c.rotate(top?m+Math.PI/2:m-Math.PI/2);c.fillText(g,0,0);c.restore();
+    a=top?a+da:a-da;});
+}
+function star(c,x,y,r){c.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.45:r;c.lineTo(x+Math.cos(a)*rr,y+Math.sin(a)*rr);}c.closePath();c.fill();}
+function cartIcon(c,x,y,s,col){
+  c.save();c.strokeStyle=col;c.fillStyle=col;c.lineWidth=s*.09;c.lineCap='round';c.lineJoin='round';
+  c.beginPath();c.moveTo(x-s*.55,y-s*.4);c.lineTo(x-s*.38,y-s*.4);c.lineTo(x-s*.22,y+s*.2);c.lineTo(x+s*.45,y+s*.2);c.lineTo(x+s*.55,y-s*.25);c.lineTo(x-s*.3,y-s*.25);c.stroke();
+  [[-.12,.38],[.35,.38]].forEach(([dx,dy])=>{c.beginPath();c.arc(x+dx*s,y+dy*s,s*.08,0,7);c.fill();});
+  c.restore();
+}
+const LOGO_DESIGNS=[
+  // 1) Gol mohar
+  (c,S,name,ini,p,fam)=>{
+    const [bg,fg,ac]=p,cx=S/2,r=S/2-6;
+    c.fillStyle=bg;c.beginPath();c.arc(cx,cx,r,0,7);c.fill();
+    c.strokeStyle=ac;c.lineWidth=14;c.beginPath();c.arc(cx,cx,r-10,0,7);c.stroke();
+    c.lineWidth=3;c.beginPath();c.arc(cx,cx,r-100,0,7);c.stroke();
+    c.fillStyle=fg;
+    const top=name.toUpperCase(),px=Math.min(54,Math.max(30,Math.floor(1350/Math.max(8,graphemes(top).length))));
+    arcText(c,top,cx,cx,r-56,px,fam,true);
+    c.fillStyle=ac;arcText(c,lang==='en'?'QUALITY & TRUST':(lang==='mr'?'विश्वास व दर्जा':'विश्वास और गुणवत्ता'),cx,cx,r-56,30,fam,false);
+    star(c,cx-(r-56),cx,12);star(c,cx+(r-56),cx,12);
+    c.fillStyle=fg;const f=lfit(c,ini,r*1.0,170,'900',fam);c.font='900 '+f+'px '+fam;c.textAlign='center';c.textBaseline='middle';c.fillText(ini,cx,cx+6);
+  },
+  // 2) Dhaal + ribbon
+  (c,S,name,ini,p,fam)=>{
+    const [bg,fg,ac]=p,cx=S/2;
+    c.fillStyle=fg;c.beginPath();c.arc(cx,cx,S/2-6,0,7);c.fill();
+    c.fillStyle=bg;c.beginPath();c.moveTo(cx,70);c.quadraticCurveTo(cx+150,95,cx+165,110);c.lineTo(cx+160,270);
+    c.quadraticCurveTo(cx+140,390,cx,450);c.quadraticCurveTo(cx-140,390,cx-160,270);c.lineTo(cx-165,110);c.quadraticCurveTo(cx-150,95,cx,70);c.fill();
+    c.strokeStyle=ac;c.lineWidth=10;c.stroke();
+    c.fillStyle=ac;star(c,cx,128,20);
+    c.fillStyle=fg;const f=lfit(c,ini,240,150,'900',fam);c.font='900 '+f+'px '+fam;c.textAlign='center';c.textBaseline='middle';c.fillText(ini,cx,250);
+    // ribbon
+    const w=graphemes(name.trim().split(/\s+/)[0]||name).join('').toUpperCase();
+    c.fillStyle=ac;c.beginPath();c.moveTo(40,330);c.lineTo(S-40,330);c.lineTo(S-70,372);c.lineTo(S-40,414);c.lineTo(40,414);c.lineTo(70,372);c.closePath();c.fill();
+    c.fillStyle=bg;const rf=lfit(c,w,S-180,44,'900',fam);c.font='900 '+rf+'px '+fam;c.fillText(w,cx,374);
+  },
+  // 3) App icon + cart
+  (c,S,name,ini,p,fam)=>{
+    const [bg,fg,ac]=p,cx=S/2;
+    const g=c.createLinearGradient(0,0,S,S);g.addColorStop(0,ac);g.addColorStop(1,bg);
+    c.fillStyle=g;c.beginPath();c.arc(cx,cx,S/2-6,0,7);c.fill();
+    c.fillStyle='rgba(255,255,255,.18)';c.beginPath();c.ellipse(cx,120,190,90,0,0,7);c.fill();
+    cartIcon(c,cx,135,120,fg);
+    c.fillStyle=fg;c.shadowColor='rgba(0,0,0,.35)';c.shadowBlur=14;c.shadowOffsetY=6;
+    const f=lfit(c,ini,330,170,'900',fam);c.font='900 '+f+'px '+fam;c.textAlign='center';c.textBaseline='middle';c.fillText(ini,cx,300);
+    c.shadowColor='transparent';c.shadowBlur=0;c.shadowOffsetY=0;
+    const n=name.toUpperCase(),nf=lfit(c,n,300,36,'800',fam);c.font='800 '+nf+'px '+fam;c.fillText(n,cx,410);
+  },
+  // 4) Hexagon monogram
+  (c,S,name,ini,p,fam)=>{
+    const [bg,fg,ac]=p,cx=S/2;
+    c.fillStyle=bg;c.beginPath();c.arc(cx,cx,S/2-6,0,7);c.fill();
+    const hex=(r,lw)=>{c.beginPath();for(let i=0;i<6;i++){const a=Math.PI/6+i*Math.PI/3;c.lineTo(cx+Math.cos(a)*r,cx-20+Math.sin(a)*r);}c.closePath();c.lineWidth=lw;c.stroke();};
+    c.strokeStyle=ac;hex(165,12);c.globalAlpha=.5;hex(140,3);c.globalAlpha=1;
+    c.fillStyle=fg;const f=lfit(c,ini,200,140,'900',fam);c.font='900 '+f+'px '+fam;c.textAlign='center';c.textBaseline='middle';c.fillText(ini,cx,cx-14);
+    c.fillStyle=ac;star(c,cx-110,cx-20,10);star(c,cx+110,cx-20,10);
+    const n=name.toUpperCase(),nf=lfit(c,n,320,40,'800',fam);c.font='800 '+nf+'px '+fam;c.fillStyle=fg;c.fillText(n,cx,430);
+  },
+  // 5) Tokri (basket) + naam
+  (c,S,name,ini,p,fam)=>{
+    const [bg,fg,ac]=p,cx=S/2;
+    c.fillStyle=ac;c.beginPath();c.arc(cx,cx,S/2-6,0,7);c.fill();
+    c.fillStyle=bg;c.beginPath();c.arc(cx,cx,S/2-26,0,7);c.fill();
+    // anaj ke daane
+    c.fillStyle=ac;[[-60,150],[-20,135],[20,132],[60,148],[-40,170],[0,160],[40,168]].forEach(([dx,y])=>{c.beginPath();c.ellipse(cx+dx,y,16,24,dx/120,0,7);c.fill();});
+    // tokri
+    c.fillStyle=fg;c.beginPath();c.moveTo(cx-120,185);c.lineTo(cx+120,185);c.lineTo(cx+90,285);c.lineTo(cx-90,285);c.closePath();c.fill();
+    c.strokeStyle=bg;c.lineWidth=5;
+    for(let i=1;i<4;i++){const y=185+i*25;c.beginPath();c.moveTo(cx-120+i*7.5,y);c.lineTo(cx+120-i*7.5,y);c.stroke();}
+    for(let i=-2;i<=2;i++){c.beginPath();c.moveTo(cx+i*45,185);c.lineTo(cx+i*36,285);c.stroke();}
+    const ws=name.trim().split(/\s+/).filter(Boolean),l1=(ws[0]||'').toUpperCase(),l2=ws.slice(1).join(' ').toUpperCase();
+    c.fillStyle=fg;c.textAlign='center';c.textBaseline='middle';
+    let f=lfit(c,l1,330,64,'900',fam);c.font='900 '+f+'px '+fam;c.fillText(l1,cx,345);
+    if(l2){c.fillStyle=ac;f=lfit(c,l2,300,40,'800',fam);c.font='800 '+f+'px '+fam;c.fillText(l2,cx,405);}
+  },
+  // 6) Do-rangi modern
+  (c,S,name,ini,p,fam)=>{
+    const [bg,fg,ac]=p,cx=S/2,r=S/2-6;
+    c.save();c.beginPath();c.arc(cx,cx,r,0,7);c.clip();
+    c.fillStyle=bg;c.fillRect(0,0,S,S);
+    c.fillStyle=ac;c.beginPath();c.moveTo(S,0);c.lineTo(S,S);c.lineTo(0,S);c.closePath();c.fill();
+    c.restore();
+    c.strokeStyle=fg;c.lineWidth=8;c.beginPath();c.arc(cx,cx,r-14,0,7);c.stroke();
+    c.fillStyle='#FFFFFF';c.strokeStyle=bg;c.lineWidth=10;c.lineJoin='round';
+    const f=lfit(c,ini,320,200,'900',fam);c.font='900 '+f+'px '+fam;c.textAlign='center';c.textBaseline='middle';
+    c.strokeText(ini,cx,cx-20);c.fillText(ini,cx,cx-20);
+    const n=name.toUpperCase(),nf=lfit(c,n,280,34,'800',fam);c.font='800 '+nf+'px '+fam;c.fillStyle=fg;c.lineWidth=6;c.strokeText(n,cx,cx+130);c.fillText(n,cx,cx+130);
+  }
+];
+function makeLogos(){
+  const name=val('shop')||'MY KIRANA',ini=shopInitials(name),grid=document.getElementById('logoGrid');
+  grid.innerHTML='';grid.style.display='grid';logoPick=-1;
+  document.getElementById('logoActs').style.display='flex';
+  LOGO_DESIGNS.forEach((fn,i)=>{
+    const S=512,c=document.createElement('canvas');c.width=c.height=S;
+    const x=c.getContext('2d'),pal=LOGO_PAL[(logoSeed*5+i*3)%LOGO_PAL.length];
+    const fam=(i+logoSeed)%2?'Georgia,"Mukta",serif':'Arial,"Mukta",sans-serif';
+    try{fn(x,S,name,ini,pal,fam);}catch(e){}
+    const b=document.createElement('button');b.type='button';b.appendChild(c);
+    const lb=document.createElement('span');lb.textContent=['Mohar','Dhaal','App icon','Hexagon','Tokri','Modern'][i];b.appendChild(lb);
+    b.onclick=()=>{
+      grid.querySelectorAll('button').forEach(o=>o.classList.remove('on'));b.classList.add('on');logoPick=i;
+      const url=c.toDataURL('image/png');
+      if(!lsSet(LKEY,url))alert('Logo save nahi hua (phone ki memory bhari hai) — abhi ke liye laga diya hai.');
+      setLogo(url);
+      document.getElementById('logoDl').disabled=false;
+    };
+    grid.appendChild(b);
+  });
+  document.getElementById('logoDl').disabled=true;
+}
+
 function setLogo(dataUrl){
   const prev=document.getElementById('logoPrev');
   if(!dataUrl){logo=null;prev.style.display='none';document.getElementById('logoDel').style.display='none';
@@ -2235,6 +2385,12 @@ document.getElementById('logoIn').addEventListener('change',e=>{
     setLogo(url);
   });
 });
+document.getElementById('logoMake').onclick=()=>{logoSeed=0;makeLogos();document.getElementById('logoHint').style.display='';};
+document.getElementById('logoMore').onclick=()=>{logoSeed++;makeLogos();};
+document.getElementById('logoDl').onclick=()=>{
+  const c=document.querySelectorAll('#logoGrid canvas')[logoPick];if(!c)return;
+  c.toBlob(b=>saveBlob(b,'logo-'+(val('shop')||'shop').replace(/[^\w\u0900-\u097F]+/g,'-').toLowerCase()+'.png'));
+};
 document.getElementById('logoDel').onclick=()=>{try{localStorage.removeItem(LKEY);}catch(e){}setLogo(null);};
 document.getElementById('upi').addEventListener('input',()=>{
   const u=val('upi').replace(/\s/g,''),h=document.getElementById('upiHint');
@@ -2353,7 +2509,7 @@ if(isIOS && !isStandalone && !lsGet('kp_ioshint_off')){iosHint.style.display='';
 document.getElementById('iosHintX').onclick=()=>{iosHint.style.display='none';lsSet('kp_ioshint_off',1);};
 
 /* ---------- 🔄 Refresh + naya version check ---------- */
-const APP_VERSION='1.10';
+const APP_VERSION='1.11';
 async function hardRefresh(){
   const b=document.getElementById('refreshBtn');b.textContent='⏳';b.disabled=true;
   try{
