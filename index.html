@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <!--
-  Kirana Poster Maker — v1.17
+  Kirana Poster Maker — v1.18
+  v1.18: 📸 Har product ki apni photo — AI se ek baar bane, phone me save, apni photo se badlo
   v1.17: 🔎 Product naam ke box me Hindi/Marathi naamon ki suggestion list (English se bhi search)
   v1.16: 🎉 Pehli baar setup page (dukaan ki jaankari ek baar) + sabke liye free AI server, roz 10 AI background
   v1.15: App look sirf Classic (Gulabi Rose) + Soft 3D
@@ -243,6 +244,8 @@ html[data-ui="soft"] #devStatus{color:#B45309}
 #uiSeg button{min-width:90px}
 .warnTxt{color:#FFD34D!important}
 html[data-ui="soft"] .warnTxt{color:#B45309!important}
+/* Smart ka 'Pehchana…' sandesh nahi dikhana (Smart rang apne aap lagta rahega) */
+#smartInfo{display:none!important}
 </style>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#7A1612">
@@ -255,7 +258,7 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
 <body>
 <header>
   <div class="mark" id="hdrMark">K</div>
-  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.17</b></p></div>
+  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.18</b></p></div>
   <div class="hbtns">
     <button id="refreshBtn" title="Naya version laao / page refresh">🔄 Refresh</button>
     <button id="logoOpen" title="Dukaan ka logo"><img id="logoMini" alt="" style="display:none">🏷️ Logo</button>
@@ -441,6 +444,8 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
       <label>Pollinations key (optional)</label>
       <input type="text" id="aiKey" placeholder="enter.pollinations.ai se mili key" autocapitalize="off" autocomplete="off">
       <p class="hint" style="text-align:left">Yeh dono sirf aapke phone me save rehte hain.</p>
+      <button class="add-row" id="pimgAll" type="button">📸 Default items ki photo ek saath bana lo</button>
+      <p class="hint" style="text-align:left">Bhav List ke default items (तूरदाळ, पोहा…) ki photo AI se ek baar banti hai aur phone me save rehti hai. Item chunte hi photo apne aap lagegi.</p>
       <p class="hint" style="text-align:left;opacity:.6">AI: FLUX.1 [schnell] (Black Forest Labs) se background · photo se naam: Built with Llama (Meta)</p>
     </details>
   </div>
@@ -1101,6 +1106,7 @@ async function readNameFromPhoto(manual){
     draw();saveAll();
     st.innerHTML='✅ Photo se naam bhara: <b></b> — galat ho to khud sudhar lo.<button>↩ Purana naam</button>';
     st.querySelector('b').textContent=el.value;
+    if(img){imgFor=pkey(el.value);pimgSet(imgFor,toJpeg(img,900));}
     st.querySelector('button').onclick=()=>{el.value=prev;delete el.dataset.en;delete el.dataset.dev;st.textContent='';draw();saveAll();};
   }catch(e){
     const m=e&&e.name==='AbortError'?'time out':(e&&e.message||String(e));
@@ -2250,6 +2256,7 @@ function applyLayout(fromUser){
   if(L==='ai'){setDefaultAI();if(fromUser&&!aiBg)aiGenerate();}
   updateHero();
   draw();
+  if(typeof applyProdPhoto==='function')applyProdPhoto(!!fromUser);
 }
 
 /* ---------- 📑 Har poster ka alag page — tabs + side swipe ---------- */
@@ -2422,19 +2429,99 @@ function loadImage(file,maxSide,cb){
   };im.src=ev.target.result;};
   r.readAsDataURL(file);
 }
+/* ---------- 📸 Har product ki apni photo — AI se ek baar, phir phone me save (IndexedDB) ---------- */
+const PIMG_PROMPT={'चनादाळ':'heap of yellow split chickpea chana dal lentils','मुगदाळ':'heap of yellow split moong dal lentils',
+  'मठदाळ':'heap of split moth bean dal lentils','तूरदाळ':'heap of yellow toor dal split pigeon pea lentils','मठ':'heap of whole brown moth beans matki',
+  'हराभरा तांदूळ':'heap of long grain white rice','बाजिगर तांदूळ':'heap of short grain white rice','बेसन 200':'bowl of yellow gram flour besan powder',
+  'बेसन 500':'bowl of yellow gram flour besan powder','दाळ्या A 1':'heap of roasted split chickpeas dalia','मसूर दाळ':'heap of orange red masoor lentils',
+  'पोहा 1 kg':'heap of flattened rice poha flakes','पोहा 500':'heap of flattened rice poha flakes','सफेद दाळ':'heap of white split urad dal lentils',
+  'काळी दाळ':'heap of whole black urad dal lentils','भगर':'heap of barnyard millet bhagar grains','साबुदाणा':'heap of white sago pearls sabudana',
+  'सोयावडी 5 kg':'heap of dry soya chunks','रवा 1 kg':'heap of semolina sooji rava','रवा 500gm':'heap of semolina sooji rava',
+  'मैदा 1 kg':'bowl of white refined wheat flour maida','मैदा 500gm':'bowl of white refined wheat flour maida',
+'टाटा नमक 1 kg':'bowl of white iodised salt','आटा 5 kg':'bowl of whole wheat flour atta'};
+const PIMG_SUFFIX=', top view close-up, natural daylight, food photography, high detail, plain background, no text, no packaging, no logo';
+const PHOTO_LAYOUTS=['offer','single','ai'];
+let imgFor='',pimgBusy={};
+function idbOpen(){return new Promise((res,rej)=>{if(!window.indexedDB)return rej('no idb');const r=indexedDB.open('kirana_poster',1);
+  r.onupgradeneeded=()=>r.result.createObjectStore('prodimg');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
+async function pimgGet(k){try{const d=await idbOpen();return await new Promise(res=>{const q=d.transaction('prodimg').objectStore('prodimg').get(k);q.onsuccess=()=>res(q.result||null);q.onerror=()=>res(null);});}catch(e){return null;}}
+async function pimgSet(k,v){if(!k)return;try{const d=await idbOpen();await new Promise(res=>{const t=d.transaction('prodimg','readwrite');t.objectStore('prodimg').put(v,k);t.oncomplete=res;t.onerror=res;});}catch(e){}}
+function pkey(n){return String(n||'').trim().toLowerCase();}
+function toJpeg(src,max){const s=Math.min(1,max/Math.max(src.width,src.height)),o=document.createElement('canvas');
+  o.width=Math.round(src.width*s);o.height=Math.round(src.height*s);o.getContext('2d').drawImage(src,0,0,o.width,o.height);return o.toDataURL('image/jpeg',.82);}
+function dataImg(u){return new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=u;});}
+function photoPrompt(name){
+  const n=String(name||'').trim();
+  if(PIMG_PROMPT[n])return PIMG_PROMPT[n]+PIMG_SUFFIX;
+  const el=document.getElementById('prod'),en=(el&&pkey(el.value)===pkey(n)&&el.dataset.en)||(/[a-z]/i.test(n)?n:'');
+  return en?'single grocery item: '+en.replace(/[^\w\s.-]/g,' ')+PIMG_SUFFIX:'';
+}
+function showPhoto(im,name){
+  img=im;imgFor=pkey(name);autoTheme=im?extractTheme():null;
+  document.getElementById('photoDel').style.display=im?'':'none';draw();
+}
+/* product badla → uski save photo lagao, na ho to AI se banao */
+async function applyProdPhoto(allowGen){
+  if(allowGen===undefined)allowGen=true;
+  if(!PHOTO_LAYOUTS.includes(layout))return;
+  const name=val('prod'),k=pkey(name);if(!k||k===imgFor)return;
+  const saved=await pimgGet(k);
+  if(pkey(val('prod'))!==k)return;
+  if(saved==='none'){showPhoto(null,name);return;}
+  if(saved){try{showPhoto(await dataImg(saved),name);}catch(e){}return;}
+  showPhoto(null,name);
+  const pr=photoPrompt(name);if(pr&&allowGen)genProdPhoto(name,pr,false);
+}
+async function genProdPhoto(name,pr,quiet){
+  const k=pkey(name),st=document.getElementById('prodAuto');
+  if(pimgBusy[k]||!navigator.onLine)return false;
+  if(aiLimited()&&aiUsed()>=AI_DAILY){if(!quiet)st.textContent='⏳ Aaj ke '+AI_DAILY+' AI ho gaye — "'+name+'" ki photo kal banegi. Tab tak 📷 se khud photo daal sakte ho.';return false;}
+  pimgBusy[k]=1;
+  if(!quiet)st.textContent='🪄 "'+name+'" ki photo AI se ban rahi hai… (10–30 sec)';
+  const u=aiServer();
+  try{
+    const im=await fetchImage(u+(u.includes('?')?'&':'?')+'prompt='+encodeURIComponent(pr)+'&seed='+Math.floor(Math.random()*1e9),90000);
+    if(aiLimited())aiCount();aiLeftText();
+    const data=toJpeg(im,700);await pimgSet(k,data);
+    if(pkey(val('prod'))===k&&PHOTO_LAYOUTS.includes(layout))showPhoto(await dataImg(data),name);
+    if(!quiet)st.textContent='✅ "'+name+'" ki photo ban gayi aur save ho gayi — badalni ho to 📷 Photo add karo.';
+    return true;
+  }catch(e){
+    if(!quiet)st.textContent='⚠️ "'+name+'" ki photo nahi ban payi ('+String(e&&e.message||e).slice(0,80)+'). 📷 se khud photo daal sakte ho.';
+    return false;
+  }finally{delete pimgBusy[k];}
+}
+/* sab default items ki photo ek saath */
+async function genAllPhotos(){
+  const b=document.getElementById('pimgAll'),names=defNames().filter(n=>PIMG_PROMPT[n]);
+  let made=0,skip=0;b.disabled=true;
+  for(let i=0;i<names.length;i++){
+    const n=names[i];
+    if(await pimgGet(pkey(n))){skip++;continue;}
+    if(aiLimited()&&aiUsed()>=AI_DAILY){aiStatus('⏳ Aaj ka AI quota khatam — '+made+' photo bani. Baaki kal button phir dabao.',true);break;}
+    b.textContent='⏳ '+(i+1)+'/'+names.length+' — '+n;
+    if(await genProdPhoto(n,PIMG_PROMPT[n]+PIMG_SUFFIX,true))made++;
+  }
+  b.disabled=false;b.textContent='📸 Default items ki photo ek saath bana lo';
+  if(!(aiLimited()&&aiUsed()>=AI_DAILY))aiStatus('✅ '+made+' nayi photo bani'+(skip?', '+skip+' pehle se thi':'')+'. Ab item chunte hi photo apne aap lagegi.');
+  imgFor='';applyProdPhoto();
+}
+document.addEventListener('change',e=>{if(e.target&&e.target.id==='prod')applyProdPhoto();});
+
 document.getElementById('photoBtn').onclick=()=>document.getElementById('photo').click();
 document.getElementById('photo').addEventListener('change',e=>{
   const f=e.target.files[0];e.target.value='';if(!f)return;
   loadImage(f,1200,c=>{
-    img=c;autoTheme=extractTheme();
+    img=c;autoTheme=extractTheme();imgFor=pkey(val('prod'));
     if(tpl!=='smart'){tpl='auto';setActive('.tpl button','t','auto');}
     document.getElementById('photoDel').style.display='';
+    if(imgFor)pimgSet(imgFor,toJpeg(c,900));   // is product ki apni photo — aage yahi lagegi
     draw();saveAll();
     if(['offer','single','ai'].includes(layout))readNameFromPhoto(false);
   });
 });
 document.getElementById('photoDel').onclick=()=>{
-  img=null;autoTheme=null;
+  img=null;autoTheme=null;imgFor=pkey(val('prod'));if(imgFor)pimgSet(imgFor,'none');
   if(tpl==='auto'){tpl='smart';setActive('.tpl button','t','smart');}
   document.getElementById('photoDel').style.display='none';
   draw();saveAll();
@@ -2687,6 +2774,7 @@ function renderHistory(){
   }));
 })();
 document.getElementById('aiGo').onclick=aiGenerate;
+document.getElementById('pimgAll').onclick=genAllPhotos;
 document.getElementById('aiStyle').addEventListener('change',()=>{if(aiBg)aiStatus('Style badla — "🔄 Naya AI background banao" dabao.');});
 
 /* app ka look (design) */
@@ -2779,7 +2867,7 @@ if(isIOS && !isStandalone && !lsGet('kp_ioshint_off')){iosHint.style.display='';
 document.getElementById('iosHintX').onclick=()=>{iosHint.style.display='none';lsSet('kp_ioshint_off',1);};
 
 /* ---------- 🔄 Refresh + naya version check ---------- */
-const APP_VERSION='1.17';
+const APP_VERSION='1.18';
 async function hardRefresh(){
   const b=document.getElementById('refreshBtn');b.textContent='⏳';b.disabled=true;
   try{
