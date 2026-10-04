@@ -26,37 +26,40 @@ const errMsg = e => String(e && e.message || e);
 /* AI ke jawab se text nikaalo (alag models alag tarah se dete hain) */
 function textOf(out) {
   if (typeof out === 'string') return out;
-  const t = out && (out.response ?? out.choices?.[0]?.message?.content ?? out.result?.response);
+  const t = out && (out.response ?? out.description ?? out.choices?.[0]?.message?.content ?? out.result?.response);
   return typeof t === 'string' ? t : '';
 }
 function cleanName(t) {
   return String(t || '').split('\n').map(s => s.trim()).filter(Boolean)[0]?.replace(/^["'*`\s]+|["'*`.\s]+$/g, '').slice(0, 80) || '';
 }
 
+/* data:image/jpeg;base64,... → bytes (Workers AI vision models photo ko number-array ke roop me lete hain) */
+function bytesOf(dataUrl) {
+  const bin = atob(dataUrl.slice(dataUrl.indexOf(',') + 1));
+  const out = new Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+
+/* Ek-ek karke models try karo — jo aapke free account pe chale, wahi jawab dega */
 async function readName(env, dataUrl) {
-  const errs = [];
-  try {   // 1) Google Gemma 3 (photo + text)
-    const out = await env.AI.run('@cf/google/gemma-3-12b-it', {
-      messages: [{ role: 'user', content: [
-        { type: 'text', text: VISION_PROMPT },
-        { type: 'image_url', image_url: { url: dataUrl } }
-      ] }],
-      max_tokens: 60
-    });
-    const name = cleanName(textOf(out));
-    if (name) return name;
-    errs.push('gemma: khaali jawab');
-  } catch (e) { errs.push('gemma: ' + errMsg(e)); }
-  try {   // 2) Meta Llama 3.2 Vision (pehli baar license maanna padta hai: /?agree=1)
-    const out = await env.AI.run('@cf/meta/llama-3.2-11b-vision-instruct', {
-      messages: [{ role: 'user', content: VISION_PROMPT }],
-      image: dataUrl,
-      max_tokens: 60
-    });
-    const name = cleanName(textOf(out));
-    if (name) return name;
-    errs.push('llama: khaali jawab');
-  } catch (e) { errs.push('llama: ' + errMsg(e)); }
+  const bytes = bytesOf(dataUrl), errs = [];
+  const tries = [
+    // Meta Llama 3.2 Vision (pehli baar license: /?agree=1) — sawaal "prompt" me, photo bytes me
+    ['llama3.2', '@cf/meta/llama-3.2-11b-vision-instruct', { prompt: VISION_PROMPT, image: bytes, max_tokens: 60 }],
+    // Meta Llama 4 Scout — photo + text messages me
+    ['llama4', '@cf/meta/llama-4-scout-17b-16e-instruct', { messages: [{ role: 'user', content: [
+      { type: 'text', text: VISION_PROMPT }, { type: 'image_url', image_url: { url: dataUrl } }] }], max_tokens: 60 }],
+    // LLaVA 1.5 — English naam ke liye theek
+    ['llava', '@cf/llava-hf/llava-1.5-7b-hf', { prompt: VISION_PROMPT, image: bytes, max_tokens: 60 }]
+  ];
+  for (const [label, model, input] of tries) {
+    try {
+      const name = cleanName(textOf(await env.AI.run(model, input)));
+      if (name) return name;
+      errs.push(label + ': khaali jawab');
+    } catch (e) { errs.push(label + ': ' + errMsg(e).slice(0, 120)); }
+  }
   throw new Error(errs.join(' | '));
 }
 
@@ -97,7 +100,7 @@ export default {
 
     // AI background
     const prompt = (url.searchParams.get('prompt') || '').slice(0, 1500);
-    if (!prompt) return new Response('Kirana Poster AI server chal raha hai ✅ (v2: background + photo se naam)', { headers: { 'content-type': 'text/plain; charset=utf-8', ...cors() } });
+    if (!prompt) return new Response('Kirana Poster AI server chal raha hai ✅ (v3: background + photo se naam)', { headers: { 'content-type': 'text/plain; charset=utf-8', ...cors() } });
     try {
       // Note: is model me ab 'seed' allowed nahi — bina seed ke har baar alag image banti hai
       const out = await env.AI.run('@cf/black-forest-labs/flux-1-schnell', { prompt });
