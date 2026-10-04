@@ -23,9 +23,9 @@ Cloudflare har account ko roz free AI quota deta hai (roz raat 12 baje UTC pe re
 2. Poster app me **✨ AI Poster** → **⚙️ AI setting** → **Cloudflare server URL** me paste karo.
 3. **✨ AI background banao** dabao — 10–30 second me naya background!
 
-## 📷 Photo se product ka naam (v2 code)
-Naya `worker.js` (v2) photo dekh kar product ka naam bhi padhta hai. Server URL kholne pe
-*"... chal raha hai ✅ (v2: background + photo se naam)"* dikhe to v2 laga hai.
+## 📷 Photo se product ka naam (v3 code)
+Naya `worker.js` (v3) photo dekh kar product ka naam bhi padhta hai. Server URL kholne pe
+*"... chal raha hai ✅ (v3: background + photo se naam)"* dikhe to v3 laga hai.
 App me product photo daalte hi naam apne aap Product me bhar jayega.
 
 Agar app me error aaye jisme **license / agree** likha ho, to ek baar browser me
