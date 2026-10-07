@@ -2046,8 +2046,8 @@ function setActive(sel,attr,v){
 const MY_NAMES=['चनादाळ','मुगदाळ','मठदाळ','तूरदाळ','मठ','हराभरा तांदूळ','बाजिगर तांदूळ','बेसन 200','बेसन 500',
   'दाळ्या A 1','मसूर दाळ','पोहा 1 kg','पोहा 500','सफेद दाळ','काळी दाळ','भगर','साबुदाणा','सोयावडी 5 kg',
   'रवा 1 kg','रवा 500gm','मैदा 1 kg','मैदा 500gm','टाटा नमक 1 kg','आटा 5 kg',
-  'पांचतारा तांदूळ','कोलम मोर तांदूळ','जेमिनी तेल 1 ltr','जेमिनी तेल 500 ml','जेमिनी तेल 200 ml','जेमिनी तेल 2 kg','जेमिनी तेल 5 kg'];
-const NEW_NAMES_V2=['पांचतारा तांदूळ','कोलम मोर तांदूळ','जेमिनी तेल 1 ltr','जेमिनी तेल 500 ml','जेमिनी तेल 200 ml','जेमिनी तेल 2 kg','जेमिनी तेल 5 kg'];
+  'चांदतारा तांदूळ','कोलम मोर तांदूळ','जेमिनी तेल 1 ltr','जेमिनी तेल 500 ml','जेमिनी तेल 200 ml','जेमिनी तेल 2 kg','जेमिनी तेल 5 kg'];
+const NEW_NAMES_V2=['चांदतारा तांदूळ','कोलम मोर तांदूळ','जेमिनी तेल 1 ltr','जेमिनी तेल 500 ml','जेमिनी तेल 200 ml','जेमिनी तेल 2 kg','जेमिनी तेल 5 kg'];
 const NKEY='kp_def_names',OLD_DEF=['Basmati Chawal','Shakkar (Sugar)','Aata (Gehu)','Toor Dal'];
 function defNames(){const n=lsGet(NKEY);return Array.isArray(n)&&n.length?n:MY_NAMES;}
 function defRows(){return defNames().map(n=>({n:n,a:'',b:''}));}
@@ -2081,7 +2081,7 @@ function applyState(d){
     const demo=rows.every(r=>OLD_DEF.includes((Array.isArray(r.e)?r.e[0]:r.n||'').trim())||!(r.n||'').trim());
     if(demo)rows=defRows();
   }
-  // ek baar (v1.19): nayi items (पांचतारा, कोलम मोर, जेमिनी तेल…) list ke aakhir me jod do
+  // ek baar (v1.19): nayi items (चांदतारा, कोलम मोर, जेमिनी तेल…) list ke aakhir me jod do
   if(!lsGet('kp_mylist_v2')){
     lsSet('kp_mylist_v2',1);
     const has=new Set(rows.map(r=>(r.n||'').trim()));
@@ -2131,7 +2131,7 @@ const SUG_ALIAS={'चनादाळ':'chana dal chanadal chana','मुगद�
   'दाळ्या A 1':'dalya daliya a1','मसूर दाळ':'masoor dal masur','पोहा 1 kg':'poha pohe 1 kg','पोहा 500':'poha pohe 500','सफेद दाळ':'safed dal white urad',
   'काळी दाळ':'kali dal black urad','भगर':'bhagar varai','साबुदाणा':'sabudana sago','सोयावडी 5 kg':'soyavadi soya chunks badi 5 kg','रवा 1 kg':'rava rawa suji sooji 1 kg',
   'रवा 500gm':'rava rawa suji sooji 500gm','मैदा 1 kg':'maida 1 kg','मैदा 500gm':'maida 500gm','टाटा नमक 1 kg':'tata namak salt 1 kg','आटा 5 kg':'aata atta flour 5 kg',
-  'पांचतारा तांदूळ':'panchtara pachtara tandul rice chawal','कोलम मोर तांदूळ':'kolam mor tandul rice chawal',
+  'चांदतारा तांदूळ':'chandtara chand tara tandul rice chawal','कोलम मोर तांदूळ':'kolam mor tandul rice chawal',
   'जेमिनी तेल 1 ltr':'gemini tel oil 1 ltr litre liter','जेमिनी तेल 500 ml':'gemini tel oil 500 ml','जेमिनी तेल 200 ml':'gemini tel oil 200 ml',
   'जेमिनी तेल 2 kg':'gemini tel oil 2 kg','जेमिनी तेल 5 kg':'gemini tel oil 5 kg'};
 function sugEntries(){
@@ -2487,7 +2487,7 @@ const PIMG_PROMPT={'चनादाळ':'heap of yellow split chickpea chana dal
   'सोयावडी 5 kg':'heap of dry soya chunks','रवा 1 kg':'heap of semolina sooji rava','रवा 500gm':'heap of semolina sooji rava',
   'मैदा 1 kg':'bowl of white refined wheat flour maida','मैदा 500gm':'bowl of white refined wheat flour maida',
 'टाटा नमक 1 kg':'bowl of white iodised salt','आटा 5 kg':'bowl of whole wheat flour atta',
-  'पांचतारा तांदूळ':'heap of long grain white rice','कोलम मोर तांदूळ':'heap of short grain white kolam rice',
+  'चांदतारा तांदूळ':'heap of long grain white rice','कोलम मोर तांदूळ':'heap of short grain white kolam rice',
   'जेमिनी तेल 1 ltr':'bottle of golden sunflower cooking oil','जेमिनी तेल 500 ml':'bottle of golden sunflower cooking oil','जेमिनी तेल 200 ml':'bottle of golden sunflower cooking oil',
   'जेमिनी तेल 2 kg':'jar of golden sunflower cooking oil','जेमिनी तेल 5 kg':'large jar of golden sunflower cooking oil'};
 const PIMG_SUFFIX=', top view close-up, natural daylight, food photography, high detail, plain background, no text, no packaging, no logo';
