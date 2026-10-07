@@ -248,32 +248,6 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
 #smartInfo{display:none!important}
 /* 🖨️ Print / PDF */
 .print-row{display:flex;gap:8px}
-#printArea{display:none}
-@media print{
-  @page{size:A4;margin:10mm}
-  html,body{background:#fff!important;margin:0!important;padding:0!important;width:auto!important;min-width:0!important;max-width:none!important;height:auto!important;min-height:0!important;overflow:visible!important}
-  #printArea{width:100%;box-sizing:border-box}
-  #printArea *{box-sizing:border-box}
-  body>*:not(#printArea){display:none!important}
-  #printArea{display:block!important;color:#000;font-family:'Noto Sans Devanagari','Mukta','Hind',Arial,sans-serif}
-  #printArea .ph{display:flex;align-items:center;justify-content:center;gap:12px;border-bottom:2px solid #000;padding-bottom:6px;margin-bottom:6px}
-  #printArea .ph img{width:56px;height:56px;object-fit:contain;border-radius:50%}
-  #printArea .ph h1{margin:0;font-size:24pt;line-height:1.1}
-  #printArea .pt{display:flex;justify-content:space-between;align-items:baseline;margin:4px 0 8px;font-size:13pt;font-weight:800}
-  #printArea table{width:100%;border-collapse:collapse;font-size:13pt}
-  #printArea th,#printArea td{border:1px solid #000;padding:5px 9px}
-  #printArea th{background:#eee;font-weight:800;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  #printArea td.n{width:34px;text-align:center}
-  #printArea td.r,#printArea th.r{text-align:right;width:22%;font-weight:700;white-space:nowrap}
-  #printArea tr{break-inside:avoid}
-  #printArea table.cmp{font-size:11.5pt}
-  #printArea table.cmp th,#printArea table.cmp td{padding:3px 8px}
-  #printArea table.cmp2{font-size:10pt}
-  #printArea table.cmp2 th,#printArea table.cmp2 td{padding:2px 8px}
-  #printArea tbody tr:nth-child(even) td{background:#f6f6f6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  #printArea .pf{margin-top:10px;text-align:center;font-size:12pt;font-weight:700}
-  #printArea img.poster{display:block;margin:0 auto;max-width:100%;max-height:265mm;object-fit:contain;break-inside:avoid}
-}
 </style>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#7A1612">
@@ -286,7 +260,7 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
 <body>
 <header>
   <div class="mark" id="hdrMark">K</div>
-  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.19</b></p></div>
+  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.20</b></p></div>
   <div class="hbtns">
     <button id="refreshBtn" title="Naya version laao / page refresh">🔄 Refresh</button>
     <button id="logoOpen" title="Dukaan ka logo"><img id="logoMini" alt="" style="display:none">🏷️ Logo</button>
@@ -515,10 +489,11 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
     </div>
     <button id="dlBoth">⬇ Dono size ek saath (Post + Status)</button>
     <div class="print-row">
-      <button class="pbtn" id="printTable">🖨️ Table Print/PDF</button>
-      <button class="pbtn" id="printPoster">🖨️ Poster Print/PDF</button>
+      <button class="pbtn" id="printTable">📄 Table PDF</button>
+      <button class="pbtn" id="printPoster">📄 Poster PDF</button>
+      <button class="pbtn" id="sharePdf">📤 PDF bhejo</button>
     </div>
-    <p class="hint" id="printHint">Print me printer chuno — ya <b>“Save as PDF”</b> chuno to PDF ban jayegi.</p>
+    <p class="hint" id="printHint">PDF phone me <b>Download</b> ho jayegi — computer pe bhej ke print karo. “PDF bhejo” se seedha WhatsApp pe.</p>
     <p class="hint">Download karke seedha WhatsApp Channel pe post karo</p>
   </div>
 
@@ -2782,37 +2757,97 @@ document.getElementById('dlBoth').onclick=async()=>{
   out.forEach((o,i)=>setTimeout(()=>saveBlob(o.b,o.n),i*700));
 };
 
-/* ---------- 🖨️ Print / PDF (A4) — table saaf, kam ink; poster jaisa bhi ---------- */
-function escH(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
-function printHtml(html){
-  let a=document.getElementById('printArea');
-  if(!a){a=document.createElement('div');a.id='printArea';document.body.appendChild(a);}
-  a.innerHTML=html;
-  const imgs=[...a.querySelectorAll('img')].map(i=>i.decode?i.decode().catch(()=>{}):null);
-  Promise.all(imgs).then(()=>setTimeout(()=>window.print(),60));
+/* ---------- 📄 PDF (A4) — phone pe hi PDF file banti hai (bina print dialog, bina internet) ---------- */
+function b64Bytes(d){const b=atob(d.split(',')[1]),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u;}
+/* chhota PDF writer: har page pe ek JPEG (canvas), A4 595x842 pt */
+function makePdf(canvases){
+  const enc=new TextEncoder(),parts=[],offs=[];let len=0;
+  const put=x=>{const u=typeof x==='string'?enc.encode(x):x;parts.push(u);len+=u.length;};
+  const obj=(n,body)=>{offs[n]=len;put(n+' 0 obj\n');body();put('\nendobj\n');};
+  const n=canvases.length,PW=595.28,PH=841.89;
+  put('%PDF-1.4\n');
+  obj(1,()=>put('<< /Type /Catalog /Pages 2 0 R >>'));
+  obj(2,()=>put('<< /Type /Pages /Count '+n+' /Kids ['+canvases.map((c,i)=>(3+i*3)+' 0 R').join(' ')+'] >>'));
+  canvases.forEach((c,i)=>{
+    const pg=3+i*3,ct=pg+1,im=pg+2,jp=b64Bytes(c.toDataURL('image/jpeg',.9));
+    const s=Math.min(PW/c.width,PH/c.height),w=c.width*s,h=c.height*s,x=(PW-w)/2,y=PH-h;   // upar se shuru
+    const cs='q '+w.toFixed(2)+' 0 0 '+h.toFixed(2)+' '+x.toFixed(2)+' '+y.toFixed(2)+' cm /Im0 Do Q';
+    obj(pg,()=>put('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+PW+' '+PH+'] /Resources << /XObject << /Im0 '+im+' 0 R >> >> /Contents '+ct+' 0 R >>'));
+    obj(ct,()=>put('<< /Length '+cs.length+' >>\nstream\n'+cs+'\nendstream'));
+    obj(im,()=>{put('<< /Type /XObject /Subtype /Image /Width '+c.width+' /Height '+c.height+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+jp.length+' >>\nstream\n');put(jp);put('\nendstream');});
+  });
+  const total=3+n*3,xref=len;
+  let x='xref\n0 '+total+'\n0000000000 65535 f \n';
+  for(let k=1;k<total;k++)x+=String(offs[k]).padStart(10,'0')+' 00000 n \n';
+  put(x+'trailer\n<< /Size '+total+' /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF');
+  return new Blob(parts,{type:'application/pdf'});
 }
-window.addEventListener('afterprint',()=>{const a=document.getElementById('printArea');if(a)a.innerHTML='';});
-function rateTableHtml(){
-  const T=LBL(),rates=readRates();
+/* Bhav table A4 canvas pages (150 dpi) — safed kagaz, kaale akshar, kam ink */
+function rateTablePages(){
+  const T=LBL(),rates=readRates(),PW=1240,PH=1754,M=70;
   const cols=[];
   if(rates.some(r=>r.r1))cols.push({label:val('unit1')||'30 Kg',key:'r1'});
   if(rates.some(r=>r.r2))cols.push({label:val('unit2')||'1 Kg',key:'r2'});
-  const shop=val('shop'),title=val('title')||T.today,vld=val('valid'),ph=val('phone'),ad=val('addr');
-  let h='<div class="ph">'+(logo&&logo.src?'<img src="'+logo.src+'" alt="">':'')+'<h1>'+escH(shop||'Kirana Store')+'</h1></div>';
-  h+='<div class="pt"><span>'+escH(title)+'</span><span>'+escH(vld)+'</span></div>';
-  h+='<table'+(rates.length>40?' class="cmp2"':rates.length>26?' class="cmp"':'')+'><thead><tr><th>#</th><th style="text-align:left">'+escH(T.product)+'</th>'+cols.map(c=>'<th class="r">'+escH(c.label)+'</th>').join('')+'</tr></thead><tbody>';
-  rates.forEach((r,i)=>{h+='<tr><td class="n">'+(i+1)+'</td><td>'+escH(r.name)+'</td>'+cols.map(c=>'<td class="r">'+(r[c.key]?'₹'+escH(fmt(r[c.key])):'')+'</td>').join('')+'</tr>';});
-  h+='</tbody></table>';
-  const ft=[ph?'📞 '+escH(ph):'',ad?'📍 '+escH(ad):''].filter(Boolean).join(' &nbsp;•&nbsp; ');
-  if(ft)h+='<div class="pf">'+ft+'</div>';
-  return h;
+  const shop=val('shop')||'Kirana Store',title=val('title')||T.today,vld=val('valid');
+  const foot=[val('phone')?'📞 '+val('phone'):'',val('addr')?'📍 '+val('addr'):''].filter(Boolean).join('   •   ');
+  const headH=190,footH=foot?70:20,hh=58,avail=PH-M*2-headH-footH-hh;
+  const rowH=Math.max(40,Math.min(64,avail/Math.max(1,rates.length)));
+  const per=Math.max(1,Math.floor(avail/rowH)),pages=[];
+  const rateW=250,numW=70,tx0=M,tx1=PW-M,prodR=tx1-rateW*cols.length;
+  const fs=Math.round(Math.min(34,rowH*0.56));
+  for(let p0=0;p0<Math.max(1,rates.length);p0+=per){
+    const c=document.createElement('canvas');c.width=PW;c.height=PH;const g=c.getContext('2d');
+    g.fillStyle='#fff';g.fillRect(0,0,PW,PH);g.fillStyle='#000';g.textBaseline='middle';
+    // head: logo + dukaan
+    let nx=PW/2;g.font='900 64px '+F;
+    const sw=Math.min(g.measureText(shop).width,PW-2*M-140);
+    if(logo&&logo.complete&&logo.naturalWidth){const lx=PW/2-sw/2-110;
+      g.save();g.beginPath();g.arc(lx+45,M+50,45,0,7);g.clip();g.drawImage(logo,lx,M+5,90,90);g.restore();nx=PW/2+55;}
+    g.textAlign='center';g.font='900 '+fitTextC(g,shop,PW-2*M-140,64,'900')+'px '+F;g.fillText(shop,nx,M+50);
+    g.fillRect(M,M+110,PW-2*M,4);
+    g.font='800 34px '+F;g.textAlign='left';g.fillText(title,M,M+150);
+    g.textAlign='right';g.fillText(vld,PW-M,M+150);
+    // table head
+    let y=M+headH;
+    g.fillStyle='#e6e6e6';g.fillRect(tx0,y,tx1-tx0,hh);g.fillStyle='#000';
+    g.font='800 30px '+F;g.textAlign='center';g.fillText('#',tx0+numW/2,y+hh/2);
+    g.textAlign='left';g.fillText(T.product,tx0+numW+16,y+hh/2);
+    g.textAlign='right';cols.forEach((cc,i)=>g.fillText(cc.label,prodR+rateW*(i+1)-18,y+hh/2));
+    const rows=rates.slice(p0,p0+per),top=y;y+=hh;
+    rows.forEach((r,i)=>{
+      if(i%2){g.fillStyle='#f3f3f3';g.fillRect(tx0,y,tx1-tx0,rowH);g.fillStyle='#000';}
+      g.font='600 '+Math.round(fs*0.85)+'px '+F;g.textAlign='center';g.fillText(String(p0+i+1),tx0+numW/2,y+rowH/2);
+      g.textAlign='left';g.font='700 '+fitTextC(g,r.name,prodR-tx0-numW-30,fs,'700')+'px '+F;g.fillText(r.name,tx0+numW+16,y+rowH/2);
+      g.textAlign='right';g.font='800 '+fs+'px '+F;
+      cols.forEach((cc,ci)=>{if(r[cc.key])g.fillText('₹'+fmt(r[cc.key]),prodR+rateW*(ci+1)-18,y+rowH/2);});
+      y+=rowH;
+    });
+    // lines
+    g.strokeStyle='#000';g.lineWidth=2;g.strokeRect(tx0,top,tx1-tx0,y-top);
+    g.beginPath();[tx0+numW,...cols.map((_,i)=>prodR+rateW*i)].forEach(x=>{g.moveTo(x,top);g.lineTo(x,y);});
+    for(let k=0;k<=rows.length;k++){g.moveTo(tx0,top+hh+k*rowH);g.lineTo(tx1,top+hh+k*rowH);}
+    g.stroke();
+    if(foot){g.font='700 30px '+F;g.textAlign='center';g.fillText(foot,PW/2,Math.min(PH-M+10,y+50));}
+    pages.push(c);
+  }
+  return pages;
 }
+function fitTextC(g,t,maxW,base,wt){let s=base;g.font=wt+' '+s+'px '+F;while(g.measureText(t).width>maxW&&s>14){s-=2;g.font=wt+' '+s+'px '+F;}return s;}
+function pdfName(base){const d=new Date();return base+'-'+d.getDate()+'-'+(d.getMonth()+1)+'-'+d.getFullYear()+'.pdf';}
 document.getElementById('printTable').onclick=()=>{
   if(!readRates().length){alert('Pehle Bhav List me item daalo.');return;}
-  recordHistory();printHtml(rateTableHtml());
+  recordHistory();saveBlob(makePdf(rateTablePages()),pdfName('bhav-list'));
 };
 document.getElementById('printPoster').onclick=()=>{
-  recordHistory();printHtml('<img class="poster" src="'+cv.toDataURL('image/png')+'" alt="poster">');
+  recordHistory();saveBlob(makePdf([cv]),pdfName(fileName().replace('.png','')+'-poster'));
+};
+document.getElementById('sharePdf').onclick=async()=>{
+  if(layout==='ratelist'&&!readRates().length){alert('Pehle Bhav List me item daalo.');return;}
+  const name=layout==='ratelist'?pdfName('bhav-list'):pdfName(fileName().replace('.png',''));
+  const blob=makePdf(layout==='ratelist'?rateTablePages():[cv]),file=new File([blob],name,{type:'application/pdf'});
+  if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:name});}catch(e){if(!e||e.name!=='AbortError')saveBlob(blob,name);}
+  }else saveBlob(blob,name);
 };
 
 const HKEY='kirana_hist';
@@ -2952,7 +2987,7 @@ if(isIOS && !isStandalone && !lsGet('kp_ioshint_off')){iosHint.style.display='';
 document.getElementById('iosHintX').onclick=()=>{iosHint.style.display='none';lsSet('kp_ioshint_off',1);};
 
 /* ---------- 🔄 Refresh + naya version check ---------- */
-const APP_VERSION='1.19';
+const APP_VERSION='1.20';
 async function hardRefresh(){
   const b=document.getElementById('refreshBtn');b.textContent='⏳';b.disabled=true;
   try{
