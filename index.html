@@ -83,7 +83,7 @@ canvas#cv{width:100%;border-radius:12px;border:2px solid var(--haldi);display:bl
 details.aiset{margin-top:12px;border:1px dashed rgba(242,179,61,.5);border-radius:10px;padding:8px 10px}
 details.aiset summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--haldi)}
 details.aiset a{color:var(--haldi)}
-#dlBoth{width:100%;margin-top:8px;padding:11px;border-radius:10px;border:1px solid var(--haldi);background:transparent;color:var(--haldi);font-size:14px;font-weight:800;cursor:pointer}
+#dlBoth,.pbtn{width:100%;margin-top:8px;padding:11px;border-radius:10px;border:1px solid var(--haldi);background:transparent;color:var(--haldi);font-size:14px;font-weight:800;cursor:pointer}
 .hint{font-size:11px;opacity:.7;margin-top:8px;text-align:center}
 .warn{font-size:12px;color:#FFD34D;background:rgba(255,211,77,.12);border-radius:8px;padding:8px;margin-top:8px}
 .rate-head{display:flex;gap:6px;margin-bottom:8px;align-items:flex-end}
@@ -232,7 +232,7 @@ html[data-ui="soft"] option{background:#E6E9EF;color:#3B4252}
 html[data-ui="soft"] .seg button{background:#E6E9EF;color:#3B4252;border:none;border-radius:14px;box-shadow:5px 5px 10px #C3C7CF,-5px -5px 10px #fff}
 html[data-ui="soft"] .seg button.active{color:#B3261E;box-shadow:var(--in);background:#E6E9EF}
 html[data-ui="soft"] .photo-btn,html[data-ui="soft"] .add-row{border:none;border-radius:14px;box-shadow:5px 5px 10px #C3C7CF,-5px -5px 10px #fff;color:#B3261E}
-html[data-ui="soft"] #dl,html[data-ui="soft"] #share,html[data-ui="soft"] #dlBoth{border:none;border-radius:16px;box-shadow:var(--out)}
+html[data-ui="soft"] #dl,html[data-ui="soft"] #share,html[data-ui="soft"] #dlBoth,html[data-ui="soft"] .pbtn{border:none;border-radius:16px;box-shadow:var(--out)}
 html[data-ui="soft"] #dl{background:#B3261E;color:#fff}
 html[data-ui="soft"] #smartInfo,html[data-ui="soft"] .chk{background:#E6E9EF;box-shadow:var(--in)}
 html[data-ui="soft"] canvas#cv{border:none;border-radius:18px;box-shadow:var(--out)}
@@ -246,6 +246,30 @@ html[data-ui="soft"] #devStatus{color:#B45309}
 html[data-ui="soft"] .warnTxt{color:#B45309!important}
 /* Smart ka 'Pehchana…' sandesh nahi dikhana (Smart rang apne aap lagta rahega) */
 #smartInfo{display:none!important}
+/* 🖨️ Print / PDF */
+.print-row{display:flex;gap:8px}
+#printArea{display:none}
+@media print{
+  @page{size:A4;margin:10mm}
+  html,body{background:#fff!important;margin:0!important;padding:0!important;width:auto!important;min-width:0!important;max-width:none!important;height:auto!important;min-height:0!important;overflow:visible!important}
+  #printArea{width:100%;box-sizing:border-box}
+  #printArea *{box-sizing:border-box}
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block!important;color:#000;font-family:'Noto Sans Devanagari','Mukta','Hind',Arial,sans-serif}
+  #printArea .ph{display:flex;align-items:center;justify-content:center;gap:12px;border-bottom:2px solid #000;padding-bottom:6px;margin-bottom:6px}
+  #printArea .ph img{width:56px;height:56px;object-fit:contain;border-radius:50%}
+  #printArea .ph h1{margin:0;font-size:24pt;line-height:1.1}
+  #printArea .pt{display:flex;justify-content:space-between;align-items:baseline;margin:4px 0 8px;font-size:13pt;font-weight:800}
+  #printArea table{width:100%;border-collapse:collapse;font-size:13pt}
+  #printArea th,#printArea td{border:1px solid #000;padding:5px 9px}
+  #printArea th{background:#eee;font-weight:800;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #printArea td.n{width:34px;text-align:center}
+  #printArea td.r,#printArea th.r{text-align:right;width:22%;font-weight:700;white-space:nowrap}
+  #printArea tr{break-inside:avoid}
+  #printArea tbody tr:nth-child(even) td{background:#f6f6f6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #printArea .pf{margin-top:10px;text-align:center;font-size:12pt;font-weight:700}
+  #printArea img.poster{display:block;margin:0 auto;max-width:100%;max-height:265mm;object-fit:contain;break-inside:avoid}
+}
 </style>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#7A1612">
@@ -258,7 +282,7 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
 <body>
 <header>
   <div class="mark" id="hdrMark">K</div>
-  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.18</b></p></div>
+  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.19</b></p></div>
   <div class="hbtns">
     <button id="refreshBtn" title="Naya version laao / page refresh">🔄 Refresh</button>
     <button id="logoOpen" title="Dukaan ka logo"><img id="logoMini" alt="" style="display:none">🏷️ Logo</button>
@@ -486,6 +510,11 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
       <button id="share">📤 Share</button>
     </div>
     <button id="dlBoth">⬇ Dono size ek saath (Post + Status)</button>
+    <div class="print-row">
+      <button class="pbtn" id="printTable">🖨️ Table Print/PDF</button>
+      <button class="pbtn" id="printPoster">🖨️ Poster Print/PDF</button>
+    </div>
+    <p class="hint" id="printHint">Print me printer chuno — ya <b>“Save as PDF”</b> chuno to PDF ban jayegi.</p>
     <p class="hint">Download karke seedha WhatsApp Channel pe post karo</p>
   </div>
 
@@ -1459,7 +1488,7 @@ function paintOffer(t){
 }
 
 /* ---------- RATE LIST layout ---------- */
-const ROWS_TOP=328+64+12,SPLIT_N=30,MAX_ROWS=80;
+const ROWS_TOP=328+64+12,SPLIT_N=32,MAX_ROWS=80;
 function cleanRate(v){return String(v).replace(/₹|rs\.?|\/-/gi,'').trim();}
 function readRates(){
   const out=[];
@@ -2012,7 +2041,9 @@ function setActive(sel,attr,v){
 /* Ankush Kirana ki apni bhav list — sirf naam, rate roz khud bharo */
 const MY_NAMES=['चनादाळ','मुगदाळ','मठदाळ','तूरदाळ','मठ','हराभरा तांदूळ','बाजिगर तांदूळ','बेसन 200','बेसन 500',
   'दाळ्या A 1','मसूर दाळ','पोहा 1 kg','पोहा 500','सफेद दाळ','काळी दाळ','भगर','साबुदाणा','सोयावडी 5 kg',
-  'रवा 1 kg','रवा 500gm','मैदा 1 kg','मैदा 500gm','टाटा नमक 1 kg','आटा 5 kg'];
+  'रवा 1 kg','रवा 500gm','मैदा 1 kg','मैदा 500gm','टाटा नमक 1 kg','आटा 5 kg',
+  'पांचतारा तांदूळ','कोलम मोर तांदूळ','जेमिनी तेल 1 ltr','जेमिनी तेल 500 ml','जेमिनी तेल 200 ml','जेमिनी तेल 2 kg','जेमिनी तेल 5 kg'];
+const NEW_NAMES_V2=['पांचतारा तांदूळ','कोलम मोर तांदूळ','जेमिनी तेल 1 ltr','जेमिनी तेल 500 ml','जेमिनी तेल 200 ml','जेमिनी तेल 2 kg','जेमिनी तेल 5 kg'];
 const NKEY='kp_def_names',OLD_DEF=['Basmati Chawal','Shakkar (Sugar)','Aata (Gehu)','Toor Dal'];
 function defNames(){const n=lsGet(NKEY);return Array.isArray(n)&&n.length?n:MY_NAMES;}
 function defRows(){return defNames().map(n=>({n:n,a:'',b:''}));}
@@ -2045,6 +2076,15 @@ function applyState(d){
     lsSet('kp_mylist_v1',1);
     const demo=rows.every(r=>OLD_DEF.includes((Array.isArray(r.e)?r.e[0]:r.n||'').trim())||!(r.n||'').trim());
     if(demo)rows=defRows();
+  }
+  // ek baar (v1.19): nayi items (पांचतारा, कोलम मोर, जेमिनी तेल…) list ke aakhir me jod do
+  if(!lsGet('kp_mylist_v2')){
+    lsSet('kp_mylist_v2',1);
+    const has=new Set(rows.map(r=>(r.n||'').trim()));
+    const add=NEW_NAMES_V2.filter(n=>!has.has(n));
+    if(add.length)rows=rows.concat(add.map(n=>({n:n,a:'',b:''})));
+    const dn=lsGet(NKEY);
+    if(Array.isArray(dn)&&dn.length)lsSet(NKEY,dn.concat(NEW_NAMES_V2.filter(n=>!dn.includes(n))));
   }
   setRows(rows);
   // validity: pehle auto date thi to aaj ki date, warna jo likha tha wahi
@@ -2086,7 +2126,10 @@ const SUG_ALIAS={'चनादाळ':'chana dal chanadal chana','मुगद�
   'मठ':'math moth matki','हराभरा तांदूळ':'harabhara tandul rice chawal','बाजिगर तांदूळ':'bajigar tandul rice chawal','बेसन 200':'besan 200','बेसन 500':'besan 500',
   'दाळ्या A 1':'dalya daliya a1','मसूर दाळ':'masoor dal masur','पोहा 1 kg':'poha pohe 1 kg','पोहा 500':'poha pohe 500','सफेद दाळ':'safed dal white urad',
   'काळी दाळ':'kali dal black urad','भगर':'bhagar varai','साबुदाणा':'sabudana sago','सोयावडी 5 kg':'soyavadi soya chunks badi 5 kg','रवा 1 kg':'rava rawa suji sooji 1 kg',
-  'रवा 500gm':'rava rawa suji sooji 500gm','मैदा 1 kg':'maida 1 kg','मैदा 500gm':'maida 500gm','टाटा नमक 1 kg':'tata namak salt 1 kg','आटा 5 kg':'aata atta flour 5 kg'};
+  'रवा 500gm':'rava rawa suji sooji 500gm','मैदा 1 kg':'maida 1 kg','मैदा 500gm':'maida 500gm','टाटा नमक 1 kg':'tata namak salt 1 kg','आटा 5 kg':'aata atta flour 5 kg',
+  'पांचतारा तांदूळ':'panchtara pachtara tandul rice chawal','कोलम मोर तांदूळ':'kolam mor tandul rice chawal',
+  'जेमिनी तेल 1 ltr':'gemini tel oil 1 ltr litre liter','जेमिनी तेल 500 ml':'gemini tel oil 500 ml','जेमिनी तेल 200 ml':'gemini tel oil 200 ml',
+  'जेमिनी तेल 2 kg':'gemini tel oil 2 kg','जेमिनी तेल 5 kg':'gemini tel oil 5 kg'};
 function sugEntries(){
   const seen={},out=[];
   const add=(n,alias)=>{n=String(n||'').trim();if(!n||n==='—'||seen[n.toLowerCase()])return;seen[n.toLowerCase()]=1;out.push({n:n,a:alias||'',k:(n+' '+(alias||'')).toLowerCase()});};
@@ -2249,6 +2292,7 @@ function applyLayout(fromUser){
   show('aiCard', L==='ai');
   show('grpFest', L==='festival');
   show('rateCard', L==='ratelist');
+  show('printTable', L==='ratelist');
   show('comboCard', L==='combo');
   const lx=document.getElementById('lblExtra');
   if(lx)lx.textContent=(L==='single')?'Tagline (niche wali ribbon)':'Extra line (optional)';
@@ -2438,7 +2482,10 @@ const PIMG_PROMPT={'चनादाळ':'heap of yellow split chickpea chana dal
   'काळी दाळ':'heap of whole black urad dal lentils','भगर':'heap of barnyard millet bhagar grains','साबुदाणा':'heap of white sago pearls sabudana',
   'सोयावडी 5 kg':'heap of dry soya chunks','रवा 1 kg':'heap of semolina sooji rava','रवा 500gm':'heap of semolina sooji rava',
   'मैदा 1 kg':'bowl of white refined wheat flour maida','मैदा 500gm':'bowl of white refined wheat flour maida',
-'टाटा नमक 1 kg':'bowl of white iodised salt','आटा 5 kg':'bowl of whole wheat flour atta'};
+'टाटा नमक 1 kg':'bowl of white iodised salt','आटा 5 kg':'bowl of whole wheat flour atta',
+  'पांचतारा तांदूळ':'heap of long grain white rice','कोलम मोर तांदूळ':'heap of short grain white kolam rice',
+  'जेमिनी तेल 1 ltr':'bottle of golden sunflower cooking oil','जेमिनी तेल 500 ml':'bottle of golden sunflower cooking oil','जेमिनी तेल 200 ml':'bottle of golden sunflower cooking oil',
+  'जेमिनी तेल 2 kg':'jar of golden sunflower cooking oil','जेमिनी तेल 5 kg':'large jar of golden sunflower cooking oil'};
 const PIMG_SUFFIX=', top view close-up, natural daylight, food photography, high detail, plain background, no text, no packaging, no logo';
 const PHOTO_LAYOUTS=['offer','single','ai'];
 let imgFor='',pimgBusy={};
@@ -2731,6 +2778,39 @@ document.getElementById('dlBoth').onclick=async()=>{
   out.forEach((o,i)=>setTimeout(()=>saveBlob(o.b,o.n),i*700));
 };
 
+/* ---------- 🖨️ Print / PDF (A4) — table saaf, kam ink; poster jaisa bhi ---------- */
+function escH(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function printHtml(html){
+  let a=document.getElementById('printArea');
+  if(!a){a=document.createElement('div');a.id='printArea';document.body.appendChild(a);}
+  a.innerHTML=html;
+  const imgs=[...a.querySelectorAll('img')].map(i=>i.decode?i.decode().catch(()=>{}):null);
+  Promise.all(imgs).then(()=>setTimeout(()=>window.print(),60));
+}
+window.addEventListener('afterprint',()=>{const a=document.getElementById('printArea');if(a)a.innerHTML='';});
+function rateTableHtml(){
+  const T=LBL(),rates=readRates();
+  const cols=[];
+  if(rates.some(r=>r.r1))cols.push({label:val('unit1')||'30 Kg',key:'r1'});
+  if(rates.some(r=>r.r2))cols.push({label:val('unit2')||'1 Kg',key:'r2'});
+  const shop=val('shop'),title=val('title')||T.today,vld=val('valid'),ph=val('phone'),ad=val('addr');
+  let h='<div class="ph">'+(logo&&logo.src?'<img src="'+logo.src+'" alt="">':'')+'<h1>'+escH(shop||'Kirana Store')+'</h1></div>';
+  h+='<div class="pt"><span>'+escH(title)+'</span><span>'+escH(vld)+'</span></div>';
+  h+='<table><thead><tr><th>#</th><th style="text-align:left">'+escH(T.product)+'</th>'+cols.map(c=>'<th class="r">'+escH(c.label)+'</th>').join('')+'</tr></thead><tbody>';
+  rates.forEach((r,i)=>{h+='<tr><td class="n">'+(i+1)+'</td><td>'+escH(r.name)+'</td>'+cols.map(c=>'<td class="r">'+(r[c.key]?'₹'+escH(fmt(r[c.key])):'')+'</td>').join('')+'</tr>';});
+  h+='</tbody></table>';
+  const ft=[ph?'📞 '+escH(ph):'',ad?'📍 '+escH(ad):''].filter(Boolean).join(' &nbsp;•&nbsp; ');
+  if(ft)h+='<div class="pf">'+ft+'</div>';
+  return h;
+}
+document.getElementById('printTable').onclick=()=>{
+  if(!readRates().length){alert('Pehle Bhav List me item daalo.');return;}
+  recordHistory();printHtml(rateTableHtml());
+};
+document.getElementById('printPoster').onclick=()=>{
+  recordHistory();printHtml('<img class="poster" src="'+cv.toDataURL('image/png')+'" alt="poster">');
+};
+
 const HKEY='kirana_hist';
 function recordHistory(){
   const st=getState();delete st.f.valid;
@@ -2825,6 +2905,7 @@ document.getElementById('setupSave').onclick=()=>{
 
 /* saved data restore */
 loadAll();
+if(lsGet(SKEY))saveAll();   // ek-baar wale badlav (nayi items) turant save
 setLogo(lsGet(LKEY));
 refreshDatalist();
 refreshBhavHist();
@@ -2867,7 +2948,7 @@ if(isIOS && !isStandalone && !lsGet('kp_ioshint_off')){iosHint.style.display='';
 document.getElementById('iosHintX').onclick=()=>{iosHint.style.display='none';lsSet('kp_ioshint_off',1);};
 
 /* ---------- 🔄 Refresh + naya version check ---------- */
-const APP_VERSION='1.18';
+const APP_VERSION='1.19';
 async function hardRefresh(){
   const b=document.getElementById('refreshBtn');b.textContent='⏳';b.disabled=true;
   try{
