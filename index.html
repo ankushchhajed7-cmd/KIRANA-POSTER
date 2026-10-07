@@ -266,6 +266,10 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
   #printArea td.n{width:34px;text-align:center}
   #printArea td.r,#printArea th.r{text-align:right;width:22%;font-weight:700;white-space:nowrap}
   #printArea tr{break-inside:avoid}
+  #printArea table.cmp{font-size:11.5pt}
+  #printArea table.cmp th,#printArea table.cmp td{padding:3px 8px}
+  #printArea table.cmp2{font-size:10pt}
+  #printArea table.cmp2 th,#printArea table.cmp2 td{padding:2px 8px}
   #printArea tbody tr:nth-child(even) td{background:#f6f6f6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   #printArea .pf{margin-top:10px;text-align:center;font-size:12pt;font-weight:700}
   #printArea img.poster{display:block;margin:0 auto;max-width:100%;max-height:265mm;object-fit:contain;break-inside:avoid}
@@ -2796,7 +2800,7 @@ function rateTableHtml(){
   const shop=val('shop'),title=val('title')||T.today,vld=val('valid'),ph=val('phone'),ad=val('addr');
   let h='<div class="ph">'+(logo&&logo.src?'<img src="'+logo.src+'" alt="">':'')+'<h1>'+escH(shop||'Kirana Store')+'</h1></div>';
   h+='<div class="pt"><span>'+escH(title)+'</span><span>'+escH(vld)+'</span></div>';
-  h+='<table><thead><tr><th>#</th><th style="text-align:left">'+escH(T.product)+'</th>'+cols.map(c=>'<th class="r">'+escH(c.label)+'</th>').join('')+'</tr></thead><tbody>';
+  h+='<table'+(rates.length>40?' class="cmp2"':rates.length>26?' class="cmp"':'')+'><thead><tr><th>#</th><th style="text-align:left">'+escH(T.product)+'</th>'+cols.map(c=>'<th class="r">'+escH(c.label)+'</th>').join('')+'</tr></thead><tbody>';
   rates.forEach((r,i)=>{h+='<tr><td class="n">'+(i+1)+'</td><td>'+escH(r.name)+'</td>'+cols.map(c=>'<td class="r">'+(r[c.key]?'₹'+escH(fmt(r[c.key])):'')+'</td>').join('')+'</tr>';});
   h+='</tbody></table>';
   const ft=[ph?'📞 '+escH(ph):'',ad?'📍 '+escH(ad):''].filter(Boolean).join(' &nbsp;•&nbsp; ');
