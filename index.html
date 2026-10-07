@@ -260,7 +260,7 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
 <body>
 <header>
   <div class="mark" id="hdrMark">K</div>
-  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.21</b></p></div>
+  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.22</b></p></div>
   <div class="hbtns">
     <button id="refreshBtn" title="Naya version laao / page refresh">🔄 Refresh</button>
     <button id="logoOpen" title="Dukaan ka logo"><img id="logoMini" alt="" style="display:none">🏷️ Logo</button>
@@ -1469,6 +1469,8 @@ function paintOffer(t){
 /* ---------- RATE LIST layout ---------- */
 const ROWS_TOP=328+64+12,SPLIT_N=32,MAX_ROWS=80;
 function cleanRate(v){return String(v).replace(/₹|rs\.?|\/-/gi,'').trim();}
+/* poster aur PDF me sirf woh items jinka rate bhara hai */
+function ratedRates(){return readRates().filter(r=>r.r1||r.r2);}
 function readRates(){
   const out=[];
   document.querySelectorAll('#rateRows .rate-row').forEach(r=>{
@@ -1526,7 +1528,7 @@ function paintRateList(t){
   ctx.fillText(perm,W/2,275);
   ctx.restore();
 
-  const rates=readRates();
+  const rates=ratedRates();
   const u1=(val('unit1')||'30 Kg').toUpperCase();
   const u2=(val('unit2')||'1 Kg').toUpperCase();
   const L=72,R=W-72;
@@ -1539,7 +1541,7 @@ function paintRateList(t){
     rateTable(t,L,R,328,[],0,0,cols,false);
     ctx.fillStyle=t.txt;ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.font='600 32px '+F;
-    ctx.fillText('Bhav list add karo →',W/2,560);
+    ctx.fillText(readRates().length?'Rate bharo → (khaali rate wale item poster pe nahi aate)':'Bhav list add karo →',W/2,560);
     return;
   }
   const split=n>SPLIT_N,per=split?Math.ceil(n/2):n;
@@ -1921,7 +1923,7 @@ function posterH(fh){
   if(size==='status')return 1920-fh;       // status hamesha 9:16 rahe — footer andar hi
   if(layout==='ai')return 1350;            // 4:5 — Instagram/WhatsApp pe poora dikhe
   if(layout!=='ratelist')return 1080;
-  const n=readRates().length,per=n>SPLIT_N?Math.ceil(n/2):n;
+  const n=ratedRates().length,per=n>SPLIT_N?Math.ceil(n/2):n;
   const need=ROWS_TOP+per*ROW_TARGET+FOOT;
   return Math.max(1080,Math.min(1920,Math.round(need)));
 }
@@ -2207,7 +2209,7 @@ document.getElementById('bhavHist').addEventListener('change',e=>{
   if(autoDevOn())devAll();
 });
 function updateRateWarn(){
-  const w=document.getElementById('rateWarn'),n=layout==='ratelist'?readRates().length:0;
+  const w=document.getElementById('rateWarn'),n=layout==='ratelist'?ratedRates().length:0;
   w.style.display=n>MAX_ROWS?'':'none';
   if(n>MAX_ROWS)w.textContent='⚠️ '+n+' products hain — text bahut chhota ho jayega. 80 se kam rakho ya 2 alag poster banao.';
 }
@@ -2782,11 +2784,9 @@ function makePdf(canvases){
   put(x+'trailer\n<< /Size '+total+' /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF');
   return new Blob(parts,{type:'application/pdf'});
 }
-/* PDF me sirf woh items jinka rate bhara hai */
-function pdfRates(){return readRates().filter(r=>r.r1||r.r2);}
 /* Bhav table A4 canvas pages (150 dpi) — safed kagaz, kaale akshar, kam ink */
 function rateTablePages(){
-  const T=LBL(),rates=pdfRates(),PW=1240,PH=1754,M=70;
+  const T=LBL(),rates=ratedRates(),PW=1240,PH=1754,M=70;
   const cols=[];
   if(rates.some(r=>r.r1))cols.push({label:val('unit1')||'30 Kg',key:'r1'});
   if(rates.some(r=>r.r2))cols.push({label:val('unit2')||'1 Kg',key:'r2'});
@@ -2837,14 +2837,14 @@ function rateTablePages(){
 function fitTextC(g,t,maxW,base,wt){let s=base;g.font=wt+' '+s+'px '+F;while(g.measureText(t).width>maxW&&s>14){s-=2;g.font=wt+' '+s+'px '+F;}return s;}
 function pdfName(base){const d=new Date();return base+'-'+d.getDate()+'-'+(d.getMonth()+1)+'-'+d.getFullYear()+'.pdf';}
 document.getElementById('printTable').onclick=()=>{
-  if(!pdfRates().length){alert('Pehle Bhav List me rate bharo — PDF me sirf rate wale items aate hain.');return;}
+  if(!ratedRates().length){alert('Pehle Bhav List me rate bharo — PDF me sirf rate wale items aate hain.');return;}
   recordHistory();saveBlob(makePdf(rateTablePages()),pdfName('bhav-list'));
 };
 document.getElementById('printPoster').onclick=()=>{
   recordHistory();saveBlob(makePdf([cv]),pdfName(fileName().replace('.png','')+'-poster'));
 };
 document.getElementById('sharePdf').onclick=async()=>{
-  if(layout==='ratelist'&&!pdfRates().length){alert('Pehle Bhav List me rate bharo — PDF me sirf rate wale items aate hain.');return;}
+  if(layout==='ratelist'&&!ratedRates().length){alert('Pehle Bhav List me rate bharo — PDF me sirf rate wale items aate hain.');return;}
   const name=layout==='ratelist'?pdfName('bhav-list'):pdfName(fileName().replace('.png',''));
   const blob=makePdf(layout==='ratelist'?rateTablePages():[cv]),file=new File([blob],name,{type:'application/pdf'});
   if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
@@ -2989,7 +2989,7 @@ if(isIOS && !isStandalone && !lsGet('kp_ioshint_off')){iosHint.style.display='';
 document.getElementById('iosHintX').onclick=()=>{iosHint.style.display='none';lsSet('kp_ioshint_off',1);};
 
 /* ---------- 🔄 Refresh + naya version check ---------- */
-const APP_VERSION='1.21';
+const APP_VERSION='1.22';
 async function hardRefresh(){
   const b=document.getElementById('refreshBtn');b.textContent='⏳';b.disabled=true;
   try{
