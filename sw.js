@@ -1,5 +1,5 @@
 /* Kirana Poster Maker - service worker (network-first) */
-const CACHE='kirana-poster-v20';
+const CACHE='kirana-poster-v21';
 
 self.addEventListener('install',e=>{
   self.skipWaiting();
