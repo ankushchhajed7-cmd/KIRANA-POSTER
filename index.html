@@ -154,9 +154,14 @@ option{background:#4A0C0A;color:#F7EFD9}
 .logo-row img{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--haldi);background:#fff}
 .logo-row .photo-btn{flex:1}
 #histList{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
-#histList button{flex:0 0 auto;padding:0;border:2px solid rgba(242,179,61,.5);border-radius:8px;background:none;cursor:pointer;overflow:hidden}
+#histList .hitem{flex:0 0 auto;position:relative}
+#histList .hopen{padding:0;border:2px solid rgba(242,179,61,.5);border-radius:8px;background:none;cursor:pointer;overflow:hidden}
 #histList img{display:block;width:84px;height:auto}
 #histList small{display:block;font-size:10px;color:var(--cream);padding:3px 0;background:rgba(0,0,0,.35)}
+#histList .hdel{position:absolute;top:-6px;right:-6px;width:26px;height:26px;border-radius:50%;border:2px solid #fff;background:#C62828;color:#fff;font-size:13px;font-weight:900;line-height:1;padding:0;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+#histList{padding-top:8px;padding-right:8px}
+#histClear{margin-top:10px;padding:8px 14px;border-radius:10px;border:1px solid #C62828;background:transparent;color:#E57373;font-size:13px;font-weight:800;cursor:pointer}
+html[data-ui="soft"] #histClear,html[data-ui="classic"] #histClear{color:#C62828}
 #pageNav{position:sticky;top:0;z-index:15;background:var(--red-d);border-bottom:1px solid rgba(242,179,61,.35);box-shadow:0 4px 12px rgba(0,0,0,.35)}
 #laySeg{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px 14px;max-width:520px;margin:0 auto;scrollbar-width:none}
 #laySeg::-webkit-scrollbar{display:none}
@@ -260,7 +265,7 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
 <body>
 <header>
   <div class="mark" id="hdrMark">K</div>
-  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.22</b></p></div>
+  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.23</b></p></div>
   <div class="hbtns">
     <button id="refreshBtn" title="Naya version laao / page refresh">🔄 Refresh</button>
     <button id="logoOpen" title="Dukaan ka logo"><img id="logoMini" alt="" style="display:none">🏷️ Logo</button>
@@ -500,7 +505,8 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
   <div class="card" id="histCard" style="display:none">
     <h2>🕘 Pichhle posters</h2>
     <div id="histList"></div>
-    <p class="hint">Download/Share kiye poster yaha save hote hain — tap karo to wapas khul jayega (photo dobara daalni hogi).</p>
+    <p class="hint">Download/Share kiye poster yaha save hote hain — tap karo to wapas khul jayega (photo dobara daalni hogi). <b>✕</b> dabao to woh poster hat jayega.</p>
+    <button id="histClear">🗑️ Sab pichhle poster hatao</button>
   </div>
 </div>
 <div id="setupSheet" role="dialog" aria-label="Pehli baar setup">
@@ -2870,7 +2876,8 @@ function renderHistory(){
   document.getElementById('histCard').style.display=h.length?'':'none';
   box.innerHTML='';
   h.forEach(x=>{
-    const b=document.createElement('button'),d=new Date(x.ts);
+    const w=document.createElement('div'),b=document.createElement('button'),d=new Date(x.ts);
+    w.className='hitem';b.className='hopen';
     b.innerHTML='<img alt="poster"><small>'+d.getDate()+' '+MONTHS.en[d.getMonth()].slice(0,3)+'</small>';
     b.querySelector('img').src=x.thumb;
     b.onclick=()=>{
@@ -2881,9 +2888,21 @@ function renderHistory(){
       if(autoDevOn())devAll();
       document.getElementById('posterCard').scrollIntoView({behavior:'smooth'});
     };
-    box.appendChild(b);
+    const del=document.createElement('button');
+    del.className='hdel';del.textContent='✕';del.title='Yeh poster hatao';
+    del.onclick=e=>{
+      e.stopPropagation();
+      if(!confirm('Yeh pichhla poster hata dein?'))return;
+      lsSet(HKEY,(lsGet(HKEY)||[]).filter(y=>y.ts!==x.ts));renderHistory();
+    };
+    w.append(b,del);box.appendChild(w);
   });
 }
+document.getElementById('histClear').onclick=()=>{
+  if(!confirm('Saare pichhle posters hata dein? (Abhi wala poster aur bhav list nahi hategi)'))return;
+  try{localStorage.removeItem(HKEY);}catch(e){}
+  renderHistory();
+};
 
 /* AI: purana background + setting */
 (function(){
@@ -2989,7 +3008,7 @@ if(isIOS && !isStandalone && !lsGet('kp_ioshint_off')){iosHint.style.display='';
 document.getElementById('iosHintX').onclick=()=>{iosHint.style.display='none';lsSet('kp_ioshint_off',1);};
 
 /* ---------- 🔄 Refresh + naya version check ---------- */
-const APP_VERSION='1.22';
+const APP_VERSION='1.23';
 async function hardRefresh(){
   const b=document.getElementById('refreshBtn');b.textContent='⏳';b.disabled=true;
   try{
