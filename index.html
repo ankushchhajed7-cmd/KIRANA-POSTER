@@ -260,7 +260,7 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
 <body>
 <header>
   <div class="mark" id="hdrMark">K</div>
-  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.20</b></p></div>
+  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.21</b></p></div>
   <div class="hbtns">
     <button id="refreshBtn" title="Naya version laao / page refresh">🔄 Refresh</button>
     <button id="logoOpen" title="Dukaan ka logo"><img id="logoMini" alt="" style="display:none">🏷️ Logo</button>
@@ -2782,9 +2782,11 @@ function makePdf(canvases){
   put(x+'trailer\n<< /Size '+total+' /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF');
   return new Blob(parts,{type:'application/pdf'});
 }
+/* PDF me sirf woh items jinka rate bhara hai */
+function pdfRates(){return readRates().filter(r=>r.r1||r.r2);}
 /* Bhav table A4 canvas pages (150 dpi) — safed kagaz, kaale akshar, kam ink */
 function rateTablePages(){
-  const T=LBL(),rates=readRates(),PW=1240,PH=1754,M=70;
+  const T=LBL(),rates=pdfRates(),PW=1240,PH=1754,M=70;
   const cols=[];
   if(rates.some(r=>r.r1))cols.push({label:val('unit1')||'30 Kg',key:'r1'});
   if(rates.some(r=>r.r2))cols.push({label:val('unit2')||'1 Kg',key:'r2'});
@@ -2835,14 +2837,14 @@ function rateTablePages(){
 function fitTextC(g,t,maxW,base,wt){let s=base;g.font=wt+' '+s+'px '+F;while(g.measureText(t).width>maxW&&s>14){s-=2;g.font=wt+' '+s+'px '+F;}return s;}
 function pdfName(base){const d=new Date();return base+'-'+d.getDate()+'-'+(d.getMonth()+1)+'-'+d.getFullYear()+'.pdf';}
 document.getElementById('printTable').onclick=()=>{
-  if(!readRates().length){alert('Pehle Bhav List me item daalo.');return;}
+  if(!pdfRates().length){alert('Pehle Bhav List me rate bharo — PDF me sirf rate wale items aate hain.');return;}
   recordHistory();saveBlob(makePdf(rateTablePages()),pdfName('bhav-list'));
 };
 document.getElementById('printPoster').onclick=()=>{
   recordHistory();saveBlob(makePdf([cv]),pdfName(fileName().replace('.png','')+'-poster'));
 };
 document.getElementById('sharePdf').onclick=async()=>{
-  if(layout==='ratelist'&&!readRates().length){alert('Pehle Bhav List me item daalo.');return;}
+  if(layout==='ratelist'&&!pdfRates().length){alert('Pehle Bhav List me rate bharo — PDF me sirf rate wale items aate hain.');return;}
   const name=layout==='ratelist'?pdfName('bhav-list'):pdfName(fileName().replace('.png',''));
   const blob=makePdf(layout==='ratelist'?rateTablePages():[cv]),file=new File([blob],name,{type:'application/pdf'});
   if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
@@ -2987,7 +2989,7 @@ if(isIOS && !isStandalone && !lsGet('kp_ioshint_off')){iosHint.style.display='';
 document.getElementById('iosHintX').onclick=()=>{iosHint.style.display='none';lsSet('kp_ioshint_off',1);};
 
 /* ---------- 🔄 Refresh + naya version check ---------- */
-const APP_VERSION='1.20';
+const APP_VERSION='1.21';
 async function hardRefresh(){
   const b=document.getElementById('refreshBtn');b.textContent='⏳';b.disabled=true;
   try{
