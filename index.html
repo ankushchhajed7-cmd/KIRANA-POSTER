@@ -265,7 +265,7 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
 <body>
 <header>
   <div class="mark" id="hdrMark">K</div>
-  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.23</b></p></div>
+  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.24</b></p></div>
   <div class="hbtns">
     <button id="refreshBtn" title="Naya version laao / page refresh">🔄 Refresh</button>
     <button id="logoOpen" title="Dukaan ka logo"><img id="logoMini" alt="" style="display:none">🏷️ Logo</button>
@@ -2029,8 +2029,8 @@ function setActive(sel,attr,v){
 const MY_NAMES=['चनादाळ','मुगदाळ','मठदाळ','तूरदाळ','मठ','हराभरा तांदूळ','बाजिगर तांदूळ','बेसन 200','बेसन 500',
   'दाळ्या A 1','मसूर दाळ','पोहा 1 kg','पोहा 500','सफेद दाळ','काळी दाळ','भगर','साबुदाणा','सोयावडी 5 kg',
   'रवा 1 kg','रवा 500gm','मैदा 1 kg','मैदा 500gm','टाटा नमक 1 kg','आटा 5 kg',
-  'चांदतारा तांदूळ','कोलम मोर तांदूळ','जेमिनी तेल 1 ltr','जेमिनी तेल 500 ml','जेमिनी तेल 200 ml','जेमिनी तेल 2 kg','जेमिनी तेल 5 kg'];
-const NEW_NAMES_V2=['चांदतारा तांदूळ','कोलम मोर तांदूळ','जेमिनी तेल 1 ltr','जेमिनी तेल 500 ml','जेमिनी तेल 200 ml','जेमिनी तेल 2 kg','जेमिनी तेल 5 kg'];
+  'चांदतारा तांदूळ','कोलम मोर तांदूळ','मुरली तेल 1 ltr','मुरली तेल 500 ml','मुरली तेल 200 ml','मुरली तेल 2 kg','मुरली तेल 5 kg'];
+const NEW_NAMES_V2=['चांदतारा तांदूळ','कोलम मोर तांदूळ','मुरली तेल 1 ltr','मुरली तेल 500 ml','मुरली तेल 200 ml','मुरली तेल 2 kg','मुरली तेल 5 kg'];
 const NKEY='kp_def_names',OLD_DEF=['Basmati Chawal','Shakkar (Sugar)','Aata (Gehu)','Toor Dal'];
 function defNames(){const n=lsGet(NKEY);return Array.isArray(n)&&n.length?n:MY_NAMES;}
 function defRows(){return defNames().map(n=>({n:n,a:'',b:''}));}
@@ -2064,7 +2064,15 @@ function applyState(d){
     const demo=rows.every(r=>OLD_DEF.includes((Array.isArray(r.e)?r.e[0]:r.n||'').trim())||!(r.n||'').trim());
     if(demo)rows=defRows();
   }
-  // ek baar (v1.19): nayi items (चांदतारा, कोलम मोर, जेमिनी तेल…) list ke aakhir me jod do
+  // ek baar (v1.24): जेमिनी तेल → मुरली तेल (galat naam laga tha)
+  if(!lsGet('kp_mylist_v3')){
+    lsSet('kp_mylist_v3',1);
+    const fx=t=>typeof t==='string'?t.replace(/जेमिनी तेल/g,'मुरली तेल'):t;
+    rows=rows.map(r=>Object.assign({},r,{n:fx(r.n)},Array.isArray(r.e)?{e:r.e.map(fx)}:{}));
+    const dn=lsGet(NKEY);
+    if(Array.isArray(dn)&&dn.some(n=>/जेमिनी/.test(n)))lsSet(NKEY,dn.map(fx));
+  }
+  // ek baar (v1.19): nayi items (चांदतारा, कोलम मोर, मुरली तेल…) list ke aakhir me jod do
   if(!lsGet('kp_mylist_v2')){
     lsSet('kp_mylist_v2',1);
     const has=new Set(rows.map(r=>(r.n||'').trim()));
@@ -2115,8 +2123,8 @@ const SUG_ALIAS={'चनादाळ':'chana dal chanadal chana','मुगद�
   'काळी दाळ':'kali dal black urad','भगर':'bhagar varai','साबुदाणा':'sabudana sago','सोयावडी 5 kg':'soyavadi soya chunks badi 5 kg','रवा 1 kg':'rava rawa suji sooji 1 kg',
   'रवा 500gm':'rava rawa suji sooji 500gm','मैदा 1 kg':'maida 1 kg','मैदा 500gm':'maida 500gm','टाटा नमक 1 kg':'tata namak salt 1 kg','आटा 5 kg':'aata atta flour 5 kg',
   'चांदतारा तांदूळ':'chandtara chand tara tandul rice chawal','कोलम मोर तांदूळ':'kolam mor tandul rice chawal',
-  'जेमिनी तेल 1 ltr':'gemini tel oil 1 ltr litre liter','जेमिनी तेल 500 ml':'gemini tel oil 500 ml','जेमिनी तेल 200 ml':'gemini tel oil 200 ml',
-  'जेमिनी तेल 2 kg':'gemini tel oil 2 kg','जेमिनी तेल 5 kg':'gemini tel oil 5 kg'};
+  'मुरली तेल 1 ltr':'murli murali tel oil 1 ltr litre liter','मुरली तेल 500 ml':'murli murali tel oil 500 ml','मुरली तेल 200 ml':'murli murali tel oil 200 ml',
+  'मुरली तेल 2 kg':'murli murali tel oil 2 kg','मुरली तेल 5 kg':'murli murali tel oil 5 kg'};
 function sugEntries(){
   const seen={},out=[];
   const add=(n,alias)=>{n=String(n||'').trim();if(!n||n==='—'||seen[n.toLowerCase()])return;seen[n.toLowerCase()]=1;out.push({n:n,a:alias||'',k:(n+' '+(alias||'')).toLowerCase()});};
@@ -2471,8 +2479,8 @@ const PIMG_PROMPT={'चनादाळ':'heap of yellow split chickpea chana dal
   'मैदा 1 kg':'bowl of white refined wheat flour maida','मैदा 500gm':'bowl of white refined wheat flour maida',
 'टाटा नमक 1 kg':'bowl of white iodised salt','आटा 5 kg':'bowl of whole wheat flour atta',
   'चांदतारा तांदूळ':'heap of long grain white rice','कोलम मोर तांदूळ':'heap of short grain white kolam rice',
-  'जेमिनी तेल 1 ltr':'bottle of golden sunflower cooking oil','जेमिनी तेल 500 ml':'bottle of golden sunflower cooking oil','जेमिनी तेल 200 ml':'bottle of golden sunflower cooking oil',
-  'जेमिनी तेल 2 kg':'jar of golden sunflower cooking oil','जेमिनी तेल 5 kg':'large jar of golden sunflower cooking oil'};
+  'मुरली तेल 1 ltr':'bottle of golden sunflower cooking oil','मुरली तेल 500 ml':'bottle of golden sunflower cooking oil','मुरली तेल 200 ml':'bottle of golden sunflower cooking oil',
+  'मुरली तेल 2 kg':'jar of golden sunflower cooking oil','मुरली तेल 5 kg':'large jar of golden sunflower cooking oil'};
 const PIMG_SUFFIX=', top view close-up, natural daylight, food photography, high detail, plain background, no text, no packaging, no logo';
 const PHOTO_LAYOUTS=['offer','single','ai'];
 let imgFor='',pimgBusy={};
@@ -3008,7 +3016,7 @@ if(isIOS && !isStandalone && !lsGet('kp_ioshint_off')){iosHint.style.display='';
 document.getElementById('iosHintX').onclick=()=>{iosHint.style.display='none';lsSet('kp_ioshint_off',1);};
 
 /* ---------- 🔄 Refresh + naya version check ---------- */
-const APP_VERSION='1.23';
+const APP_VERSION='1.24';
 async function hardRefresh(){
   const b=document.getElementById('refreshBtn');b.textContent='⏳';b.disabled=true;
   try{
