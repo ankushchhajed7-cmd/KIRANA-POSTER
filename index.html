@@ -154,9 +154,14 @@ option{background:#4A0C0A;color:#F7EFD9}
 .logo-row img{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--haldi);background:#fff}
 .logo-row .photo-btn{flex:1}
 #histList{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
-#histList button{flex:0 0 auto;padding:0;border:2px solid rgba(242,179,61,.5);border-radius:8px;background:none;cursor:pointer;overflow:hidden}
+#histList .hitem{flex:0 0 auto;position:relative}
+#histList .hopen{padding:0;border:2px solid rgba(242,179,61,.5);border-radius:8px;background:none;cursor:pointer;overflow:hidden}
 #histList img{display:block;width:84px;height:auto}
 #histList small{display:block;font-size:10px;color:var(--cream);padding:3px 0;background:rgba(0,0,0,.35)}
+#histList .hdel{position:absolute;top:-6px;right:-6px;width:26px;height:26px;border-radius:50%;border:2px solid #fff;background:#C62828;color:#fff;font-size:13px;font-weight:900;line-height:1;padding:0;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+#histList{padding-top:8px;padding-right:8px}
+#histClear{margin-top:10px;padding:8px 14px;border-radius:10px;border:1px solid #C62828;background:transparent;color:#E57373;font-size:13px;font-weight:800;cursor:pointer}
+html[data-ui="soft"] #histClear,html[data-ui="classic"] #histClear{color:#C62828}
 #pageNav{position:sticky;top:0;z-index:15;background:var(--red-d);border-bottom:1px solid rgba(242,179,61,.35);box-shadow:0 4px 12px rgba(0,0,0,.35)}
 #laySeg{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px 14px;max-width:520px;margin:0 auto;scrollbar-width:none}
 #laySeg::-webkit-scrollbar{display:none}
@@ -260,7 +265,7 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
 <body>
 <header>
   <div class="mark" id="hdrMark">K</div>
-  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.22</b></p></div>
+  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.24</b></p></div>
   <div class="hbtns">
     <button id="refreshBtn" title="Naya version laao / page refresh">🔄 Refresh</button>
     <button id="logoOpen" title="Dukaan ka logo"><img id="logoMini" alt="" style="display:none">🏷️ Logo</button>
@@ -500,7 +505,8 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
   <div class="card" id="histCard" style="display:none">
     <h2>🕘 Pichhle posters</h2>
     <div id="histList"></div>
-    <p class="hint">Download/Share kiye poster yaha save hote hain — tap karo to wapas khul jayega (photo dobara daalni hogi).</p>
+    <p class="hint">Download/Share kiye poster yaha save hote hain — tap karo to wapas khul jayega (photo dobara daalni hogi). <b>✕</b> dabao to woh poster hat jayega.</p>
+    <button id="histClear">🗑️ Sab pichhle poster hatao</button>
   </div>
 </div>
 <div id="setupSheet" role="dialog" aria-label="Pehli baar setup">
@@ -2023,8 +2029,8 @@ function setActive(sel,attr,v){
 const MY_NAMES=['चनादाळ','मुगदाळ','मठदाळ','तूरदाळ','मठ','हराभरा तांदूळ','बाजिगर तांदूळ','बेसन 200','बेसन 500',
   'दाळ्या A 1','मसूर दाळ','पोहा 1 kg','पोहा 500','सफेद दाळ','काळी दाळ','भगर','साबुदाणा','सोयावडी 5 kg',
   'रवा 1 kg','रवा 500gm','मैदा 1 kg','मैदा 500gm','टाटा नमक 1 kg','आटा 5 kg',
-  'चांदतारा तांदूळ','कोलम मोर तांदूळ','जेमिनी तेल 1 ltr','जेमिनी तेल 500 ml','जेमिनी तेल 200 ml','जेमिनी तेल 2 kg','जेमिनी तेल 5 kg'];
-const NEW_NAMES_V2=['चांदतारा तांदूळ','कोलम मोर तांदूळ','जेमिनी तेल 1 ltr','जेमिनी तेल 500 ml','जेमिनी तेल 200 ml','जेमिनी तेल 2 kg','जेमिनी तेल 5 kg'];
+  'चांदतारा तांदूळ','डबल मोर तांदूळ','मुरली तेल 1 ltr','मुरली तेल 500 ml','मुरली तेल 200 ml','मुरली तेल 2 kg','मुरली तेल 5 kg'];
+const NEW_NAMES_V2=['चांदतारा तांदूळ','डबल मोर तांदूळ','मुरली तेल 1 ltr','मुरली तेल 500 ml','मुरली तेल 200 ml','मुरली तेल 2 kg','मुरली तेल 5 kg'];
 const NKEY='kp_def_names',OLD_DEF=['Basmati Chawal','Shakkar (Sugar)','Aata (Gehu)','Toor Dal'];
 function defNames(){const n=lsGet(NKEY);return Array.isArray(n)&&n.length?n:MY_NAMES;}
 function defRows(){return defNames().map(n=>({n:n,a:'',b:''}));}
@@ -2058,7 +2064,15 @@ function applyState(d){
     const demo=rows.every(r=>OLD_DEF.includes((Array.isArray(r.e)?r.e[0]:r.n||'').trim())||!(r.n||'').trim());
     if(demo)rows=defRows();
   }
-  // ek baar (v1.19): nayi items (चांदतारा, कोलम मोर, जेमिनी तेल…) list ke aakhir me jod do
+  // ek baar (v1.24): जेमिनी तेल → मुरली तेल, कोलम मोर → डबल मोर (galat naam lage the)
+  if(!lsGet('kp_mylist_v3')){
+    lsSet('kp_mylist_v3',1);
+    const fx=t=>typeof t==='string'?t.replace(/जेमिनी तेल/g,'मुरली तेल').replace(/^कोलम मोर तांदूळ$/,'डबल मोर तांदूळ'):t;
+    rows=rows.map(r=>Object.assign({},r,{n:fx(r.n)},Array.isArray(r.e)?{e:r.e.map(fx)}:{}));
+    const dn=lsGet(NKEY);
+    if(Array.isArray(dn)&&dn.some(n=>/जेमिनी|कोलम मोर/.test(n)))lsSet(NKEY,dn.map(fx));
+  }
+  // ek baar (v1.19): nayi items (चांदतारा, डबल मोर, मुरली तेल…) list ke aakhir me jod do
   if(!lsGet('kp_mylist_v2')){
     lsSet('kp_mylist_v2',1);
     const has=new Set(rows.map(r=>(r.n||'').trim()));
@@ -2108,9 +2122,9 @@ const SUG_ALIAS={'चनादाळ':'chana dal chanadal chana','मुगद�
   'दाळ्या A 1':'dalya daliya a1','मसूर दाळ':'masoor dal masur','पोहा 1 kg':'poha pohe 1 kg','पोहा 500':'poha pohe 500','सफेद दाळ':'safed dal white urad',
   'काळी दाळ':'kali dal black urad','भगर':'bhagar varai','साबुदाणा':'sabudana sago','सोयावडी 5 kg':'soyavadi soya chunks badi 5 kg','रवा 1 kg':'rava rawa suji sooji 1 kg',
   'रवा 500gm':'rava rawa suji sooji 500gm','मैदा 1 kg':'maida 1 kg','मैदा 500gm':'maida 500gm','टाटा नमक 1 kg':'tata namak salt 1 kg','आटा 5 kg':'aata atta flour 5 kg',
-  'चांदतारा तांदूळ':'chandtara chand tara tandul rice chawal','कोलम मोर तांदूळ':'kolam mor tandul rice chawal',
-  'जेमिनी तेल 1 ltr':'gemini tel oil 1 ltr litre liter','जेमिनी तेल 500 ml':'gemini tel oil 500 ml','जेमिनी तेल 200 ml':'gemini tel oil 200 ml',
-  'जेमिनी तेल 2 kg':'gemini tel oil 2 kg','जेमिनी तेल 5 kg':'gemini tel oil 5 kg'};
+  'चांदतारा तांदूळ':'chandtara chand tara tandul rice chawal','डबल मोर तांदूळ':'dabal double mor tandul rice chawal',
+  'मुरली तेल 1 ltr':'murli murali tel oil 1 ltr litre liter','मुरली तेल 500 ml':'murli murali tel oil 500 ml','मुरली तेल 200 ml':'murli murali tel oil 200 ml',
+  'मुरली तेल 2 kg':'murli murali tel oil 2 kg','मुरली तेल 5 kg':'murli murali tel oil 5 kg'};
 function sugEntries(){
   const seen={},out=[];
   const add=(n,alias)=>{n=String(n||'').trim();if(!n||n==='—'||seen[n.toLowerCase()])return;seen[n.toLowerCase()]=1;out.push({n:n,a:alias||'',k:(n+' '+(alias||'')).toLowerCase()});};
@@ -2464,9 +2478,9 @@ const PIMG_PROMPT={'चनादाळ':'heap of yellow split chickpea chana dal
   'सोयावडी 5 kg':'heap of dry soya chunks','रवा 1 kg':'heap of semolina sooji rava','रवा 500gm':'heap of semolina sooji rava',
   'मैदा 1 kg':'bowl of white refined wheat flour maida','मैदा 500gm':'bowl of white refined wheat flour maida',
 'टाटा नमक 1 kg':'bowl of white iodised salt','आटा 5 kg':'bowl of whole wheat flour atta',
-  'चांदतारा तांदूळ':'heap of long grain white rice','कोलम मोर तांदूळ':'heap of short grain white kolam rice',
-  'जेमिनी तेल 1 ltr':'bottle of golden sunflower cooking oil','जेमिनी तेल 500 ml':'bottle of golden sunflower cooking oil','जेमिनी तेल 200 ml':'bottle of golden sunflower cooking oil',
-  'जेमिनी तेल 2 kg':'jar of golden sunflower cooking oil','जेमिनी तेल 5 kg':'large jar of golden sunflower cooking oil'};
+  'चांदतारा तांदूळ':'heap of long grain white rice','डबल मोर तांदूळ':'heap of short grain white rice',
+  'मुरली तेल 1 ltr':'bottle of golden sunflower cooking oil','मुरली तेल 500 ml':'bottle of golden sunflower cooking oil','मुरली तेल 200 ml':'bottle of golden sunflower cooking oil',
+  'मुरली तेल 2 kg':'jar of golden sunflower cooking oil','मुरली तेल 5 kg':'large jar of golden sunflower cooking oil'};
 const PIMG_SUFFIX=', top view close-up, natural daylight, food photography, high detail, plain background, no text, no packaging, no logo';
 const PHOTO_LAYOUTS=['offer','single','ai'];
 let imgFor='',pimgBusy={};
@@ -2870,7 +2884,8 @@ function renderHistory(){
   document.getElementById('histCard').style.display=h.length?'':'none';
   box.innerHTML='';
   h.forEach(x=>{
-    const b=document.createElement('button'),d=new Date(x.ts);
+    const w=document.createElement('div'),b=document.createElement('button'),d=new Date(x.ts);
+    w.className='hitem';b.className='hopen';
     b.innerHTML='<img alt="poster"><small>'+d.getDate()+' '+MONTHS.en[d.getMonth()].slice(0,3)+'</small>';
     b.querySelector('img').src=x.thumb;
     b.onclick=()=>{
@@ -2881,9 +2896,21 @@ function renderHistory(){
       if(autoDevOn())devAll();
       document.getElementById('posterCard').scrollIntoView({behavior:'smooth'});
     };
-    box.appendChild(b);
+    const del=document.createElement('button');
+    del.className='hdel';del.textContent='✕';del.title='Yeh poster hatao';
+    del.onclick=e=>{
+      e.stopPropagation();
+      if(!confirm('Yeh pichhla poster hata dein?'))return;
+      lsSet(HKEY,(lsGet(HKEY)||[]).filter(y=>y.ts!==x.ts));renderHistory();
+    };
+    w.append(b,del);box.appendChild(w);
   });
 }
+document.getElementById('histClear').onclick=()=>{
+  if(!confirm('Saare pichhle posters hata dein? (Abhi wala poster aur bhav list nahi hategi)'))return;
+  try{localStorage.removeItem(HKEY);}catch(e){}
+  renderHistory();
+};
 
 /* AI: purana background + setting */
 (function(){
@@ -2989,7 +3016,7 @@ if(isIOS && !isStandalone && !lsGet('kp_ioshint_off')){iosHint.style.display='';
 document.getElementById('iosHintX').onclick=()=>{iosHint.style.display='none';lsSet('kp_ioshint_off',1);};
 
 /* ---------- 🔄 Refresh + naya version check ---------- */
-const APP_VERSION='1.22';
+const APP_VERSION='1.24';
 async function hardRefresh(){
   const b=document.getElementById('refreshBtn');b.textContent='⏳';b.disabled=true;
   try{
