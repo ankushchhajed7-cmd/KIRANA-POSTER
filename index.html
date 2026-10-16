@@ -127,6 +127,32 @@ html[data-ui="soft"] #logoSheet .sheet-panel{background:#E6E9EF}
 .sheet-head h2{margin:0}
 #logoClose{width:36px;height:36px;border-radius:50%;border:1px solid rgba(128,128,128,.5);background:transparent;color:inherit;font-size:16px;cursor:pointer}
 body.sheet-open{overflow:hidden}
+/* 💬 WhatsApp sticker page */
+#stkSheet{display:none;position:fixed;inset:0;z-index:65;background:rgba(0,0,0,.55);overflow-y:auto;padding:18px 12px 40px}
+#stkSheet.open{display:block}
+#stkSheet .sheet-panel{max-width:520px;margin:0 auto;background:var(--red-d)}
+html[data-ui="soft"] #stkSheet .sheet-panel{background:#E6E9EF}
+html[data-ui="classic"] #stkSheet .sheet-panel{background:#FFFFFF}
+#stkClose{width:36px;height:36px;border-radius:50%;border:1px solid rgba(128,128,128,.5);background:transparent;color:inherit;font-size:16px;cursor:pointer}
+.stk-prev{width:240px;height:240px;margin:10px auto 4px;border-radius:16px;overflow:hidden;
+  background:conic-gradient(#ddd 25%,#fff 0 50%,#ddd 0 75%,#fff 0) 0 0/24px 24px;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.stk-prev canvas{width:240px;height:240px;display:block}
+.stk-row{display:flex;gap:8px;flex-wrap:wrap}
+.stk-row button{padding:8px 12px;border-radius:999px;border:1px solid rgba(128,128,128,.45);background:rgba(255,255,255,.08);color:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.stk-row button.on{outline:3px solid #F2B33D;outline-offset:1px}
+.stk-sw{width:34px;height:34px;padding:0!important;border-radius:50%!important;border:3px solid #fff!important;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+#stkDev{margin-top:6px}
+.stk-acts{display:flex;gap:10px;margin-top:14px}
+.stk-acts button{flex:1;padding:13px;border:none;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer}
+#stkSend{background:#1E8E3E;color:#fff}
+#stkDl{background:#F2B33D;color:#4A0C0A}
+.stk-chk{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px}
+.stk-chk input{width:18px;height:18px}
+#stkOpen{display:flex;align-items:center;justify-content:center;gap:5px;background:transparent;color:var(--cream);border:1px solid rgba(242,179,61,.6);padding:6px 10px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap}
+html[data-ui] header #stkOpen{color:inherit}
+html[data-ui="soft"] #stkOpen{background:#E6E9EF;border:none;box-shadow:5px 5px 10px #C3C7CF,-5px -5px 10px #fff;border-radius:12px;color:#3B4252}
+html[data-ui="classic"] #stkOpen{color:#fff;border-color:rgba(255,255,255,.6)}
+#laySeg button[data-open]{border-style:dashed}
 #installBtn{margin-left:auto;background:var(--haldi);color:var(--red-d);border:none;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
 #iosHint{max-width:520px;margin:0 auto;padding:0 14px}
 #iosHint .box{position:relative;background:rgba(242,179,61,.14);border:1px solid rgba(242,179,61,.5);border-radius:10px;padding:10px 34px 10px 12px;font-size:12px;color:var(--cream);margin-top:12px}
@@ -265,10 +291,11 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
 <body>
 <header>
   <div class="mark" id="hdrMark">K</div>
-  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.25</b></p></div>
+  <div><h1>Kirana Poster Maker</h1><p>Scheme banao • Download karo • Channel pe daalo &nbsp;<b>v1.26</b></p></div>
   <div class="hbtns">
     <button id="refreshBtn" title="Naya version laao / page refresh">🔄 Refresh</button>
     <button id="logoOpen" title="Dukaan ka logo"><img id="logoMini" alt="" style="display:none">🏷️ Logo</button>
+    <button id="stkOpen" title="Text se WhatsApp sticker">💬 Sticker</button>
     <button id="installBtn" style="display:none">📲 App Install</button>
   </div>
 </header>
@@ -283,6 +310,7 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
   <button data-l="combo">🎁 Combo</button>
   <button data-l="festival">🪔 Festival</button>
   <button data-l="ai">✨ AI Poster</button>
+  <button data-open="sticker">💬 Sticker</button>
 </div>
 <div class="tpl" id="tplBar">
   <button class="t-smart active" data-t="smart">🪄 Smart</button>
@@ -547,6 +575,34 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
     <div id="logoActs"><button id="logoMore">🔄 Aur design</button><button id="logoDl" disabled>⬇ Logo download</button></div>
     <p class="hint" id="logoHint" style="text-align:left;display:none">Pasand wale logo pe tap karo — har poster pe lag jayega. Download karke WhatsApp DP bhi bana sakte ho.</p>
     <button class="add-row" id="logoDone">✅ Ho gaya</button>
+  </div>
+</div>
+
+<div id="stkSheet" role="dialog" aria-label="WhatsApp sticker">
+  <div class="card sheet-panel">
+    <div class="sheet-head"><h2>💬 WhatsApp Sticker</h2><button id="stkClose" title="Band karo">✕</button></div>
+    <p class="hint" style="text-align:left;margin:4px 0 0">Text likho → design aur rang chuno → <b>WhatsApp pe bhejo</b>. Sticker ka background transparent hota hai.</p>
+    <div class="stk-prev"><canvas id="stkCv" width="512" height="512"></canvas></div>
+    <label for="stkText">Sticker ka text (Enter = nayi line)</label>
+    <textarea id="stkText" rows="2" placeholder="jaise: धन्यवाद 🙏 / Order ready hai ✅"></textarea>
+    <div class="stk-row"><button id="stkDev" type="button">अ Marathi / Hindi me badlo</button></div>
+    <label>Jaldi wale text</label>
+    <div class="stk-row" id="stkQuick"></div>
+    <label>Design</label>
+    <div class="stk-row" id="stkStyle"></div>
+    <label>Rang</label>
+    <div class="stk-row" id="stkColor"></div>
+    <label class="stk-chk"><input type="checkbox" id="stkShop"> Niche dukaan ka naam bhi daalo</label>
+    <div class="stk-acts">
+      <button id="stkSend">📤 WhatsApp pe bhejo</button>
+      <button id="stkDl">⬇ Download</button>
+    </div>
+    <p class="hint" style="text-align:left;line-height:1.5">
+      <b>Sticker kaise banega:</b><br>
+      1️⃣ <b>WhatsApp pe bhejo</b> dabao → apni hi chat (<b>“Message yourself”</b>) ya kisi bhi chat me bhejo — sticker ki tarah jayega.<br>
+      2️⃣ Chat me sticker pe tap karo → <b>⭐ Add to favourites</b> — ab sticker hamesha aapke sticker section me rahega.<br>
+      Photo ki tarah jaye to: WhatsApp me 😊 → Sticker → <b>Create / ➕</b> → gallery se yeh download kiya sticker chuno.
+    </p>
   </div>
 </div>
 <div id="miniPrev" title="Poster dekho"><canvas id="mini"></canvas><span>👁 Poster</span></div>
@@ -2339,7 +2395,7 @@ document.getElementById('pgNext').onclick=()=>stepPage(1);
   const w=document.querySelector('.wrap');
   w.addEventListener('touchstart',e=>{
     const t=e.touches[0];
-    ok=e.touches.length===1&&!e.target.closest('input,textarea,select,#histList,.tpl,#laySeg,details');
+    ok=e.touches.length===1&&!e.target.closest('input,textarea,select,#histList,.tpl,#laySeg,details,#stkSheet,#logoSheet,#setupSheet');
     sx=t.clientX;sy=t.clientY;st=Date.now();
   },{passive:true});
   w.addEventListener('touchend',e=>{
@@ -2407,6 +2463,7 @@ document.querySelectorAll('.tpl button').forEach(b=>{
   b.onclick=()=>{tpl=b.dataset.t;setActive('.tpl button','t',tpl);showActiveTpl();draw();saveAll();};
 });
 document.querySelectorAll('#laySeg button').forEach(b=>{
+  if(b.dataset.open){b.onclick=()=>openStk();return;}
   b.onclick=()=>goPage(b.dataset.l,PAGES.indexOf(b.dataset.l)-PAGES.indexOf(layout));
 });
 document.querySelectorAll('#langSeg button').forEach(b=>{
@@ -2873,6 +2930,152 @@ document.getElementById('sharePdf').onclick=async()=>{
   }else saveBlob(blob,name);
 };
 
+/* ---------- 💬 Text se WhatsApp sticker (512×512, transparent WebP) ---------- */
+const STK_KEY='kp_stk';
+const STK_STYLES=[['outline','✏️ Outline'],['bubble','💭 Bubble'],['badge','🌟 Badge'],['ribbon','🎀 Ribbon'],['neon','💡 Neon'],['d3','🧱 3D']];
+const STK_COLORS=['#D32F2F','#EF6C00','#F9A825','#2E7D32','#1565C0','#6A1B9A','#D81B60','#212121'];
+const STK_QUICK=['धन्यवाद 🙏','ऑर्डर तयार आहे ✅','पेमेंट मिळाले ✅','होम डिलिव्हरी 🛵','नवीन स्टॉक आला!','आजची ऑफर 🔥','शुभ सकाळ ☀️','दुकान आज बंद'];
+let stk={text:'धन्यवाद 🙏',style:'outline',color:'#D32F2F',shop:false};
+try{const o=lsGet(STK_KEY);if(o&&typeof o==='object')stk=Object.assign(stk,o);}catch(e){}
+function stkShade(hex,f){const n=parseInt(hex.slice(1),16),r=n>>16,g=n>>8&255,b=n&255;
+  return 'rgb('+Math.round(r*f)+','+Math.round(g*f)+','+Math.round(b*f)+')';}
+/* text ko lines me todo aur sabse bada font jo box me fit ho */
+function stkFit(g,text,maxW,maxH,maxF,wt){
+  const paras=String(text||'').split('\n').map(t=>t.trim()).filter(Boolean);
+  if(!paras.length)paras.push('Text likho');
+  for(let f=maxF;f>=22;f-=4){
+    g.font=wt+' '+f+'px '+F;const lines=[];let ok=true;
+    paras.forEach(p=>{
+      let cur='';
+      p.split(/\s+/).forEach(w=>{const t=cur?cur+' '+w:w;
+        if(g.measureText(t).width<=maxW)cur=t;else{if(cur)lines.push(cur);cur=w;if(g.measureText(w).width>maxW)ok=false;}});
+      if(cur)lines.push(cur);
+    });
+    if(ok&&lines.length*f*1.18<=maxH)return{f,lines};
+  }
+  g.font=wt+' 22px '+F;return{f:22,lines:paras};
+}
+function stkLines(g,fit,cx,cy,paint){
+  const lh=fit.f*1.18,y0=cy-(fit.lines.length-1)*lh/2;
+  g.textAlign='center';g.textBaseline='middle';g.lineJoin='round';g.miterLimit=2;
+  fit.lines.forEach((l,i)=>paint(l,cx,y0+i*lh));
+}
+function drawSticker(c){
+  const g=c.getContext('2d'),S=512,col=stk.color,dk=stkShade(col,.55),wt='900';
+  g.clearRect(0,0,S,S);
+  const shop=stk.shop&&val('shop')?val('shop'):'';
+  const cy=shop?236:256,boxH=shop?330:380;
+  g.save();
+  if(stk.style==='outline'){
+    const fit=stkFit(g,stk.text,430,boxH,150,wt);g.font=wt+' '+fit.f+'px '+F;
+    stkLines(g,fit,256,cy,(l,x,y)=>{
+      g.shadowColor='rgba(0,0,0,.35)';g.shadowBlur=10;g.shadowOffsetY=4;
+      g.lineWidth=fit.f*0.32;g.strokeStyle='#fff';g.strokeText(l,x,y);
+      g.shadowColor='transparent';g.lineWidth=fit.f*0.08;g.strokeStyle=dk;g.strokeText(l,x,y);
+      g.fillStyle=col;g.fillText(l,x,y);});
+  }else if(stk.style==='bubble'){
+    const fit=stkFit(g,stk.text,370,shop?250:290,120,wt);g.font=wt+' '+fit.f+'px '+F;
+    const bw=Math.min(470,Math.max(...fit.lines.map(l=>g.measureText(l).width))+80),bh=fit.lines.length*fit.f*1.18+70;
+    const bx=256-bw/2,by=cy-bh/2-14;
+    g.shadowColor='rgba(0,0,0,.3)';g.shadowBlur=12;g.shadowOffsetY=5;
+    g.fillStyle='#fff';g.beginPath();g.roundRect(bx,by,bw,bh,40);g.fill();
+    g.beginPath();g.moveTo(bx+bw*0.22,by+bh-4);g.lineTo(bx+bw*0.12,by+bh+46);g.lineTo(bx+bw*0.40,by+bh-4);g.closePath();g.fill();
+    g.shadowColor='transparent';g.lineWidth=10;g.strokeStyle=col;
+    g.beginPath();g.roundRect(bx,by,bw,bh,40);g.stroke();
+    g.fillStyle='#fff';g.fillRect(bx+bw*0.22-2,by+bh-8,bw*0.18+4,14);
+    g.beginPath();g.moveTo(bx+bw*0.22,by+bh+1);g.lineTo(bx+bw*0.12,by+bh+46);g.lineTo(bx+bw*0.40,by+bh+1);g.stroke();
+    g.font=wt+' '+fit.f+'px '+F;g.fillStyle=col;stkLines(g,fit,256,by+bh/2,(l,x,y)=>g.fillText(l,x,y));
+  }else if(stk.style==='badge'){
+    const R=shop?205:228,cx=256;
+    g.shadowColor='rgba(0,0,0,.3)';g.shadowBlur=12;g.shadowOffsetY=5;g.fillStyle=col;g.beginPath();
+    for(let i=0;i<=48;i++){const a=i*Math.PI/24,r=i%2?R:R*0.9;const x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;i?g.lineTo(x,y):g.moveTo(x,y);}
+    g.closePath();g.fill();g.shadowColor='transparent';
+    g.strokeStyle='#fff';g.lineWidth=6;g.setLineDash([14,10]);g.beginPath();g.arc(cx,cy,R*0.76,0,7);g.stroke();g.setLineDash([]);
+    const fit=stkFit(g,stk.text,R*1.3,R*1.25,110,wt);g.font=wt+' '+fit.f+'px '+F;
+    stkLines(g,fit,cx,cy,(l,x,y)=>{g.lineWidth=fit.f*0.14;g.strokeStyle=dk;g.strokeText(l,x,y);g.fillStyle='#fff';g.fillText(l,x,y);});
+  }else if(stk.style==='ribbon'){
+    const fit=stkFit(g,stk.text,380,shop?240:280,110,wt);g.font=wt+' '+fit.f+'px '+F;
+    const rh=fit.lines.length*fit.f*1.18+50,ry=cy-rh/2,rx=50,rw=412;
+    g.fillStyle=dk;   // peeche ke mude kone
+    [[rx-38,rx+22,1],[rx+rw+38,rx+rw-22,-1]].forEach(([o,i,d])=>{g.beginPath();g.moveTo(i,ry+18);g.lineTo(o,ry+18);g.lineTo(o+d*26,ry+rh/2+18);g.lineTo(o,ry+rh+18);g.lineTo(i,ry+rh+18);g.closePath();g.fill();});
+    g.shadowColor='rgba(0,0,0,.3)';g.shadowBlur=10;g.shadowOffsetY=4;g.fillStyle=col;g.beginPath();g.roundRect(rx,ry,rw,rh,8);g.fill();
+    g.shadowColor='transparent';g.strokeStyle='rgba(255,255,255,.85)';g.lineWidth=4;g.setLineDash([10,8]);g.beginPath();g.roundRect(rx+10,ry+10,rw-20,rh-20,6);g.stroke();g.setLineDash([]);
+    stkLines(g,fit,256,cy,(l,x,y)=>{g.fillStyle='#fff';g.fillText(l,x,y);});
+  }else if(stk.style==='neon'){
+    const fit=stkFit(g,stk.text,380,shop?250:300,120,wt);g.font=wt+' '+fit.f+'px '+F;
+    const bh=Math.min(460,fit.lines.length*fit.f*1.18+90),by=cy-bh/2;
+    g.fillStyle='#14121F';g.beginPath();g.roundRect(26,by,460,bh,36);g.fill();
+    g.shadowColor=col;g.shadowBlur=24;g.strokeStyle=col;g.lineWidth=7;g.beginPath();g.roundRect(40,by+14,432,bh-28,28);g.stroke();
+    stkLines(g,fit,256,cy,(l,x,y)=>{g.shadowColor=col;g.shadowBlur=28;g.fillStyle='#fff';g.fillText(l,x,y);g.shadowBlur=10;g.fillText(l,x,y);});
+  }else{ // 3D
+    const fit=stkFit(g,stk.text,420,boxH,140,wt);g.font=wt+' '+fit.f+'px '+F;
+    const dep=Math.max(6,Math.round(fit.f*0.09));
+    stkLines(g,fit,250,cy-4,(l,x,y)=>{
+      g.lineWidth=fit.f*0.3;g.strokeStyle='#fff';g.shadowColor='rgba(0,0,0,.3)';g.shadowBlur=10;
+      g.strokeText(l,x+dep/2,y+dep/2);g.shadowColor='transparent';
+      g.fillStyle=dk;for(let k=dep;k>0;k--)g.fillText(l,x+k,y+k);
+      g.fillStyle=col;g.fillText(l,x,y);});
+  }
+  g.restore();
+  if(shop){
+    g.save();g.font='800 30px '+F;
+    const t=shop.length>26?shop.slice(0,25)+'…':shop,tw=Math.min(440,g.measureText(t).width+44);
+    g.shadowColor='rgba(0,0,0,.3)';g.shadowBlur=8;g.shadowOffsetY=3;
+    g.fillStyle='#fff';g.beginPath();g.roundRect(256-tw/2,440,tw,50,25);g.fill();g.shadowColor='transparent';
+    g.strokeStyle=col;g.lineWidth=4;g.stroke();
+    g.fillStyle=stkShade(col,.8);g.textAlign='center';g.textBaseline='middle';g.fillText(t,256,466,tw-24);g.restore();
+  }
+}
+function stkRender(){drawSticker(document.getElementById('stkCv'));lsSet(STK_KEY,stk);}
+function stkBuild(){
+  const q=document.getElementById('stkQuick');q.innerHTML='';
+  STK_QUICK.forEach(t=>{const b=document.createElement('button');b.type='button';b.textContent=t;
+    b.onclick=()=>{stk.text=t;document.getElementById('stkText').value=t;stkRender();};q.appendChild(b);});
+  const st=document.getElementById('stkStyle');st.innerHTML='';
+  STK_STYLES.forEach(([k,l])=>{const b=document.createElement('button');b.type='button';b.textContent=l;b.dataset.k=k;
+    b.className=k===stk.style?'on':'';
+    b.onclick=()=>{stk.style=k;st.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.k===k));stkRender();};st.appendChild(b);});
+  const co=document.getElementById('stkColor');co.innerHTML='';
+  STK_COLORS.forEach(c=>{const b=document.createElement('button');b.type='button';b.className='stk-sw'+(c===stk.color?' on':'');
+    b.style.background=c;b.title=c;b.dataset.c=c;
+    b.onclick=()=>{stk.color=c;co.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.c===c));stkRender();};co.appendChild(b);});
+}
+function openStk(){
+  stkBuild();document.getElementById('stkText').value=stk.text;document.getElementById('stkShop').checked=!!stk.shop;
+  document.getElementById('stkSheet').classList.add('open');document.body.classList.add('sheet-open');
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(stkRender);stkRender();
+}
+function closeStk(){document.getElementById('stkSheet').classList.remove('open');document.body.classList.remove('sheet-open');}
+/* WebP (WhatsApp sticker format), 100 KB se kam; WebP na bane (iPhone) to PNG */
+function stkBlob(){
+  const c=document.createElement('canvas');c.width=c.height=512;drawSticker(c);
+  const tryQ=q=>new Promise(res=>c.toBlob(b=>res(b),'image/webp',q));
+  return (async()=>{
+    for(const q of [0.9,0.8,0.65,0.5]){const b=await tryQ(q);if(!b||b.type!=='image/webp')break;if(b.size<100*1024)return b;}
+    return await new Promise(res=>c.toBlob(res,'image/png'));
+  })();
+}
+function stkName(b){return 'sticker-'+Date.now()+(b.type==='image/webp'?'.webp':'.png');}
+document.getElementById('stkOpen').onclick=openStk;
+document.getElementById('stkClose').onclick=closeStk;
+document.getElementById('stkSheet').addEventListener('click',e=>{if(e.target.id==='stkSheet')closeStk();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeStk();});
+document.getElementById('stkText').addEventListener('input',e=>{stk.text=e.target.value;stkRender();});
+document.getElementById('stkShop').addEventListener('change',e=>{stk.shop=e.target.checked;stkRender();});
+document.getElementById('stkDev').onclick=async()=>{
+  const el=document.getElementById('stkText');if(!/[A-Za-z]/.test(el.value))return;
+  const b=document.getElementById('stkDev');b.disabled=true;
+  try{el.value=await toDev(el.value,lang==='hi'?'hi':'mr');stk.text=el.value;stkRender();}catch(e){}
+  b.disabled=false;
+};
+document.getElementById('stkDl').onclick=async()=>{const b=await stkBlob();saveBlob(b,stkName(b));};
+document.getElementById('stkSend').onclick=async()=>{
+  const b=await stkBlob(),n=stkName(b),file=new File([b],n,{type:b.type});
+  if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file]});}catch(e){if(!e||e.name!=='AbortError')saveBlob(b,n);}
+  }else saveBlob(b,n);
+};
+
 const HKEY='kirana_hist';
 function recordHistory(){
   const st=getState();delete st.f.valid;
@@ -3023,7 +3226,7 @@ if(isIOS && !isStandalone && !lsGet('kp_ioshint_off')){iosHint.style.display='';
 document.getElementById('iosHintX').onclick=()=>{iosHint.style.display='none';lsSet('kp_ioshint_off',1);};
 
 /* ---------- 🔄 Refresh + naya version check ---------- */
-const APP_VERSION='1.25';
+const APP_VERSION='1.26';
 async function hardRefresh(){
   const b=document.getElementById('refreshBtn');b.textContent='⏳';b.disabled=true;
   try{
