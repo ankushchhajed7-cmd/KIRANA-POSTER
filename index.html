@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <!--
-  Kirana Poster Maker — v1.18
+  Kirana Poster Maker — v1.19
+  v1.19: 🕘 Pichhle poster tap karo → photo ke saath wapas khulega (bina confirm), "edit ho raha hai" patti,
+         Download/Share karoge to usi poster me save (naya chahiye to "➕ Naya poster"), har thumbnail pe 📤
+         seedha WhatsApp bhejne ka button (poori badi photo IndexedDB me), 6 ki jagah 12 poster save
   v1.18: 📸 Har product ki apni photo — AI se ek baar bane, phone me save, apni photo se badlo
   v1.17: 🔎 Product naam ke box me Hindi/Marathi naamon ki suggestion list (English se bhi search)
   v1.16: 🎉 Pehli baar setup page (dukaan ki jaankari ek baar) + sabke liye free AI server, roz 10 AI background
@@ -195,6 +198,14 @@ option{background:#4A0C0A;color:#F7EFD9}
 #histList small{display:block;font-size:10px;color:var(--cream);padding:3px 0;background:rgba(0,0,0,.35)}
 #histList .hdel{position:absolute;top:-6px;right:-6px;width:26px;height:26px;border-radius:50%;border:2px solid #fff;background:#C62828;color:#fff;font-size:13px;font-weight:900;line-height:1;padding:0;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.35)}
 #histList{padding-top:8px;padding-right:8px}
+#histList .hshare{position:absolute;bottom:22px;right:-6px;width:30px;height:30px;border-radius:50%;border:2px solid #fff;background:#1E8E5A;color:#fff;font-size:14px;line-height:1;padding:0;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+#histList .hshare:disabled{opacity:.5}
+#histList .hopen.editing{border-color:#1E8E5A;box-shadow:0 0 0 3px rgba(30,142,90,.35)}
+#editBar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 10px;padding:9px 12px;border-radius:10px;
+  background:rgba(30,142,90,.16);border:1px solid rgba(30,142,90,.55);font-size:13px;line-height:1.35}
+#editBar span{flex:1 1 150px;min-width:0}
+#editBar button{flex:0 0 auto;padding:7px 12px;border-radius:9px;border:1px solid var(--haldi);background:transparent;color:var(--haldi);font-size:12px;font-weight:800;cursor:pointer}
+html[data-ui="soft"] #editBar button,html[data-ui="classic"] #editBar button{color:#8E2A3A;border-color:#8E2A3A}
 #histClear{margin-top:10px;padding:8px 14px;border-radius:10px;border:1px solid #C62828;background:transparent;color:#E57373;font-size:13px;font-weight:800;cursor:pointer}
 html[data-ui="soft"] #histClear,html[data-ui="classic"] #histClear{color:#C62828}
 #pageNav{position:sticky;top:0;z-index:15;background:var(--red-d);border-bottom:1px solid rgba(242,179,61,.35);box-shadow:0 4px 12px rgba(0,0,0,.35)}
@@ -524,6 +535,7 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
 
   <div class="card" id="posterCard">
     <h2>5 · Poster ready!</h2>
+    <div id="editBar" style="display:none"><span id="editBarTxt"></span><button id="editNew" type="button">➕ Naya poster</button></div>
     <canvas id="cv" width="1080" height="1080"></canvas>
     <div class="actions">
       <button id="dl">⬇ Download</button>
@@ -542,7 +554,7 @@ html[data-ui="soft"] .warnTxt{color:#B45309!important}
   <div class="card" id="histCard" style="display:none">
     <h2>🕘 Pichhle posters</h2>
     <div id="histList"></div>
-    <p class="hint">Download/Share kiye poster yaha save hote hain — tap karo to wapas khul jayega (photo dobara daalni hogi). <b>✕</b> dabao to woh poster hat jayega.</p>
+    <p class="hint">Download/Share kiye poster yaha save hote hain. <b>Tap karo</b> to photo ke saath wapas khul jayega — badal ke Download/Share karoge to usi poster me save hoga (naya chahiye to upar “➕ Naya poster”). <b>📤</b> se bina khole seedha WhatsApp pe bhejo, <b>✕</b> se woh poster hat jayega.</p>
     <button id="histClear">🗑️ Sab pichhle poster hatao</button>
   </div>
 </div>
@@ -2369,6 +2381,7 @@ function applyLayout(fromUser){
   updateHero();
   draw();
   if(typeof applyProdPhoto==='function')applyProdPhoto(!!fromUser);
+  if(fromUser&&typeof setEdit==='function')setEdit(0);   // doosre type ka poster = naya poster
 }
 
 /* ---------- 📑 Har poster ka alag page — tabs + side swipe ---------- */
@@ -2558,10 +2571,16 @@ const PIMG_PROMPT={'चनादाळ':'heap of yellow split chickpea chana dal
 const PIMG_SUFFIX=', top view close-up, natural daylight, food photography, high detail, plain background, no text, no packaging, no logo';
 const PHOTO_LAYOUTS=['offer','single','ai'];
 let imgFor='',pimgBusy={};
-function idbOpen(){return new Promise((res,rej)=>{if(!window.indexedDB)return rej('no idb');const r=indexedDB.open('kirana_poster',1);
-  r.onupgradeneeded=()=>r.result.createObjectStore('prodimg');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
-async function pimgGet(k){try{const d=await idbOpen();return await new Promise(res=>{const q=d.transaction('prodimg').objectStore('prodimg').get(k);q.onsuccess=()=>res(q.result||null);q.onerror=()=>res(null);});}catch(e){return null;}}
-async function pimgSet(k,v){if(!k)return;try{const d=await idbOpen();await new Promise(res=>{const t=d.transaction('prodimg','readwrite');t.objectStore('prodimg').put(v,k);t.oncomplete=res;t.onerror=res;});}catch(e){}}
+function idbOpen(){return new Promise((res,rej)=>{if(!window.indexedDB)return rej('no idb');const r=indexedDB.open('kirana_poster',2);
+  r.onupgradeneeded=()=>{const d=r.result;
+    if(!d.objectStoreNames.contains('prodimg'))d.createObjectStore('prodimg');
+    if(!d.objectStoreNames.contains('poster'))d.createObjectStore('poster');};   // pichhle poster ki poori photo
+  r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
+async function idbGet(store,k){try{const d=await idbOpen();return await new Promise(res=>{const q=d.transaction(store).objectStore(store).get(k);q.onsuccess=()=>res(q.result||null);q.onerror=()=>res(null);});}catch(e){return null;}}
+async function idbSet(store,k,v){if(!k)return;try{const d=await idbOpen();await new Promise(res=>{const t=d.transaction(store,'readwrite');t.objectStore(store).put(v,k);t.oncomplete=res;t.onerror=res;});}catch(e){}}
+async function idbDel(store,k){if(!k)return;try{const d=await idbOpen();await new Promise(res=>{const t=d.transaction(store,'readwrite');t.objectStore(store).delete(k);t.oncomplete=res;t.onerror=res;});}catch(e){}}
+async function pimgGet(k){return idbGet('prodimg',k);}
+async function pimgSet(k,v){return idbSet('prodimg',k,v);}
 function pkey(n){return String(n||'').trim().toLowerCase();}
 function toJpeg(src,max){const s=Math.min(1,max/Math.max(src.width,src.height)),o=document.createElement('canvas');
   o.width=Math.round(src.width*s);o.height=Math.round(src.height*s);o.getContext('2d').drawImage(src,0,0,o.width,o.height);return o.toDataURL('image/jpeg',.82);}
@@ -3125,49 +3144,97 @@ document.getElementById('stkSave').onclick=()=>{
 document.getElementById('stkDl').onclick=async()=>{const b=await stkBlob();saveBlob(b,stkName(b));};
 document.getElementById('stkSend').onclick=()=>stkShare(stk);
 
-const HKEY='kirana_hist';
+const HKEY='kirana_hist',HMAX=12;
+let editTs=0;                                  // kaunsa pichhla poster abhi edit ho raha hai
+function histDate(ts){const d=new Date(ts);return d.getDate()+' '+MONTHS.en[d.getMonth()].slice(0,3);}
+function setEdit(ts){
+  editTs=(lsGet(HKEY)||[]).some(x=>x.ts===ts)?ts:0;
+  const bar=document.getElementById('editBar');
+  if(!editTs){bar.style.display='none';renderHistory();return;}
+  document.getElementById('editBarTxt').innerHTML='✏️ <b>'+histDate(editTs)+'</b> wala poster edit ho raha hai — Download / Share karoge to <b>isi me</b> save hoga.';
+  bar.style.display='';
+  renderHistory();
+}
+document.getElementById('editNew').onclick=()=>setEdit(0);
 function recordHistory(){
   const st=getState();delete st.f.valid;
   const tc=document.createElement('canvas');tc.width=168;tc.height=Math.round(168*cv.height/W);
   tc.getContext('2d').drawImage(cv,0,0,tc.width,tc.height);
-  const item={ts:Date.now(),thumb:tc.toDataURL('image/jpeg',.7),state:st};
+  const thumb=tc.toDataURL('image/jpeg',.7),full=cv.toDataURL('image/jpeg',.92);
   let h=lsGet(HKEY)||[];
-  const sig=JSON.stringify(st);
+  if(editTs&&h.some(x=>x.ts===editTs)){        // khola hua poster — usi jagah update
+    h=h.map(x=>x.ts===editTs?{ts:editTs,thumb:thumb,state:st}:x);
+    if(lsSet(HKEY,h))idbSet('poster',String(editTs),full);
+    renderHistory();return;
+  }
+  const sig=JSON.stringify(st),ts=Date.now();
+  h.filter(x=>JSON.stringify(x.state)===sig).forEach(x=>idbDel('poster',String(x.ts)));
   h=h.filter(x=>JSON.stringify(x.state)!==sig);
-  h.unshift(item);h=h.slice(0,6);
-  while(h.length&&!lsSet(HKEY,h))h.pop();
-  renderHistory();
+  h.unshift({ts:ts,thumb:thumb,state:st});
+  h.slice(HMAX).forEach(x=>idbDel('poster',String(x.ts)));
+  h=h.slice(0,HMAX);
+  while(h.length&&!lsSet(HKEY,h)){const x=h.pop();if(x)idbDel('poster',String(x.ts));}
+  idbSet('poster',String(ts),full);
+  setEdit(ts);                                  // ab yahi poster edit ho raha hai
+}
+function openHist(x){
+  const st=JSON.parse(JSON.stringify(x.state));
+  st.f.valid=val('valid');st.validAuto=val('valid')===autoDate(lang);
+  applyState(st);applyLayout(false);saveAll();
+  imgFor='';                                    // product ki save photo dobara lag jaye
+  if(typeof applyProdPhoto==='function')applyProdPhoto(true);
+  if(autoDevOn())devAll();
+  setEdit(x.ts);
+  document.getElementById('posterCard').scrollIntoView({behavior:'smooth'});
+}
+async function shareHist(x,btn){
+  const nm='poster-'+new Date(x.ts).toISOString().slice(0,10)+'.jpg';
+  let data=null;
+  try{data=await idbGet('poster',String(x.ts));}catch(e){}
+  if(!data){                                    // purana poster — badi photo save nahi hai
+    if(!confirm('Is poster ki badi photo save nahi hai (purana poster hai). Kholke bhejun?'))return;
+    openHist(x);setTimeout(()=>document.getElementById('share').click(),600);return;
+  }
+  try{
+    const b=await (await fetch(data)).blob(),file=new File([b],nm,{type:'image/jpeg'});
+    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file],title:'Kirana Poster'});}
+      catch(e){if(!e||e.name!=='AbortError')saveBlob(b,nm);}
+    }else saveBlob(b,nm);
+  }catch(e){alert('Bhej nahi paya — poster pe tap karke kholo aur Share dabao.');}
 }
 function renderHistory(){
   const h=lsGet(HKEY)||[],box=document.getElementById('histList');
   document.getElementById('histCard').style.display=h.length?'':'none';
   box.innerHTML='';
   h.forEach(x=>{
-    const w=document.createElement('div'),b=document.createElement('button'),d=new Date(x.ts);
-    w.className='hitem';b.className='hopen';
-    b.innerHTML='<img alt="poster"><small>'+d.getDate()+' '+MONTHS.en[d.getMonth()].slice(0,3)+'</small>';
+    const w=document.createElement('div'),b=document.createElement('button');
+    w.className='hitem';b.className='hopen'+(x.ts===editTs?' editing':'');
+    b.title='Kholo aur badlo';
+    b.innerHTML='<img alt="poster"><small>'+(x.ts===editTs?'✏️ ':'')+histDate(x.ts)+'</small>';
     b.querySelector('img').src=x.thumb;
-    b.onclick=()=>{
-      if(!confirm('Yeh poster wapas kholein? Abhi bhara hua data badal jayega.'))return;
-      const st=JSON.parse(JSON.stringify(x.state));
-      st.f.valid=val('valid');st.validAuto=val('valid')===autoDate(lang);
-      applyState(st);applyLayout(false);saveAll();
-      if(autoDevOn())devAll();
-      document.getElementById('posterCard').scrollIntoView({behavior:'smooth'});
-    };
+    b.onclick=()=>openHist(x);
+    const sh=document.createElement('button');
+    sh.className='hshare';sh.textContent='📤';sh.title='Seedha bhejo (WhatsApp)';
+    sh.onclick=async e=>{e.stopPropagation();sh.disabled=true;try{await shareHist(x,sh);}finally{sh.disabled=false;}};
     const del=document.createElement('button');
     del.className='hdel';del.textContent='✕';del.title='Yeh poster hatao';
     del.onclick=e=>{
       e.stopPropagation();
       if(!confirm('Yeh pichhla poster hata dein?'))return;
-      lsSet(HKEY,(lsGet(HKEY)||[]).filter(y=>y.ts!==x.ts));renderHistory();
+      lsSet(HKEY,(lsGet(HKEY)||[]).filter(y=>y.ts!==x.ts));
+      idbDel('poster',String(x.ts));
+      if(editTs===x.ts){editTs=0;document.getElementById('editBar').style.display='none';}
+      renderHistory();
     };
-    w.append(b,del);box.appendChild(w);
+    w.append(b,sh,del);box.appendChild(w);
   });
 }
 document.getElementById('histClear').onclick=()=>{
   if(!confirm('Saare pichhle posters hata dein? (Abhi wala poster aur bhav list nahi hategi)'))return;
+  (lsGet(HKEY)||[]).forEach(x=>idbDel('poster',String(x.ts)));
   try{localStorage.removeItem(HKEY);}catch(e){}
+  editTs=0;document.getElementById('editBar').style.display='none';
   renderHistory();
 };
 
