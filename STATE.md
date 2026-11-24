@@ -5,13 +5,15 @@ Repo: ankushchhajed7-cmd/KIRANA-POSTER · single-file PWA (`index.html`) + `sw.j
 
 ## Abhi ka version
 
-**v1.19** — SW cache `kirana-poster-v30`
+**v1.28** — SW cache `kirana-poster-v30`
 
 ## Version history
 
 | Version | Kya aaya |
 |---|---|
-| v1.19 | Pichhle poster tap → photo ke saath wapas khulta hai (bina confirm), "edit ho raha hai" patti, Download/Share se usi poster me save, har thumbnail pe 📤 seedha share, 12 poster save (pehle 6), poori photo IndexedDB me |
+| v1.28 | Pichhle poster tap → photo ke saath wapas khulta hai (bina confirm), "edit ho raha hai" patti, Download/Share se usi poster me save, har thumbnail pe 📤 seedha share, 12 poster save (pehle 6), poori photo IndexedDB me |
+| v1.27 | Sticker save karke ek tap me dobara bhejo |
+| v1.23 | जेमिनी तेल → मुरली तेल |
 | v1.18 | Har product ki apni photo — AI se ek baar bane, phone me save, apni photo se badlo |
 | v1.17 | Product naam ke box me Hindi/Marathi suggestion list |
 | v1.16 | Pehli baar setup page + free AI server, roz 10 AI background |
@@ -61,3 +63,5 @@ Size: `post` (1080×1080 / bhav list me auto-lamba) aur `status` (1080×1920)
 - [ ] Purane poster X din baad apne aap hatana (abhi sirf 12 ki limit)
 - [ ] Rate badla to poster pe ↑↓ arrow (kal ke rate se compare)
 - [ ] Multiple numbers pe ek saath bhejna — WhatsApp Broadcast/Channel ke bina seedha nahi hota (alag app ka plan)
+
+> Note: file ke upar wala changelog comment v1.18 ke baad update hona ruk gaya tha, jabki app header v1.27 tak pahunch gaya tha. v1.28 se dono ek saath badalne hain — header `<b>vX.Y</b>` (line ~316) aur upar ka comment block.
